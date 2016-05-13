@@ -1,0 +1,94 @@
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+
+    dependencies {
+        classpath 'me.tatarka:gradle-retrolambda:3.2.5'
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+apply plugin: 'com.android.library'
+apply plugin: 'me.tatarka.retrolambda'
+apply plugin: 'jacoco-android'
+apply plugin: 'maven-publish'
+
+version = "1.0.0"
+
+android {
+
+    lintOptions {
+        abortOnError false
+    }
+
+    compileSdkVersion 23
+    buildToolsVersion "23.0.1"
+
+    defaultConfig {
+
+        minSdkVersion 14
+        targetSdkVersion 23
+        versionCode 1
+        versionName version.toString()
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+        debug {
+            testCoverageEnabled true
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+}
+
+dependencies {
+    compile fileTree(include: ['*.jar'], dir: 'libs')
+
+    testCompile 'junit:junit:4.12'
+
+    compile 'com.google.android.gms:play-services-gcm:8.4.0'
+    compile 'io.reactivex:rxandroid:1.1.0'
+    compile 'com.squareup.retrofit2:retrofit:2.0.2'
+    compile 'com.squareup.retrofit2:converter-gson:2.0.2'
+    compile 'com.squareup.retrofit2:adapter-rxjava:2.0.2'
+    compile 'com.squareup.okhttp3:logging-interceptor:3.0.1'
+
+    compile files('libs/ormlite-android-4.49-SNAPSHOT.jar')
+    compile files('libs/ormlite-core-4.49-SNAPSHOT.jar')
+}
+
+def boolean isReleaseBuild() {
+    return !version.toString().contains("SNAPSHOT")
+}
+
+// To publish to maven local execute "gradle clean build publishToMavenLocal"
+android.libraryVariants
+publishing {
+    publications {
+        maven(MavenPublication) {
+            artifact "build/outputs/aar/Hyber-release.aar"
+            artifactId = "hyber-android"
+            groupId = "com.gms_worldwide"
+            version = version.toString()
+        }
+    }
+
+    repositories {
+        maven {
+            url isReleaseBuild() ?
+                    "file://${project.buildDir}/../releases" :
+                    "file://${project.buildDir}/../snapshots"
+        }
+    }
+}

@@ -1,0 +1,16 @@
+# Generated files
+build/
+
+# IDEA/Android Studio project files, because
+# the project can be imported from settings.gradle
+.idea
+*.iml
+
+### Android template
+
+# Gradle files
+.gradle
+gradle.properties
+
+# Local configuration file
+local.properties
