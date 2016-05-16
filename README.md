@@ -15,7 +15,7 @@ To use Hyber SDK, add next repository in Gradle:
 
 Then define in Gradle next dependencies:
 ```groovy
-    compile 'com.gms_worldwide:hybersdk:1.0.0'
+    compile 'com.gms_worldwide:hybersdk:1.1.0'
     compile 'com.google.android.gms:play-services-gcm:8.4.0'
 ```
 
