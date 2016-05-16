@@ -1,12 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <metadata>
   <groupId>com.gms_worldwide</groupId>
-  <artifactId>hyber-android</artifactId>
+  <artifactId>hybersdk</artifactId>
   <versioning>
-    <release>1.0.0</release>
     <versions>
-      <version>1.0.0</version>
+      <version>1.0.1-SNAPSHOT</version>
     </versions>
-    <lastUpdated>20160513140150</lastUpdated>
+    <lastUpdated>20160516064539</lastUpdated>
   </versioning>
 </metadata>
