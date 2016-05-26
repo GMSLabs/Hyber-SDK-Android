@@ -1,5 +1,7 @@
 # Hyber SDK for Android
 [![Release][release-svg]][release-link]
+[![Build Status][build-status-svg]][build-status-link]
+[![codecov.io][codecov-svg]][codecov-link]
 [![License][license-svg]][license-link]
 
 A library that gives you access to the powerful Hyber cloud platform from your Android app. 
