@@ -1,5 +1,7 @@
 package com.gms_worldwide.hybersdk;
 
+import android.text.TextUtils;
+
 import java.io.IOException;
 
 import okhttp3.Interceptor;
@@ -108,7 +110,7 @@ class HyberApiClient {
         String p = null;
         if (phone > 0)
             p = String.valueOf(phone);
-        if (email.equals(""))
+        if (TextUtils.isEmpty(email))
             email = null;
         HyberRegistrationPushModelWithNull registrationPushModel =
                 new HyberRegistrationPushModelWithNull(p, email, gcmToken);
