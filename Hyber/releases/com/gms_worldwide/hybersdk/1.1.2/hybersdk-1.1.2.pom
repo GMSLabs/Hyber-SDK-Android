@@ -4,6 +4,6 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.gms_worldwide</groupId>
   <artifactId>hybersdk</artifactId>
-  <version>1.0.1-SNAPSHOT</version>
+  <version>1.1.2</version>
   <packaging>aar</packaging>
 </project>
