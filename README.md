@@ -17,7 +17,7 @@ To use Hyber SDK, add next repository in Gradle:
 
 Then define in Gradle next dependencies:
 ```groovy
-    compile 'com.gms_worldwide:hybersdk:1.1.0'
+    compile 'com.gms_worldwide:hybersdk:1.1.2'
     compile 'com.google.android.gms:play-services-gcm:8.4.0'
 ```
 
@@ -27,10 +27,10 @@ Do not forget to unsubscribe when you do not need a subscription, this is to pre
 
 Add the next lines for Rx compatibility:
 ```groovy
-    compile 'io.reactivex:rxandroid:1.1.0'
+    compile 'io.reactivex:rxandroid:1.2.1'
     // Because RxAndroid releases are few and far between, it is recommended you also
     // explicitly depend on RxJava's latest version for bug fixes and new features.
-    compile 'io.reactivex:rxjava:1.1.3'
+    compile 'io.reactivex:rxjava:1.1.6'
 ```
 
 ## Connect your app to Hyber
