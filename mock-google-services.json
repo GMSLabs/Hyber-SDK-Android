@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "936888476680",
+    "firebase_url": "https://mock-hyber-example.firebaseio.com",
+    "project_id": "mock-hyber-example",
+    "storage_bucket": "mock-hyber-example.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:936888476680:android:e141ac06737be8a7",
+        "android_client_info": {
+          "package_name": "com.hyber.example"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "936888476680-1if99h5qt5pje93k4rh13o0jm700mkuv.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.hyber.example",
+            "certificate_hash": "16137ED393A1E684EA83C4F07E2F73C1D2E9B802"
+          }
+        },
+        {
+          "client_id": "936888476680-1if99h5qt5pje93k4rh13o0jm700mkuv.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAFQaINn83mAzz8iGOQRDVlQFIgnmgVHLo"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "936888476680-1if99h5qt5pje93k4rh13o0jm700mkuv.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
