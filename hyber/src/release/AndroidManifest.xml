@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.hyber">
+
+    <!--TODO Add permission for receive FCM-->
+
+    <application>
+        <meta-data
+            android:name="hyber_client_api_key"
+            android:value="${hyber_client_api_key}" />
+        <meta-data
+            android:name="hyber_application_key"
+            android:value="${hyber_application_key}" />
+        <meta-data
+            android:name="hyber_google_project_number"
+            android:value="str:${hyber_google_project_number}" />
+
+
+        <!--TODO Add Firebase services-->
+    </application>
+
+</manifest>
