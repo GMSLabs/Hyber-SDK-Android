@@ -12,8 +12,9 @@ import java.util.Locale;
 
 class Fingerprint {
 
+    private static final String TAG_FINGERPRINT = "FINGERPRINT";
+
     private static String sFingerprint = null;
-    private static final String FINGERPRINT = "FINGERPRINT";
 
     public synchronized static String keyHash(Context context) {
         if (sFingerprint == null) {

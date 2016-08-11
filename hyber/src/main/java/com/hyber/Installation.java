@@ -10,12 +10,13 @@ import java.util.UUID;
 
 class Installation {
 
+    private static final String TAG_INSTALLATION = "TAG_INSTALLATION";
+
     private static String sID = null;
-    private static final String INSTALLATION = "INSTALLATION";
 
     public synchronized static String id(Context context) {
         if (sID == null) {
-            File installation = new File(context.getFilesDir(), INSTALLATION);
+            File installation = new File(context.getFilesDir(), TAG_INSTALLATION);
             try {
                 if (!installation.exists())
                     writeInstallationFile(installation);
