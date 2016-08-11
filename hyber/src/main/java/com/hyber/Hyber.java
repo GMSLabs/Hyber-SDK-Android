@@ -2,9 +2,12 @@ package com.hyber;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 
 import java.util.UUID;
@@ -13,9 +16,32 @@ import timber.log.Timber;
 
 public class Hyber {
 
-    public enum LOG_LEVEL {
-        NONE, FATAL, ERROR, WARN, INFO, DEBUG, VERBOSE
-    }
+    /**
+     * Tag used on log messages.
+     */
+    static final String TAG = "Hyber";
+
+    public static String sdkType = "native";
+    public static final String sdkVersion = "000001";
+
+    private static LOG_LEVEL visualLogLevel = LOG_LEVEL.NONE;
+    private static LOG_LEVEL logCatLevel = LOG_LEVEL.WARN;
+
+    private static OSUtils.DeviceType deviceType;
+    private static OSUtils osUtils;
+
+    static Context appContext;
+    static String clientApiKey, applicationKey;
+    static String installationID, fingerprint;
+
+    static Hyber.Builder mInitBuilder;
+    static boolean initDone;
+    private static boolean startedRegistration;
+
+    private static boolean foreground;
+
+    private static String lastRegistrationId;
+    private static boolean registerForPushFired;
 
     public static class Builder {
         Context mContext;
@@ -44,28 +70,6 @@ public class Hyber {
         }
     }
 
-    /**
-     * Tag used on log messages.
-     */
-    static final String TAG = "Hyber";
-
-    static String clientApiKey, applicationKey, mGoogleProjectNumber;
-    static String installationID, fingerprint;
-    static Context appContext;
-
-    private static LOG_LEVEL visualLogLevel = LOG_LEVEL.NONE;
-    private static LOG_LEVEL logCatLevel = LOG_LEVEL.WARN;
-
-    static boolean initDone;
-    private static boolean foreground;
-
-    private static OSUtils.DeviceType deviceType;
-    public static String sdkType = "native";
-
-    private static OSUtils osUtils;
-
-    static Hyber.Builder mInitBuilder;
-
     public static Hyber.Builder startInit(Context context) {
         return new Hyber.Builder(context);
     }
@@ -79,13 +83,13 @@ public class Hyber {
         try {
             ApplicationInfo ai = context.getPackageManager().getApplicationInfo(context.getPackageName(), PackageManager.GET_META_DATA);
             Bundle bundle = ai.metaData;
-            Hyber.init(context, bundle.getString("hyber_google_project_number"), bundle.getString("hyber_client_api_key"), bundle.getString("hyber_application_key"));
+            Hyber.init(context, bundle.getString("hyber_client_api_key"), bundle.getString("hyber_application_key"));
         } catch (Throwable t) {
             t.printStackTrace();
         }
     }
 
-    public static void init(Context context, String googleProjectNumber, String hyberClientApiKey, String hyberApplicationKey) {
+    public static void init(Context context, String hyberClientApiKey, String hyberApplicationKey) {
         HyberDataSourceController.with(context);
 
         if (mInitBuilder == null)
@@ -122,31 +126,8 @@ public class Hyber {
             Log(LOG_LEVEL.WARN, "Hyber Example AppID detected, please update to your app's id found on Hyber.com");
 
         if (deviceType == OSUtils.DeviceType.FCM) {
-            //TODO
-        } else if (deviceType == OSUtils.DeviceType.GCM) {
-            try {
-                //noinspection ResultOfMethodCallIgnored
-                Double.parseDouble(googleProjectNumber);
-                if (googleProjectNumber.length() < 8 || googleProjectNumber.length() > 16)
-                    throw new IllegalArgumentException("Google Project number (Sender_ID) should be a 10 to 14 digit number in length.");
-            } catch (Throwable t) {
-                Log(LOG_LEVEL.FATAL, "Google Project number (Sender_ID) format is invalid. Please use the 10 to 14 digit number found in the Google Developer Console for your project.\nExample: '703322744261'\n", t);
-            }
-
-            try {
-                Class.forName("com.google.android.gms.gcm.GoogleCloudMessaging");
-            } catch (ClassNotFoundException e) {
-                Log(LOG_LEVEL.FATAL, "The GCM Google Play services client library was not found. Please make sure to include it in your project.", e);
-            }
-
-            try {
-                Class.forName("com.google.android.gms.common.GooglePlayServicesUtil");
-            } catch (ClassNotFoundException e) {
-                Log(LOG_LEVEL.FATAL, "The GooglePlayServicesUtil class part of Google Play services client library was not found. Include this in your project.", e);
-            }
+            //TODO Validate integration params
         }
-
-        mGoogleProjectNumber = googleProjectNumber;
 
         try {
             Class.forName("android.support.v4.view.MenuCompat");
@@ -235,6 +216,62 @@ public class Hyber {
             else if (level == LOG_LEVEL.ERROR || level == LOG_LEVEL.FATAL)
                 Log.e(TAG, message, throwable);
         }
+    }
+
+    static void onAppFocus() {
+        foreground = true;
+
+        try {
+            startRegistrationOrOnSession();
+        } catch (Throwable throwable) {
+            throwable.printStackTrace();
+        }
+    }
+
+    private static void startRegistrationOrOnSession() throws Throwable {
+        if (startedRegistration)
+            return;
+
+        startedRegistration = true;
+
+        PushRegistrator pushRegistrator;
+
+        switch (deviceType) {
+            case FCM:
+                pushRegistrator = new PushRegistrarFCM();
+                break;
+            default:
+                throw new Throwable("Firebase classes not found");
+        }
+
+        pushRegistrator.registerForPush(appContext, new PushRegistrator.RegisteredHandler() {
+            @Override
+            public void complete(String id) {
+                lastRegistrationId = id;
+                registerForPushFired = true;
+                updateDeviceData();
+            }
+        });
+    }
+
+    private static void updateDeviceData() {
+        Log(LOG_LEVEL.DEBUG, "updateDeviceData: registerForPushFired:" + registerForPushFired);
+
+        if (!registerForPushFired)
+            return;
+    }
+
+    static SharedPreferences getHyberPreferences(Context context) {
+        return context.getSharedPreferences(Hyber.class.getSimpleName(), Context.MODE_PRIVATE);
+    }
+
+    static void runOnUiThread(Runnable action) {
+        Handler handler = new Handler(Looper.getMainLooper());
+        handler.post(action);
+    }
+
+    public enum LOG_LEVEL {
+        NONE, FATAL, ERROR, WARN, INFO, DEBUG, VERBOSE
     }
 
 }
