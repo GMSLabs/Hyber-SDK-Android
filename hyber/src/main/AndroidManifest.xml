@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.hyber">
+
+    <!-- INTERNET are basic requirements for push messages. -->
+    <uses-permission android:name="android.permission.INTERNET" />
+
+    <!-- Required, makes sure notifications are delivered on time. -->
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+
+    <!-- Required so the device vibrates on receiving a push notification.
+         Vibration settings of the device still apply. -->
+    <uses-permission android:name="android.permission.VIBRATE" />
+
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+
+    <application>
+        <!--TODO Add receiver for FCM-->
+    </application>
+
+</manifest>
