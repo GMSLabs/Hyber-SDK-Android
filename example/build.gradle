@@ -6,6 +6,13 @@ android {
 
     defaultConfig {
         applicationId "com.hyber.example"
+
+        // TODO: Please update the Google Project number and Hyber client and app Id below to yours.
+        manifestPlaceholders = [manifestApplicationId: "${applicationId}",
+                                hyber_client_api_key: "b5a5b6f4-5af7-11e6-8b77-86f30ca893d3",
+                                hyber_application_key: "c0903c42-5af7-11e6-8b77-86f30ca893d3",
+                                hyber_google_project_number: "703322644261"]
+
         minSdkVersion 16
         targetSdkVersion 24
         versionCode 1
@@ -32,6 +39,10 @@ dependencies {
     })
     testCompile 'junit:junit:4.12'
 
+    compile project(':hyber')
+
     compile 'com.android.support:appcompat-v7:24.1.1'
 
 }
+
+apply plugin: 'com.google.gms.google-services'
