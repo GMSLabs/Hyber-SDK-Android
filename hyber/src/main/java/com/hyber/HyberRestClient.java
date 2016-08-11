@@ -101,6 +101,50 @@ class HyberRestClient {
                 });
     }
 
+    static void refreshToken(@NonNull String refreshToken, @NonNull final RefreshTokenHandler handler) {
+        refreshTokenObservable(new RefreshTokenReqModel(refreshToken))
+                .subscribe(new Action1<Response<RefreshTokenRespModel>>() {
+                    @Override
+                    public void call(Response<RefreshTokenRespModel> response) {
+                        Timber.d("Success - Refresh token complete.\nData:%s",
+                                response.message());
+                        if (response.isSuccessful()) {
+                            if (response.body().getSession() != null &&
+                                    response.body().getSession().getToken() != null &&
+                                    response.body().getSession().getExpirationDate() != null) {
+                                DateFormat df = new SimpleDateFormat(Tweakables.API_DATE_FORMAT, Locale.US);
+                                Hawk.chain()
+                                        .put(Tweakables.HAWK_HyberAuthToken, response.body().getSession().getToken())
+                                        .put(Tweakables.HAWK_HyberTokenExpDate, df.format(response.body().getSession().getExpirationDate()))
+                                        .commit();
+                                if (response.body().getSession().getRefreshToken() != null) {
+                                    Hawk.chain()
+                                            .put(Tweakables.HAWK_HyberRefreshToken, response.body().getSession().getRefreshToken())
+                                            .commit();
+                                }
+                            }
+                            handler.onSuccess();
+                        } else {
+                            String errorBody = null;
+                            Throwable throwable = null;
+                            try {
+                                errorBody = response.errorBody().string();
+                            } catch (IOException e) {
+                                throwable = e;
+                            }
+                            handler.onFailure(response.code(), errorBody, throwable);
+                        }
+                    }
+                }, new Action1<Throwable>() {
+                    @Override
+                    public void call(Throwable throwable) {
+                        Timber.d("Failure: Refresh token unsuccessful.\nError:%s",
+                                throwable.toString());
+                        handler.onThrowable(throwable);
+                    }
+                });
+    }
+
     static void updateFcmToken(@NonNull String fcmToken, @NonNull final DeviceUpdateHandler handler) {
         updateDeviceObservable(new UpdateDeviceReqModel(fcmToken))
                 .subscribe(new Action1<Response<UpdateDeviceRespModel>>() {
@@ -171,6 +215,13 @@ class HyberRestClient {
                 .observeOn(AndroidSchedulers.mainThread());
     }
 
+    private static Observable<Response<RefreshTokenRespModel>> refreshTokenObservable(
+            @NonNull RefreshTokenReqModel model) {
+        return hyberApiService.refreshTokenObservable(model)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread());
+    }
+
     private static Observable<Response<UpdateDeviceRespModel>> updateDeviceObservable(
             @NonNull UpdateDeviceReqModel model) {
         return hyberApiService.updateDeviceObservable(model)
@@ -179,6 +230,14 @@ class HyberRestClient {
     }
 
     interface UserRegisterHandler {
+        void onSuccess();
+
+        void onFailure(int statusCode, @Nullable String response, @Nullable Throwable throwable);
+
+        void onThrowable(@Nullable Throwable throwable);
+    }
+
+    interface RefreshTokenHandler {
         void onSuccess();
 
         void onFailure(int statusCode, @Nullable String response, @Nullable Throwable throwable);

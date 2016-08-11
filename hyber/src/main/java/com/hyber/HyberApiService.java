@@ -10,6 +10,9 @@ interface HyberApiService {
     @POST("register/device")
     Observable<Response<RegisterDeviceRespModel>> registerDeviceObservable(@Body RegisterDeviceReqModel body);
 
+    @POST("refreshtoken/device")
+    Observable<Response<RefreshTokenRespModel>> refreshTokenObservable(@Body RefreshTokenReqModel body);
+
     @POST("update/device")
     Observable<Response<UpdateDeviceRespModel>> updateDeviceObservable(@Body UpdateDeviceReqModel body);
 
