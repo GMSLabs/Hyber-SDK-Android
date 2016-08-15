@@ -3,12 +3,15 @@ package com.hyber.example;
 import android.app.Application;
 
 import com.hyber.Hyber;
+import com.crashlytics.android.Crashlytics;
+import io.fabric.sdk.android.Fabric;
 
 public class MyApp extends Application {
 
     @Override
     public void onCreate() {
         super.onCreate();
+        Fabric.with(this, new Crashlytics());
 
         // Logging set to help debug issues, remove before releasing your app.
         Hyber.setLogLevel(Hyber.LOG_LEVEL.VERBOSE, Hyber.LOG_LEVEL.WARN);

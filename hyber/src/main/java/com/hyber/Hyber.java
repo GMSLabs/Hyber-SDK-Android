@@ -271,8 +271,18 @@ public class Hyber {
 
                     @Override
                     public void onThrowable(@Nullable Throwable throwable) {
-                        String err = String.format(Locale.US, "error %s",
-                                throwable != null ? throwable.getCause().getLocalizedMessage() : "");
+                        String err = "";
+
+                        if (throwable != null) {
+                            if (throwable.getCause() != null) {
+                                err = String.format(Locale.US, "error %s",
+                                        throwable.getCause().getLocalizedMessage());
+                            } else {
+                                err = String.format(Locale.US, "error %s",
+                                        throwable.getLocalizedMessage());
+                            }
+                        }
+
                         Hyber.Log(LOG_LEVEL.ERROR, err, throwable);
                         handler.onFailure(err);
                     }
@@ -300,8 +310,18 @@ public class Hyber {
 
                     @Override
                     public void onThrowable(@Nullable Throwable throwable) {
-                        String err = String.format(Locale.US, "error %s",
-                                throwable != null ? throwable.getCause().getLocalizedMessage() : "");
+                        String err = "";
+
+                        if (throwable != null) {
+                            if (throwable.getCause() != null) {
+                                err = String.format(Locale.US, "error %s",
+                                        throwable.getCause().getLocalizedMessage());
+                            } else {
+                                err = String.format(Locale.US, "error %s",
+                                        throwable.getLocalizedMessage());
+                            }
+                        }
+
                         Hyber.Log(LOG_LEVEL.ERROR, err, throwable);
                         handler.onFailure(err);
                     }
@@ -326,8 +346,18 @@ public class Hyber {
 
                     @Override
                     public void onThrowable(@Nullable Throwable throwable) {
-                        String err = String.format(Locale.US, "error %s",
-                                throwable != null ? throwable.getCause().getLocalizedMessage() : "");
+                        String err = "";
+
+                        if (throwable != null) {
+                            if (throwable.getCause() != null) {
+                                err = String.format(Locale.US, "error %s",
+                                        throwable.getCause().getLocalizedMessage());
+                            } else {
+                                err = String.format(Locale.US, "error %s",
+                                        throwable.getLocalizedMessage());
+                            }
+                        }
+
                         Hyber.Log(LOG_LEVEL.ERROR, err, throwable);
                         handler.onFailure(err);
                     }

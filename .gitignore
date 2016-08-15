@@ -12,5 +12,5 @@ build/
 .gradle
 gradle.properties
 
-# Local configuration file
-local.properties
+# Configuration files
+*.properties
