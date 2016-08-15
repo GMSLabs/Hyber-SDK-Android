@@ -2,7 +2,7 @@ package com.hyber;
 
 public class Tweakables {
 
-    public static final String BASE_API_URL = "http://46.101.192.217:8090/mobile-abonents/";
+    public static final String BASE_API_URL = "http://46.101.192.217/mobile-abonents/";
     public static final int STANDARD_ADI_TIMEOUT_SECONDS = 3;
     public static final String X_Hyber_Client_API_Key = "X-Hyber-Client-API-Key";
     public static final String X_Hyber_Application_Key = "X-Hyber-Application-Key";

@@ -6,6 +6,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
+import com.google.firebase.messaging.RemoteMessage;
 import com.hyber.Hyber;
 
 import timber.log.Timber;
@@ -38,10 +39,10 @@ public class SplashActivity extends AppCompatActivity {
                     }
 
                     @Override
-                    public void onFailure() {
+                    public void onFailure(String message) {
                         String s = "User registration onFailure";
-                        Timber.e(s);
-                        textView.setText(s);
+                        Timber.e(s + "\n" + message);
+                        textView.setText(s + "\n" + message);
                     }
                 });
             }
@@ -59,10 +60,10 @@ public class SplashActivity extends AppCompatActivity {
                     }
 
                     @Override
-                    public void onFailure() {
+                    public void onFailure(String message) {
                         String s = "Device update onFailure";
-                        Timber.e(s);
-                        textView.setText(s);
+                        Timber.e(s + "\n" + message);
+                        textView.setText(s + "\n" + message);
                     }
                 });
             }
@@ -80,12 +81,32 @@ public class SplashActivity extends AppCompatActivity {
                     }
 
                     @Override
-                    public void onFailure() {
+                    public void onFailure(String message) {
                         String s = "Message history onFailure";
-                        Timber.e(s);
-                        textView.setText(s);
+                        Timber.e(s + "\n" + message);
+                        textView.setText(s + "\n" + message);
                     }
                 });
+            }
+        });
+
+        Hyber.notificationListener(new Hyber.NotificationListener() {
+            @Override
+            public void onMessageReceived(RemoteMessage remoteMessage) {
+                String message = "";
+                message += "From: " + remoteMessage.getFrom();
+
+                // Check if message contains a data payload.
+                if (remoteMessage.getData().size() > 0) {
+                    message += "\nMessage data payload: " + remoteMessage.getData();
+                }
+
+                // Check if message contains a notification payload.
+                if (remoteMessage.getNotification() != null) {
+                    message += "\nMessage Notification Body: " + remoteMessage.getNotification().getBody();
+                }
+
+                textView.setText(message);
             }
         });
     }

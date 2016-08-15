@@ -68,18 +68,16 @@ class HyberRestClient {
                         Timber.d("Success - Register complete.\nData:%s",
                                 response.message());
                         if (response.isSuccessful()) {
-                            if (response.body().getSession() != null &&
-                                    response.body().getSession().getToken() != null &&
-                                    response.body().getSession().getExpirationDate() != null) {
-                                DateFormat df = new SimpleDateFormat(Tweakables.API_DATE_FORMAT, Locale.US);
-                                Hawk.chain()
-                                        .put(Tweakables.HAWK_HyberAuthToken, response.body().getSession().getToken())
-                                        .put(Tweakables.HAWK_HyberTokenExpDate, df.format(response.body().getSession().getExpirationDate()))
-                                        .commit();
-                                if (response.body().getSession().getRefreshToken() != null) {
-                                    Hawk.chain()
-                                            .put(Tweakables.HAWK_HyberRefreshToken, response.body().getSession().getRefreshToken())
-                                            .commit();
+                            SessionRespItemModel session = response.body().getSession();
+                            if (session != null) {
+                                if (session.getToken() != null) {
+                                    Hawk.put(Tweakables.HAWK_HyberAuthToken, session.getToken());
+                                }
+                                if (session.getRefreshToken() != null) {
+                                    Hawk.put(Tweakables.HAWK_HyberRefreshToken, session.getRefreshToken());
+                                }
+                                if (session.getExpirationDate() != null) {
+                                    Hawk.put(Tweakables.HAWK_HyberTokenExpDate, session.getExpirationDate());
                                 }
                             }
                             handler.onSuccess();
@@ -112,18 +110,16 @@ class HyberRestClient {
                         Timber.d("Success - Refresh token complete.\nData:%s",
                                 response.message());
                         if (response.isSuccessful()) {
-                            if (response.body().getSession() != null &&
-                                    response.body().getSession().getToken() != null &&
-                                    response.body().getSession().getExpirationDate() != null) {
-                                DateFormat df = new SimpleDateFormat(Tweakables.API_DATE_FORMAT, Locale.US);
-                                Hawk.chain()
-                                        .put(Tweakables.HAWK_HyberAuthToken, response.body().getSession().getToken())
-                                        .put(Tweakables.HAWK_HyberTokenExpDate, df.format(response.body().getSession().getExpirationDate()))
-                                        .commit();
-                                if (response.body().getSession().getRefreshToken() != null) {
-                                    Hawk.chain()
-                                            .put(Tweakables.HAWK_HyberRefreshToken, response.body().getSession().getRefreshToken())
-                                            .commit();
+                            SessionRespItemModel session = response.body().getSession();
+                            if (session != null) {
+                                if (session.getToken() != null) {
+                                    Hawk.put(Tweakables.HAWK_HyberAuthToken, session.getToken());
+                                }
+                                if (session.getRefreshToken() != null) {
+                                    Hawk.put(Tweakables.HAWK_HyberRefreshToken, session.getRefreshToken());
+                                }
+                                if (session.getExpirationDate() != null) {
+                                    Hawk.put(Tweakables.HAWK_HyberTokenExpDate, session.getExpirationDate());
                                 }
                             }
                             handler.onSuccess();
