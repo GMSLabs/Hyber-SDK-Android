@@ -2,7 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.hyber">
 
-    <!-- INTERNET are basic requirements for push messages. -->
+    <!-- INTERNET are basic requirements for push mMessages. -->
     <uses-permission android:name="android.permission.INTERNET" />
 
     <!-- Required, makes sure notifications are delivered on time. -->

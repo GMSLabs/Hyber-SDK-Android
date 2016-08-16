@@ -58,6 +58,9 @@ class HyberRestClient {
                                @NonNull String deviceOs, @NonNull String androidVersion,
                                @NonNull String deviceName, @NonNull String modelName,
                                @NonNull String deviceType, @NonNull final UserRegisterHandler handler) {
+
+        Hawk.remove(Tweakables.HAWK_HyberAuthToken);
+
         registerDeviceObservable(new RegisterDeviceReqModel(phone, deviceOs, androidVersion, deviceName, modelName, deviceType))
                 .subscribe(new Action1<Response<RegisterDeviceRespModel>>() {
                     @Override
@@ -208,6 +211,36 @@ class HyberRestClient {
                 });
     }
 
+    static void getMessageHistory(@NonNull Long startDate, @NonNull final MessageHistoryHandler handler) {
+        getMessageHistoryObservable(new MessageHistoryReqModel(startDate))
+                .subscribe(new Action1<Response<MessageHistoryRespModel>>() {
+                    @Override
+                    public void call(Response<MessageHistoryRespModel> response) {
+                        Timber.d("Success - Message history complete.\nData:%s",
+                                response.message());
+                        if (response.isSuccessful()) {
+                            handler.onSuccess();
+                        } else {
+                            String errorBody = null;
+                            Throwable throwable = null;
+                            try {
+                                errorBody = response.errorBody().string();
+                            } catch (IOException e) {
+                                throwable = e;
+                            }
+                            handler.onFailure(response.code(), errorBody, throwable);
+                        }
+                    }
+                }, new Action1<Throwable>() {
+                    @Override
+                    public void call(Throwable throwable) {
+                        Timber.d("Failure: Message history unsuccessful.\nError:%s",
+                                throwable.toString());
+                        handler.onThrowable(throwable);
+                    }
+                });
+    }
+
     private static Observable<Response<RegisterDeviceRespModel>> registerDeviceObservable(
             @NonNull RegisterDeviceReqModel model) {
         return hyberApiService.registerDeviceObservable(model)
@@ -229,6 +262,13 @@ class HyberRestClient {
                 .observeOn(AndroidSchedulers.mainThread());
     }
 
+    private static Observable<Response<MessageHistoryRespModel>> getMessageHistoryObservable(
+            @NonNull MessageHistoryReqModel model) {
+        return hyberApiService.getMessageHistoryObservable(model)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread());
+    }
+
     interface UserRegisterHandler {
         void onSuccess();
 
@@ -246,6 +286,14 @@ class HyberRestClient {
     }
 
     interface DeviceUpdateHandler {
+        void onSuccess();
+
+        void onFailure(int statusCode, @Nullable String response, @Nullable Throwable throwable);
+
+        void onThrowable(@Nullable Throwable throwable);
+    }
+
+    interface MessageHistoryHandler {
         void onSuccess();
 
         void onFailure(int statusCode, @Nullable String response, @Nullable Throwable throwable);

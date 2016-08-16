@@ -8,6 +8,8 @@ import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.util.Log;
 
 import java.util.UUID;
@@ -42,6 +44,21 @@ public class Hyber {
 
     private static String lastRegistrationId;
     private static boolean registerForPushFired;
+
+    public interface UserRegistrationHandler {
+        void onSuccess();
+        void onFailure();
+    }
+
+    public interface DeviceUpdateHandler {
+        void onSuccess();
+        void onFailure();
+    }
+
+    public interface MessageHistoryHandler {
+        void onSuccess();
+        void onFailure();
+    }
 
     public static class Builder {
         Context mContext;
@@ -226,6 +243,75 @@ public class Hyber {
         } catch (Throwable throwable) {
             throwable.printStackTrace();
         }
+    }
+
+    public static void userRegistration(@NonNull Long phone, final UserRegistrationHandler handler) {
+        HyberRestClient.registerDevice(phone,
+                osUtils.getDeviceOs(), osUtils.getAndroidVersion(),
+                osUtils.getDeviceName(), osUtils.getModelName(),
+                osUtils.getDeviceFormat(appContext),
+                new HyberRestClient.UserRegisterHandler() {
+                    @Override
+                    public void onSuccess() {
+                        handler.onSuccess();
+                    }
+
+                    @Override
+                    public void onFailure(int statusCode, @Nullable String response, @Nullable Throwable throwable) {
+                        Hyber.Log(LOG_LEVEL.ERROR, response, throwable);
+                        handler.onFailure();
+                    }
+
+                    @Override
+                    public void onThrowable(@Nullable Throwable throwable) {
+                        Hyber.Log(throwable);
+                    }
+                });
+    }
+
+    public static void deviceUpdate(final DeviceUpdateHandler handler) {
+        HyberRestClient.updateDevice(
+                osUtils.getDeviceOs(), osUtils.getAndroidVersion(),
+                osUtils.getDeviceName(), osUtils.getModelName(),
+                osUtils.getDeviceFormat(appContext),
+                new HyberRestClient.DeviceUpdateHandler() {
+                    @Override
+                    public void onSuccess() {
+                        handler.onSuccess();
+                    }
+
+                    @Override
+                    public void onFailure(int statusCode, @Nullable String response, @Nullable Throwable throwable) {
+                        Hyber.Log(LOG_LEVEL.ERROR, response, throwable);
+                        handler.onFailure();
+                    }
+
+                    @Override
+                    public void onThrowable(@Nullable Throwable throwable) {
+                        Hyber.Log(throwable);
+                    }
+                });
+    }
+
+    public static void getMessageHistory(@NonNull Long startDate, final MessageHistoryHandler handler) {
+        HyberRestClient.getMessageHistory(startDate,
+                new HyberRestClient.MessageHistoryHandler() {
+                    @Override
+                    public void onSuccess() {
+                        handler.onSuccess();
+                    }
+
+                    @Override
+                    public void onFailure(int statusCode, @Nullable String response, @Nullable Throwable throwable) {
+                        Hyber.Log(LOG_LEVEL.ERROR, response, throwable);
+                        handler.onFailure();
+                    }
+
+                    @Override
+                    public void onThrowable(@Nullable Throwable throwable) {
+                        Hyber.Log(throwable);
+                    }
+                });
     }
 
     private static void startRegistrationOrOnSession() throws Throwable {

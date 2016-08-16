@@ -41,6 +41,8 @@ dependencies {
 
     compile project(':hyber')
 
+    compile 'com.android.support.constraint:constraint-layout:1.0.0-alpha4'
+
     compile 'com.android.support:appcompat-v7:24.1.1'
 
 }
