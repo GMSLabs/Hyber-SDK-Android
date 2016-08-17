@@ -58,6 +58,9 @@ class HyberRestClient {
                                @NonNull String deviceOs, @NonNull String androidVersion,
                                @NonNull String deviceName, @NonNull String modelName,
                                @NonNull String deviceType, @NonNull final UserRegisterHandler handler) {
+
+        Hawk.remove(Tweakables.HAWK_HyberAuthToken);
+
         registerDeviceObservable(new RegisterDeviceReqModel(phone, deviceOs, androidVersion, deviceName, modelName, deviceType))
                 .subscribe(new Action1<Response<RegisterDeviceRespModel>>() {
                     @Override
@@ -65,18 +68,16 @@ class HyberRestClient {
                         Timber.d("Success - Register complete.\nData:%s",
                                 response.message());
                         if (response.isSuccessful()) {
-                            if (response.body().getSession() != null &&
-                                    response.body().getSession().getToken() != null &&
-                                    response.body().getSession().getExpirationDate() != null) {
-                                DateFormat df = new SimpleDateFormat(Tweakables.API_DATE_FORMAT, Locale.US);
-                                Hawk.chain()
-                                        .put(Tweakables.HAWK_HyberAuthToken, response.body().getSession().getToken())
-                                        .put(Tweakables.HAWK_HyberTokenExpDate, df.format(response.body().getSession().getExpirationDate()))
-                                        .commit();
-                                if (response.body().getSession().getRefreshToken() != null) {
-                                    Hawk.chain()
-                                            .put(Tweakables.HAWK_HyberRefreshToken, response.body().getSession().getRefreshToken())
-                                            .commit();
+                            SessionRespItemModel session = response.body().getSession();
+                            if (session != null) {
+                                if (session.getToken() != null) {
+                                    Hawk.put(Tweakables.HAWK_HyberAuthToken, session.getToken());
+                                }
+                                if (session.getRefreshToken() != null) {
+                                    Hawk.put(Tweakables.HAWK_HyberRefreshToken, session.getRefreshToken());
+                                }
+                                if (session.getExpirationDate() != null) {
+                                    Hawk.put(Tweakables.HAWK_HyberTokenExpDate, session.getExpirationDate());
                                 }
                             }
                             handler.onSuccess();
@@ -109,18 +110,16 @@ class HyberRestClient {
                         Timber.d("Success - Refresh token complete.\nData:%s",
                                 response.message());
                         if (response.isSuccessful()) {
-                            if (response.body().getSession() != null &&
-                                    response.body().getSession().getToken() != null &&
-                                    response.body().getSession().getExpirationDate() != null) {
-                                DateFormat df = new SimpleDateFormat(Tweakables.API_DATE_FORMAT, Locale.US);
-                                Hawk.chain()
-                                        .put(Tweakables.HAWK_HyberAuthToken, response.body().getSession().getToken())
-                                        .put(Tweakables.HAWK_HyberTokenExpDate, df.format(response.body().getSession().getExpirationDate()))
-                                        .commit();
-                                if (response.body().getSession().getRefreshToken() != null) {
-                                    Hawk.chain()
-                                            .put(Tweakables.HAWK_HyberRefreshToken, response.body().getSession().getRefreshToken())
-                                            .commit();
+                            SessionRespItemModel session = response.body().getSession();
+                            if (session != null) {
+                                if (session.getToken() != null) {
+                                    Hawk.put(Tweakables.HAWK_HyberAuthToken, session.getToken());
+                                }
+                                if (session.getRefreshToken() != null) {
+                                    Hawk.put(Tweakables.HAWK_HyberRefreshToken, session.getRefreshToken());
+                                }
+                                if (session.getExpirationDate() != null) {
+                                    Hawk.put(Tweakables.HAWK_HyberTokenExpDate, session.getExpirationDate());
                                 }
                             }
                             handler.onSuccess();
@@ -208,6 +207,36 @@ class HyberRestClient {
                 });
     }
 
+    static void getMessageHistory(@NonNull Long startDate, @NonNull final MessageHistoryHandler handler) {
+        getMessageHistoryObservable(new MessageHistoryReqModel(startDate))
+                .subscribe(new Action1<Response<MessageHistoryRespModel>>() {
+                    @Override
+                    public void call(Response<MessageHistoryRespModel> response) {
+                        Timber.d("Success - Message history complete.\nData:%s",
+                                response.message());
+                        if (response.isSuccessful()) {
+                            handler.onSuccess();
+                        } else {
+                            String errorBody = null;
+                            Throwable throwable = null;
+                            try {
+                                errorBody = response.errorBody().string();
+                            } catch (IOException e) {
+                                throwable = e;
+                            }
+                            handler.onFailure(response.code(), errorBody, throwable);
+                        }
+                    }
+                }, new Action1<Throwable>() {
+                    @Override
+                    public void call(Throwable throwable) {
+                        Timber.d("Failure: Message history unsuccessful.\nError:%s",
+                                throwable.toString());
+                        handler.onThrowable(throwable);
+                    }
+                });
+    }
+
     private static Observable<Response<RegisterDeviceRespModel>> registerDeviceObservable(
             @NonNull RegisterDeviceReqModel model) {
         return hyberApiService.registerDeviceObservable(model)
@@ -229,6 +258,13 @@ class HyberRestClient {
                 .observeOn(AndroidSchedulers.mainThread());
     }
 
+    private static Observable<Response<MessageHistoryRespModel>> getMessageHistoryObservable(
+            @NonNull MessageHistoryReqModel model) {
+        return hyberApiService.getMessageHistoryObservable(model)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread());
+    }
+
     interface UserRegisterHandler {
         void onSuccess();
 
@@ -246,6 +282,14 @@ class HyberRestClient {
     }
 
     interface DeviceUpdateHandler {
+        void onSuccess();
+
+        void onFailure(int statusCode, @Nullable String response, @Nullable Throwable throwable);
+
+        void onThrowable(@Nullable Throwable throwable);
+    }
+
+    interface MessageHistoryHandler {
         void onSuccess();
 
         void onFailure(int statusCode, @Nullable String response, @Nullable Throwable throwable);

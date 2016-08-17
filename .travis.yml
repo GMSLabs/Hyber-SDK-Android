@@ -22,7 +22,6 @@ android:
   licenses:
     - 'android-sdk-license-.+'
 
-
 before_script:
     - chmod +x build.sh
 

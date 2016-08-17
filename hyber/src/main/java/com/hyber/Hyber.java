@@ -8,10 +8,17 @@ import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.util.Log;
 
+import com.google.firebase.messaging.RemoteMessage;
+
+import java.util.Locale;
 import java.util.UUID;
 
+import rx.android.schedulers.AndroidSchedulers;
+import rx.functions.Action1;
 import timber.log.Timber;
 
 public class Hyber {
@@ -42,6 +49,25 @@ public class Hyber {
 
     private static String lastRegistrationId;
     private static boolean registerForPushFired;
+
+    public interface NotificationListener {
+        void onMessageReceived(RemoteMessage remoteMessage);
+    }
+
+    public interface UserRegistrationHandler {
+        void onSuccess();
+        void onFailure(String message);
+    }
+
+    public interface DeviceUpdateHandler {
+        void onSuccess();
+        void onFailure(String message);
+    }
+
+    public interface MessageHistoryHandler {
+        void onSuccess();
+        void onFailure(String message);
+    }
 
     public static class Builder {
         Context mContext;
@@ -199,10 +225,6 @@ public class Hyber {
         Log(level, message, null);
     }
 
-    static void Log(Throwable throwable) {
-        Timber.e(throwable, throwable.getLocalizedMessage());
-    }
-
     static void Log(final LOG_LEVEL level, String message, Throwable throwable) {
         if (level.compareTo(logCatLevel) < 1) {
             if (level == LOG_LEVEL.VERBOSE)
@@ -226,6 +248,120 @@ public class Hyber {
         } catch (Throwable throwable) {
             throwable.printStackTrace();
         }
+    }
+
+    public static void userRegistration(@NonNull Long phone, final UserRegistrationHandler handler) {
+        HyberRestClient.registerDevice(phone,
+                osUtils.getDeviceOs(), osUtils.getAndroidVersion(),
+                osUtils.getDeviceName(), osUtils.getModelName(),
+                osUtils.getDeviceFormat(appContext),
+                new HyberRestClient.UserRegisterHandler() {
+                    @Override
+                    public void onSuccess() {
+                        handler.onSuccess();
+                    }
+
+                    @Override
+                    public void onFailure(int statusCode, @Nullable String response, @Nullable Throwable throwable) {
+                        String err = String.format(Locale.US, "statusCode %d, response %s, error %s", statusCode, response,
+                                throwable != null ? throwable.getCause().getLocalizedMessage() : "");
+                        Hyber.Log(LOG_LEVEL.ERROR, err, throwable);
+                        handler.onFailure(err);
+                    }
+
+                    @Override
+                    public void onThrowable(@Nullable Throwable throwable) {
+                        String err = "";
+
+                        if (throwable != null) {
+                            if (throwable.getCause() != null) {
+                                err = String.format(Locale.US, "error %s",
+                                        throwable.getCause().getLocalizedMessage());
+                            } else {
+                                err = String.format(Locale.US, "error %s",
+                                        throwable.getLocalizedMessage());
+                            }
+                        }
+
+                        Hyber.Log(LOG_LEVEL.ERROR, err, throwable);
+                        handler.onFailure(err);
+                    }
+                });
+    }
+
+    public static void deviceUpdate(final DeviceUpdateHandler handler) {
+        HyberRestClient.updateDevice(
+                osUtils.getDeviceOs(), osUtils.getAndroidVersion(),
+                osUtils.getDeviceName(), osUtils.getModelName(),
+                osUtils.getDeviceFormat(appContext),
+                new HyberRestClient.DeviceUpdateHandler() {
+                    @Override
+                    public void onSuccess() {
+                        handler.onSuccess();
+                    }
+
+                    @Override
+                    public void onFailure(int statusCode, @Nullable String response, @Nullable Throwable throwable) {
+                        String err = String.format(Locale.US, "statusCode %d, response %s, error %s", statusCode, response,
+                                throwable != null ? throwable.getCause().getLocalizedMessage() : "");
+                        Hyber.Log(LOG_LEVEL.ERROR, err, throwable);
+                        handler.onFailure(err);
+                    }
+
+                    @Override
+                    public void onThrowable(@Nullable Throwable throwable) {
+                        String err = "";
+
+                        if (throwable != null) {
+                            if (throwable.getCause() != null) {
+                                err = String.format(Locale.US, "error %s",
+                                        throwable.getCause().getLocalizedMessage());
+                            } else {
+                                err = String.format(Locale.US, "error %s",
+                                        throwable.getLocalizedMessage());
+                            }
+                        }
+
+                        Hyber.Log(LOG_LEVEL.ERROR, err, throwable);
+                        handler.onFailure(err);
+                    }
+                });
+    }
+
+    public static void getMessageHistory(@NonNull Long startDate, final MessageHistoryHandler handler) {
+        HyberRestClient.getMessageHistory(startDate,
+                new HyberRestClient.MessageHistoryHandler() {
+                    @Override
+                    public void onSuccess() {
+                        handler.onSuccess();
+                    }
+
+                    @Override
+                    public void onFailure(int statusCode, @Nullable String response, @Nullable Throwable throwable) {
+                        String err = String.format(Locale.US, "statusCode %d, response %s, error %s", statusCode, response,
+                                throwable != null ? throwable.getCause().getLocalizedMessage() : "");
+                        Hyber.Log(LOG_LEVEL.ERROR, err, throwable);
+                        handler.onFailure(err);
+                    }
+
+                    @Override
+                    public void onThrowable(@Nullable Throwable throwable) {
+                        String err = "";
+
+                        if (throwable != null) {
+                            if (throwable.getCause() != null) {
+                                err = String.format(Locale.US, "error %s",
+                                        throwable.getCause().getLocalizedMessage());
+                            } else {
+                                err = String.format(Locale.US, "error %s",
+                                        throwable.getLocalizedMessage());
+                            }
+                        }
+
+                        Hyber.Log(LOG_LEVEL.ERROR, err, throwable);
+                        handler.onFailure(err);
+                    }
+                });
     }
 
     private static void startRegistrationOrOnSession() throws Throwable {
@@ -252,6 +388,17 @@ public class Hyber {
                 updateDeviceData();
             }
         });
+    }
+
+    public static void notificationListener(final NotificationListener listener) {
+        NotificationBundleProcessor.remoteMessageObservable
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Action1<RemoteMessage>() {
+                    @Override
+                    public void call(RemoteMessage remoteMessage) {
+                        listener.onMessageReceived(remoteMessage);
+                    }
+                });
     }
 
     private static void updateDeviceData() {

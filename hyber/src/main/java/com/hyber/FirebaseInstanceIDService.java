@@ -5,6 +5,8 @@ import android.support.annotation.Nullable;
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.iid.FirebaseInstanceIdService;
 
+import java.util.Locale;
+
 public class FirebaseInstanceIDService extends FirebaseInstanceIdService {
 
     private static final String TAG = "FirebaseIIDService";
@@ -50,7 +52,9 @@ public class FirebaseInstanceIDService extends FirebaseInstanceIdService {
 
             @Override
             public void onThrowable(@Nullable Throwable throwable) {
-                Hyber.Log(throwable);
+                String err = String.format(Locale.US, "error %s",
+                        throwable != null ? throwable.getLocalizedMessage() : "");
+                Hyber.Log(Hyber.LOG_LEVEL.ERROR, err, throwable);
             }
         });
     }

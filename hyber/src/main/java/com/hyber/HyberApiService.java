@@ -16,4 +16,7 @@ interface HyberApiService {
     @POST("update/device")
     Observable<Response<UpdateDeviceRespModel>> updateDeviceObservable(@Body UpdateDeviceReqModel body);
 
+    @POST("messages/history")
+    Observable<Response<MessageHistoryRespModel>> getMessageHistoryObservable(@Body MessageHistoryReqModel body);
+
 }
