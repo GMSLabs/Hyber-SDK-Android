@@ -32,22 +32,21 @@ class HyberDataSourceController {
                 .setLogLevel(LogLevel.FULL)
                 .build();
 
-        if (BuildConfig.DEBUG) {
-            RealmInspectorModulesProvider realmInspectorModulesProvider =
-                    RealmInspectorModulesProvider.builder(context)
-                            .withFolder(context.getCacheDir())
-                            .withEncryptionKey("encrypted.realm", "kjdfdgsfnvihdyeldhlugdkysgfdsfhyesgflakhdfdsgflkdsjhfdguehfseygf".getBytes())
-                            .withMetaTables()
-                            .withDescendingOrder()
-                            .withLimit(1000)
-                            .databaseNamePattern(Pattern.compile(".+\\.realm"))
-                            .build();
-
+        if (true) {
             Stetho.initialize(
                     Stetho.newInitializerBuilder(context)
                             .enableDumpapp(Stetho.defaultDumperPluginsProvider(context))
-                            .enableWebKitInspector(realmInspectorModulesProvider)
+                            .enableWebKitInspector(RealmInspectorModulesProvider.builder(context).build())
                             .build());
+
+            RealmInspectorModulesProvider.builder(context)
+                    .withFolder(context.getCacheDir())
+                    .withEncryptionKey("encrypted.realm", "keyydjghlakfjg;adlshjgdasfjgjdhgdfh;ljga'fgnirhag'lhwrifgioawhnj".getBytes())
+                    .withMetaTables()
+                    .withDescendingOrder()
+                    .withLimit(1000)
+                    .databaseNamePattern(Pattern.compile(".+\\.realm"))
+                    .build();
         }
 
     }
