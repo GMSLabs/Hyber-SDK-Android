@@ -17,9 +17,13 @@ import com.google.firebase.messaging.RemoteMessage;
 import java.util.Locale;
 import java.util.UUID;
 
+import io.realm.Realm;
+import io.realm.RealmChangeListener;
+import io.realm.RealmResults;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
-import timber.log.Timber;
+import rx.subjects.PublishSubject;
+import rx.subjects.SerializedSubject;
 
 public class Hyber {
 
@@ -49,6 +53,11 @@ public class Hyber {
 
     private static String lastRegistrationId;
     private static boolean registerForPushFired;
+
+    private static ReceivedMessageBusinessModel receivedMessageBusinessModel;
+
+    private static RealmChangeListener<RealmResults<ReceivedMessage>> receivedMessageChangeListener;
+    private static RealmResults<ReceivedMessage> receivedMessages;
 
     public interface NotificationListener {
         void onMessageReceived(RemoteMessage remoteMessage);
@@ -181,6 +190,21 @@ public class Hyber {
         clientApiKey = hyberClientApiKey;
         applicationKey = hyberApplicationKey;
         appContext = context.getApplicationContext();
+
+        receivedMessageBusinessModel = ReceivedMessageBusinessModel.getInstance();
+
+        receivedMessageChangeListener = new RealmChangeListener<RealmResults<ReceivedMessage>>() {
+            @Override
+            public void onChange(RealmResults<ReceivedMessage> elements) {
+                for (ReceivedMessage message : elements) {
+                    Hyber.Log(Hyber.LOG_LEVEL.ERROR, "Element changed " + message.getId());
+                }
+            }
+        };
+        receivedMessages = Realm.getDefaultInstance().where(ReceivedMessage.class)
+                .equalTo(ReceivedMessage.IS_REPORTED, false)
+                .findAll();
+        receivedMessages.addChangeListener(receivedMessageChangeListener);
 
         initDone = true;
     }
@@ -410,6 +434,25 @@ public class Hyber {
 
     static SharedPreferences getHyberPreferences(Context context) {
         return context.getSharedPreferences(Hyber.class.getSimpleName(), Context.MODE_PRIVATE);
+    }
+
+    static ReceivedMessageBusinessModel getReceivedMessageBusinessModel() {
+        return receivedMessageBusinessModel;
+    }
+
+    static void saveMessage(ReceivedMessage message) {
+        getReceivedMessageBusinessModel().saveMessage(message)
+                .subscribe(new Action1<ReceivedMessage>() {
+                    @Override
+                    public void call(ReceivedMessage message) {
+
+                    }
+                }, new Action1<Throwable>() {
+                    @Override
+                    public void call(Throwable throwable) {
+                        Log(LOG_LEVEL.WARN, throwable.getLocalizedMessage());
+                    }
+                });
     }
 
     static void runOnUiThread(Runnable action) {
