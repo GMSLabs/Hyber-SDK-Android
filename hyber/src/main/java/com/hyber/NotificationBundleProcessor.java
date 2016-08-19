@@ -42,7 +42,7 @@ class NotificationBundleProcessor {
         Process(context, remoteMessage.getNotification(), remoteMessage.getData());
     }
 
-    static void Process(Context context, RemoteMessage.Notification notification, Map<String, String> data) {
+    private static void Process(Context context, RemoteMessage.Notification notification, Map<String, String> data) {
         //TODO Process notification and data payload
 
         if (data != null && !data.isEmpty()) {

@@ -146,13 +146,13 @@ public class SplashActivity extends AppCompatActivity {
 
                 // Check if message contains a data payload.
                 if (remoteMessage.getData().size() > 0) {
-                    ce.putCustomAttribute("Message data payload", "" + remoteMessage.getData());
+                    ce.putCustomAttribute("Message data payload", "exists");
                     message += "\nMessage data payload: " + remoteMessage.getData();
                 }
 
                 // Check if message contains a notification payload.
                 if (remoteMessage.getNotification() != null) {
-                    ce.putCustomAttribute("Message Notification Body", remoteMessage.getNotification().getBody());
+                    ce.putCustomAttribute("Message Notification Body", "exists");
                     message += "\nMessage Notification Body: " + remoteMessage.getNotification().getBody();
                 }
 
