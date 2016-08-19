@@ -33,7 +33,7 @@ class HyberRestClient {
 
     static {
         OkHttpClient okHttpClient = new OkHttpClient.Builder()
-                .addInterceptor(new StethoInterceptor())
+                //.addInterceptor(new StethoInterceptor())
                 .addInterceptor(new HyberInterceptor())
                 .addInterceptor(new HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY))
                 .connectTimeout(Tweakables.STANDARD_ADI_TIMEOUT_SECONDS, TimeUnit.SECONDS)
@@ -65,8 +65,9 @@ class HyberRestClient {
                 .subscribe(new Action1<Response<RegisterDeviceRespModel>>() {
                     @Override
                     public void call(Response<RegisterDeviceRespModel> response) {
-                        Timber.d("Success - Register complete.\nData:%s",
-                                response.message());
+                        Hyber.Log(Hyber.LOG_LEVEL.DEBUG, String.format(Locale.getDefault(),
+                                "Success - Registration complete.\nData:%s",
+                                response.message()));
                         if (response.isSuccessful()) {
                             SessionRespItemModel session = response.body().getSession();
                             if (session != null) {
@@ -95,8 +96,9 @@ class HyberRestClient {
                 }, new Action1<Throwable>() {
                     @Override
                     public void call(Throwable throwable) {
-                        Timber.d("Failure: Register unsuccessful.\nError:%s",
-                                throwable.toString());
+                        Hyber.Log(Hyber.LOG_LEVEL.WARN, String.format(Locale.getDefault(),
+                                "Failure: Registration unsuccessful.\nError:%s",
+                                throwable.toString()));
                         handler.onThrowable(throwable);
                     }
                 });
@@ -107,8 +109,9 @@ class HyberRestClient {
                 .subscribe(new Action1<Response<RefreshTokenRespModel>>() {
                     @Override
                     public void call(Response<RefreshTokenRespModel> response) {
-                        Timber.d("Success - Refresh token complete.\nData:%s",
-                                response.message());
+                        Hyber.Log(Hyber.LOG_LEVEL.DEBUG, String.format(Locale.getDefault(),
+                                "Success - Refresh token complete.\nData:%s",
+                                response.message()));
                         if (response.isSuccessful()) {
                             SessionRespItemModel session = response.body().getSession();
                             if (session != null) {
@@ -137,8 +140,9 @@ class HyberRestClient {
                 }, new Action1<Throwable>() {
                     @Override
                     public void call(Throwable throwable) {
-                        Timber.d("Failure: Refresh token unsuccessful.\nError:%s",
-                                throwable.toString());
+                        Hyber.Log(Hyber.LOG_LEVEL.WARN, String.format(Locale.getDefault(),
+                                "Failure: Refresh token unsuccessful.\nError:%s",
+                                throwable.toString()));
                         handler.onThrowable(throwable);
                     }
                 });
@@ -149,8 +153,9 @@ class HyberRestClient {
                 .subscribe(new Action1<Response<UpdateDeviceRespModel>>() {
                     @Override
                     public void call(Response<UpdateDeviceRespModel> response) {
-                        Timber.d("Success - Device update complete.\nData:%s",
-                                response.message());
+                        Hyber.Log(Hyber.LOG_LEVEL.DEBUG, String.format(Locale.getDefault(),
+                                "Success - FCM Token update complete.\nData:%s",
+                                response.message()));
                         if (response.isSuccessful()) {
                             handler.onSuccess();
                         } else {
@@ -167,8 +172,9 @@ class HyberRestClient {
                 }, new Action1<Throwable>() {
                     @Override
                     public void call(Throwable throwable) {
-                        Timber.d("Failure: Device update unsuccessful.\nError:%s",
-                                throwable.toString());
+                        Hyber.Log(Hyber.LOG_LEVEL.WARN, String.format(Locale.getDefault(),
+                                "Failure: FCM Token update unsuccessful.\nError:%s",
+                                throwable.toString()));
                         handler.onThrowable(throwable);
                     }
                 });
@@ -182,8 +188,9 @@ class HyberRestClient {
                 .subscribe(new Action1<Response<UpdateDeviceRespModel>>() {
                     @Override
                     public void call(Response<UpdateDeviceRespModel> response) {
-                        Timber.d("Success - Device update complete.\nData:%s",
-                                response.message());
+                        Hyber.Log(Hyber.LOG_LEVEL.DEBUG, String.format(Locale.getDefault(),
+                                "Success - Device update complete.\nData:%s",
+                                response.message()));
                         if (response.isSuccessful()) {
                             handler.onSuccess();
                         } else {
@@ -200,8 +207,9 @@ class HyberRestClient {
                 }, new Action1<Throwable>() {
                     @Override
                     public void call(Throwable throwable) {
-                        Timber.d("Failure: Device update unsuccessful.\nError:%s",
-                                throwable.toString());
+                        Hyber.Log(Hyber.LOG_LEVEL.WARN, String.format(Locale.getDefault(),
+                                "Failure: Device update unsuccessful.\nError:%s",
+                                throwable.toString()));
                         handler.onThrowable(throwable);
                     }
                 });
@@ -212,8 +220,9 @@ class HyberRestClient {
                 .subscribe(new Action1<Response<MessageHistoryRespModel>>() {
                     @Override
                     public void call(Response<MessageHistoryRespModel> response) {
-                        Timber.d("Success - Message history complete.\nData:%s",
-                                response.message());
+                        Hyber.Log(Hyber.LOG_LEVEL.DEBUG, String.format(Locale.getDefault(),
+                                "Success - Message history complete.\nData:%s",
+                                response.message()));
                         if (response.isSuccessful()) {
                             handler.onSuccess();
                         } else {
@@ -230,8 +239,41 @@ class HyberRestClient {
                 }, new Action1<Throwable>() {
                     @Override
                     public void call(Throwable throwable) {
-                        Timber.d("Failure: Message history unsuccessful.\nError:%s",
-                                throwable.toString());
+                        Hyber.Log(Hyber.LOG_LEVEL.WARN, String.format(Locale.getDefault(),
+                                "Failure: Message history unsuccessful.\nError:%s",
+                                throwable.toString()));
+                        handler.onThrowable(throwable);
+                    }
+                });
+    }
+
+    static void sendPushDeliveryReport(@NonNull final String messageId, @NonNull Long receivedAt, @NonNull final PushDeliveryReportHandler handler) {
+        sendPushDeliveryReportObservable(new PushDeliveryReportReqModel(messageId, receivedAt))
+                .subscribe(new Action1<Response<Void>>() {
+                    @Override
+                    public void call(Response response) {
+                        Hyber.Log(Hyber.LOG_LEVEL.DEBUG, String.format(Locale.getDefault(),
+                                "Success - Push delivery report complete.\nData:%s",
+                                response.message()));
+                        if (response.isSuccessful()) {
+                            handler.onSuccess(messageId);
+                        } else {
+                            String errorBody = null;
+                            Throwable throwable = null;
+                            try {
+                                errorBody = response.errorBody().string();
+                            } catch (IOException e) {
+                                throwable = e;
+                            }
+                            handler.onFailure(response.code(), errorBody, throwable);
+                        }
+                    }
+                }, new Action1<Throwable>() {
+                    @Override
+                    public void call(Throwable throwable) {
+                        Hyber.Log(Hyber.LOG_LEVEL.WARN, String.format(Locale.getDefault(),
+                                "Failure: Push delivery report unsuccessful.\nError:%s",
+                                throwable.toString()));
                         handler.onThrowable(throwable);
                     }
                 });
@@ -265,6 +307,13 @@ class HyberRestClient {
                 .observeOn(AndroidSchedulers.mainThread());
     }
 
+    private static Observable<Response<Void>> sendPushDeliveryReportObservable(
+            @NonNull PushDeliveryReportReqModel model) {
+        return hyberApiService.sendPushDeliveryReportObservable(model)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread());
+    }
+
     interface UserRegisterHandler {
         void onSuccess();
 
@@ -291,6 +340,14 @@ class HyberRestClient {
 
     interface MessageHistoryHandler {
         void onSuccess();
+
+        void onFailure(int statusCode, @Nullable String response, @Nullable Throwable throwable);
+
+        void onThrowable(@Nullable Throwable throwable);
+    }
+
+    interface PushDeliveryReportHandler {
+        void onSuccess(@NonNull String messageId);
 
         void onFailure(int statusCode, @Nullable String response, @Nullable Throwable throwable);
 
