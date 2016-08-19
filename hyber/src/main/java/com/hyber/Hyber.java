@@ -8,22 +8,31 @@ import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.support.annotation.BoolRes;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.annotation.StringDef;
 import android.util.Log;
 
 import com.google.firebase.messaging.RemoteMessage;
 
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 import io.realm.Realm;
 import io.realm.RealmChangeListener;
 import io.realm.RealmResults;
+import io.realm.Sort;
+import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
-import rx.subjects.PublishSubject;
-import rx.subjects.SerializedSubject;
+import rx.functions.Func2;
 
 public class Hyber {
 
@@ -58,6 +67,7 @@ public class Hyber {
 
     private static RealmChangeListener<RealmResults<ReceivedMessage>> receivedMessageChangeListener;
     private static RealmResults<ReceivedMessage> receivedMessages;
+    private static HashMap<String, Boolean> drInQueue;
 
     public interface NotificationListener {
         void onMessageReceived(RemoteMessage remoteMessage);
@@ -75,6 +85,11 @@ public class Hyber {
 
     public interface MessageHistoryHandler {
         void onSuccess();
+        void onFailure(String message);
+    }
+
+    public interface PushDeliveryReportHandler {
+        void onSuccess(@NonNull String messageId);
         void onFailure(String message);
     }
 
@@ -193,17 +208,90 @@ public class Hyber {
 
         receivedMessageBusinessModel = ReceivedMessageBusinessModel.getInstance();
 
+        drInQueue = new HashMap<>();
+
         receivedMessageChangeListener = new RealmChangeListener<RealmResults<ReceivedMessage>>() {
             @Override
             public void onChange(RealmResults<ReceivedMessage> elements) {
+
                 for (ReceivedMessage message : elements) {
-                    Hyber.Log(Hyber.LOG_LEVEL.ERROR, "Element changed " + message.getId());
+                    if (!drInQueue.containsKey(message.getId())) {
+                        drInQueue.put(message.getId(), false);
+                    }
                 }
+
+                List<String> messageIds = new ArrayList<>();
+                for (Map.Entry<String, Boolean> entry : drInQueue.entrySet()) {
+                    if (!entry.getValue()) {
+                        drInQueue.put(entry.getKey(), true);
+                        messageIds.add(entry.getKey());
+                    }
+                }
+
+                Observable.zip(Observable.from(messageIds),
+                        Observable.interval(1, TimeUnit.SECONDS),
+                        new Func2<String, Long, String>() {
+                            @Override
+                            public String call(String messageId, Long timer) {
+                                return messageId;
+                            }
+                        })
+                        .subscribe(new Action1<String>() {
+                            @Override
+                            public void call(final String messageId) {
+                                Hyber.Log(LOG_LEVEL.DEBUG, "Message " + messageId + " is changed");
+                                Realm realm = Realm.getDefaultInstance();
+                                ReceivedMessage receivedMessage =
+                                        realm.where(ReceivedMessage.class)
+                                                .equalTo(ReceivedMessage.ID, messageId)
+                                                .findFirst();
+
+                                if (receivedMessage != null) {
+                                    Hyber.Log(LOG_LEVEL.DEBUG, "Sending push delivery report with message id " + messageId);
+                                    sendPushDeliveryReport(receivedMessage.getId(), receivedMessage.getReceivedAt().getTime(), new PushDeliveryReportHandler() {
+                                        @Override
+                                        public void onSuccess(@NonNull String messageId) {
+                                            String s = "Push delivery report onSuccess" +
+                                                    "\nWith message id " + messageId;
+                                            Realm realm = Realm.getDefaultInstance();
+                                            Log(LOG_LEVEL.INFO, s);
+                                            realm.beginTransaction();
+                                            ReceivedMessage rm = realm.where(ReceivedMessage.class)
+                                                    .equalTo(ReceivedMessage.ID, messageId)
+                                                    .findFirst();
+                                            if (rm != null) {
+                                                rm.setReported(true);
+                                                Log(LOG_LEVEL.INFO, String.format(Locale.getDefault(),
+                                                        "Message %s set delivery report status is %s",
+                                                        rm.getId(), rm.isReported()));
+                                            } else {
+                                                Log(LOG_LEVEL.WARN, String.format(Locale.getDefault(),
+                                                        "Message %s local not found", messageId));
+                                            }
+                                            realm.commitTransaction();
+                                        }
+
+                                        @Override
+                                        public void onFailure(String message) {
+                                            String s = "Push delivery report onFailure" +
+                                                    "\n" + message;
+                                            Log(LOG_LEVEL.WARN, s);
+                                        }
+                                    });
+                                }
+                            }
+                        }, new Action1<Throwable>() {
+                            @Override
+                            public void call(Throwable throwable) {
+                                Log(LOG_LEVEL.ERROR, throwable.getLocalizedMessage());
+                            }
+                        });
             }
         };
         receivedMessages = Realm.getDefaultInstance().where(ReceivedMessage.class)
                 .equalTo(ReceivedMessage.IS_REPORTED, false)
-                .findAll();
+                .greaterThan(ReceivedMessage.RECEIVED_AT, new Date(System.currentTimeMillis() - TimeUnit.MINUTES.toMillis(15)))
+                .findAllSorted(ReceivedMessage.RECEIVED_AT, Sort.DESCENDING);
         receivedMessages.addChangeListener(receivedMessageChangeListener);
 
         initDone = true;
@@ -358,6 +446,42 @@ public class Hyber {
                     @Override
                     public void onSuccess() {
                         handler.onSuccess();
+                    }
+
+                    @Override
+                    public void onFailure(int statusCode, @Nullable String response, @Nullable Throwable throwable) {
+                        String err = String.format(Locale.US, "statusCode %d, response %s, error %s", statusCode, response,
+                                throwable != null ? throwable.getCause().getLocalizedMessage() : "");
+                        Hyber.Log(LOG_LEVEL.ERROR, err, throwable);
+                        handler.onFailure(err);
+                    }
+
+                    @Override
+                    public void onThrowable(@Nullable Throwable throwable) {
+                        String err = "";
+
+                        if (throwable != null) {
+                            if (throwable.getCause() != null) {
+                                err = String.format(Locale.US, "error %s",
+                                        throwable.getCause().getLocalizedMessage());
+                            } else {
+                                err = String.format(Locale.US, "error %s",
+                                        throwable.getLocalizedMessage());
+                            }
+                        }
+
+                        Hyber.Log(LOG_LEVEL.ERROR, err, throwable);
+                        handler.onFailure(err);
+                    }
+                });
+    }
+
+    public static void sendPushDeliveryReport(@NonNull String messageId, @NonNull Long receivedAt, final PushDeliveryReportHandler handler) {
+        HyberRestClient.sendPushDeliveryReport(messageId, receivedAt,
+                new HyberRestClient.PushDeliveryReportHandler() {
+                    @Override
+                    public void onSuccess(@NonNull String messageId) {
+                        handler.onSuccess(messageId);
                     }
 
                     @Override

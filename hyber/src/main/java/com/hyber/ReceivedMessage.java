@@ -61,7 +61,7 @@ public class ReceivedMessage extends RealmObject {
     }
 
     @NonNull
-    public Boolean getReported() {
+    public Boolean isReported() {
         return isReported;
     }
 
