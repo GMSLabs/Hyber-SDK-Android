@@ -54,7 +54,7 @@ dependencies {
     compile 'com.squareup.okhttp3:logging-interceptor:3.4.1'
 
     //Logging dependencies
-    compile 'com.jakewharton.timber:timber:4.1.2'
+    compile 'com.jakewharton.timber:timber:4.3.0'
 
     //Data utils dependencies
     compile 'com.github.orhanobut:hawk:1.23'
