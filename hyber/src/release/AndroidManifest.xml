@@ -9,9 +9,6 @@
             android:name="hyber_client_api_key"
             android:value="${hyber_client_api_key}" />
         <meta-data
-            android:name="hyber_application_key"
-            android:value="${hyber_application_key}" />
-        <meta-data
             android:name="hyber_google_project_number"
             android:value="str:${hyber_google_project_number}" />
 

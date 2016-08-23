@@ -5,7 +5,6 @@ public class Tweakables {
     public static final String BASE_API_URL = "http://185.46.89.20/";
     public static final int STANDARD_ADI_TIMEOUT_SECONDS = 3;
     public static final String X_Hyber_Client_API_Key = "X-Hyber-Client-API-Key";
-    public static final String X_Hyber_Application_Key = "X-Hyber-Application-Key";
     public static final String X_Hyber_App_Fingerprint = "X-Hyber-App-Fingerprint";
     public static final String X_Hyber_Installation_Id = "X-Hyber-Installation-Id";
 

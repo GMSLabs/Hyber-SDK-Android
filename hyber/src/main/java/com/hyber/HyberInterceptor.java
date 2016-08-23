@@ -17,7 +17,6 @@ public class HyberInterceptor implements Interceptor {
         // Request customization: add request headers
         Request.Builder requestBuilder = original.newBuilder()
                 .header(Tweakables.X_Hyber_Client_API_Key, Hyber.clientApiKey)
-                .header(Tweakables.X_Hyber_Application_Key, Hyber.applicationKey)
                 .header(Tweakables.X_Hyber_App_Fingerprint, Hyber.fingerprint)
                 .header(Tweakables.X_Hyber_Installation_Id, Hyber.installationID);
 
