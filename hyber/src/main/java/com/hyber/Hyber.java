@@ -49,7 +49,7 @@ public class Hyber {
     private static OSUtils osUtils;
 
     static Context appContext;
-    static String clientApiKey, applicationKey;
+    static String clientApiKey;
     static String installationID, fingerprint;
 
     static Hyber.Builder mInitBuilder;
@@ -131,13 +131,13 @@ public class Hyber {
         try {
             ApplicationInfo ai = context.getPackageManager().getApplicationInfo(context.getPackageName(), PackageManager.GET_META_DATA);
             Bundle bundle = ai.metaData;
-            Hyber.init(context, bundle.getString("hyber_client_api_key"), bundle.getString("hyber_application_key"));
+            Hyber.init(context, bundle.getString("hyber_client_api_key"));
         } catch (Throwable t) {
             t.printStackTrace();
         }
     }
 
-    public static void init(Context context, String hyberClientApiKey, String hyberApplicationKey) {
+    public static void init(Context context, String hyberClientApiKey) {
         HyberDataSourceController.with(context);
 
         if (mInitBuilder == null)
@@ -159,19 +159,8 @@ public class Hyber {
             return;
         }
 
-        try {
-            //noinspection ResultOfMethodCallIgnored
-            UUID.fromString(hyberApplicationKey);
-        } catch (Throwable t) {
-            Log(LOG_LEVEL.FATAL, "Hyber AppId format is invalid.\nExample: 'b2f7f966-d8cc-11e4-bed1-df8f05be55ba'\n", t);
-            return;
-        }
-
         if ("b2f7f966-d8cc-11e4-bed1-df8f05be55ba".equals(hyberClientApiKey))
             Log(LOG_LEVEL.WARN, "Hyber Example ClientID detected, please update to your client's id found on Hyber.com");
-
-        if ("5eb5a37e-b458-11e3-ac11-000c2940e62c".equals(hyberApplicationKey))
-            Log(LOG_LEVEL.WARN, "Hyber Example AppID detected, please update to your app's id found on Hyber.com");
 
         if (deviceType == OSUtils.DeviceType.FCM) {
             //TODO Validate integration params
@@ -201,7 +190,6 @@ public class Hyber {
 
         foreground = contextIsActivity;
         clientApiKey = hyberClientApiKey;
-        applicationKey = hyberApplicationKey;
         appContext = context.getApplicationContext();
 
         receivedMessageBusinessModel = ReceivedMessageBusinessModel.getInstance();
