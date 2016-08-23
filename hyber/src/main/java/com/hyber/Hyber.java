@@ -90,7 +90,7 @@ public class Hyber {
 
     public interface PushDeliveryReportHandler {
         void onSuccess(@NonNull String messageId);
-        void onFailure(String message);
+        void onFailure(@NonNull String messageId, String message);
     }
 
     public static class Builder {
@@ -228,17 +228,10 @@ public class Hyber {
                     }
                 }
 
-                Observable.zip(Observable.from(messageIds),
-                        Observable.interval(1, TimeUnit.SECONDS),
-                        new Func2<String, Long, String>() {
-                            @Override
-                            public String call(String messageId, Long timer) {
-                                return messageId;
-                            }
-                        })
+                Observable.from(messageIds)
                         .subscribe(new Action1<String>() {
                             @Override
-                            public void call(final String messageId) {
+                            public void call(String messageId) {
                                 Hyber.Log(LOG_LEVEL.DEBUG, "Message " + messageId + " is changed");
                                 Realm realm = Realm.getDefaultInstance();
                                 ReceivedMessage receivedMessage =
@@ -268,30 +261,41 @@ public class Hyber {
                                                 Log(LOG_LEVEL.WARN, String.format(Locale.getDefault(),
                                                         "Message %s local not found", messageId));
                                             }
+                                            drInQueue.remove(messageId);
                                             realm.commitTransaction();
+                                            realm.close();
                                         }
 
                                         @Override
-                                        public void onFailure(String message) {
+                                        public void onFailure(@NonNull String messageId, String message) {
                                             String s = "Push delivery report onFailure" +
                                                     "\n" + message;
                                             Log(LOG_LEVEL.WARN, s);
+                                            drInQueue.remove(messageId);
                                         }
                                     });
+                                } else {
+                                    drInQueue.put(messageId, false);
                                 }
+                                receivedMessageChangeListener.onChange(realm.where(ReceivedMessage.class)
+                                        .equalTo(ReceivedMessage.IS_REPORTED, false)
+                                        .findAllSorted(ReceivedMessage.RECEIVED_AT, Sort.DESCENDING));
+                                realm.close();
                             }
                         }, new Action1<Throwable>() {
                             @Override
                             public void call(Throwable throwable) {
                                 Log(LOG_LEVEL.ERROR, throwable.getLocalizedMessage());
+                                drInQueue = new HashMap<>();
                             }
                         });
             }
         };
-        receivedMessages = Realm.getDefaultInstance().where(ReceivedMessage.class)
+        Realm realm = Realm.getDefaultInstance();
+        receivedMessages = realm.where(ReceivedMessage.class)
                 .equalTo(ReceivedMessage.IS_REPORTED, false)
-                .greaterThan(ReceivedMessage.RECEIVED_AT, new Date(System.currentTimeMillis() - TimeUnit.MINUTES.toMillis(15)))
                 .findAllSorted(ReceivedMessage.RECEIVED_AT, Sort.DESCENDING);
+        realm.close();
         receivedMessages.addChangeListener(receivedMessageChangeListener);
 
         initDone = true;
@@ -485,15 +489,15 @@ public class Hyber {
                     }
 
                     @Override
-                    public void onFailure(int statusCode, @Nullable String response, @Nullable Throwable throwable) {
+                    public void onFailure(@NonNull String messageId, int statusCode, @Nullable String response, @Nullable Throwable throwable) {
                         String err = String.format(Locale.US, "statusCode %d, response %s, error %s", statusCode, response,
                                 throwable != null ? throwable.getCause().getLocalizedMessage() : "");
                         Hyber.Log(LOG_LEVEL.ERROR, err, throwable);
-                        handler.onFailure(err);
+                        handler.onFailure(messageId, err);
                     }
 
                     @Override
-                    public void onThrowable(@Nullable Throwable throwable) {
+                    public void onThrowable(@NonNull String messageId, @Nullable Throwable throwable) {
                         String err = "";
 
                         if (throwable != null) {
@@ -507,7 +511,7 @@ public class Hyber {
                         }
 
                         Hyber.Log(LOG_LEVEL.ERROR, err, throwable);
-                        handler.onFailure(err);
+                        handler.onFailure(messageId, err);
                     }
                 });
     }

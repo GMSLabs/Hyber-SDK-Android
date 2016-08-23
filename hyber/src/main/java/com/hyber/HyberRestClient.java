@@ -265,7 +265,7 @@ class HyberRestClient {
                             } catch (IOException e) {
                                 throwable = e;
                             }
-                            handler.onFailure(response.code(), errorBody, throwable);
+                            handler.onFailure(messageId, response.code(), errorBody, throwable);
                         }
                     }
                 }, new Action1<Throwable>() {
@@ -274,7 +274,7 @@ class HyberRestClient {
                         Hyber.Log(Hyber.LOG_LEVEL.WARN, String.format(Locale.getDefault(),
                                 "Failure: Push delivery report unsuccessful.\nError:%s",
                                 throwable.toString()));
-                        handler.onThrowable(throwable);
+                        handler.onThrowable(messageId, throwable);
                     }
                 });
     }
@@ -349,9 +349,9 @@ class HyberRestClient {
     interface PushDeliveryReportHandler {
         void onSuccess(@NonNull String messageId);
 
-        void onFailure(int statusCode, @Nullable String response, @Nullable Throwable throwable);
+        void onFailure(@NonNull String messageId, int statusCode, @Nullable String response, @Nullable Throwable throwable);
 
-        void onThrowable(@Nullable Throwable throwable);
+        void onThrowable(@NonNull String messageId, @Nullable Throwable throwable);
     }
 
 }
