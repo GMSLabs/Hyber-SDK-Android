@@ -17,7 +17,7 @@ interface HyberApiService {
     Observable<Response<UpdateDeviceRespModel>> updateDeviceObservable(@Body UpdateDeviceReqModel body);
 
     @POST("mobile-abonents/messages/history")
-    Observable<Response<MessageHistoryRespModel>> getMessageHistoryObservable(@Body MessageHistoryReqModel body);
+    Observable<Response<MessageHistoryRespEnvelope>> getMessageHistoryObservable(@Body MessageHistoryReqModel body);
 
     @POST("push-dr-receiver/sdk_api/dr")
     Observable<Response<Void>> sendPushDeliveryReportObservable(@Body PushDeliveryReportReqModel body);

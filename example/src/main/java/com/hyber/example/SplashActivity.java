@@ -2,6 +2,7 @@ package com.hyber.example;
 
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.text.InputType;
@@ -14,6 +15,8 @@ import com.crashlytics.android.answers.Answers;
 import com.crashlytics.android.answers.CustomEvent;
 import com.google.firebase.messaging.RemoteMessage;
 import com.hyber.Hyber;
+
+import java.util.Date;
 
 import timber.log.Timber;
 
@@ -117,8 +120,9 @@ public class SplashActivity extends AppCompatActivity {
                         .putCustomAttribute("name", button3.getText().toString()));
                 Hyber.getMessageHistory(System.currentTimeMillis(), new Hyber.MessageHistoryHandler() {
                     @Override
-                    public void onSuccess() {
-                        String s = "Message history onSuccess";
+                    public void onSuccess(@NonNull Long recommendedNextTime) {
+                        String s = "Message history onSuccess\n" +
+                                "recommendedNextTime is " + new Date(recommendedNextTime).toString();
                         Timber.d(s);
                         textView.setText(s);
                     }

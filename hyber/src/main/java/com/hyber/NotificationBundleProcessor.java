@@ -51,7 +51,7 @@ class NotificationBundleProcessor {
                 try {
                     FCMessageModel messageModel = new Gson().fromJson(message, FCMessageModel.class);
                     ReceivedMessage receivedMessage =
-                            new ReceivedMessage(messageModel.getId(), messageModel.getAlpha(), messageModel.getText(), new Date());
+                            new ReceivedMessage(messageModel.getId());
                     ReceivedMessageBusinessModel.newInstance().saveMessage(receivedMessage)
                             .subscribe(new Action1<ReceivedMessage>() {
                                 @Override

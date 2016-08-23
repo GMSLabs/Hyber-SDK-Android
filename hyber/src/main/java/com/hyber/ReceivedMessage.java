@@ -10,9 +10,9 @@ import io.realm.annotations.Required;
 
 public class ReceivedMessage extends RealmObject {
 
-    public static final String ID = "mId";
-    public static final String RECEIVED_AT = "mReceivedAt";
-    public static final String IS_REPORTED = "isReported";
+    static final String ID = "mId";
+    static final String RECEIVED_AT = "mReceivedAt";
+    static final String IS_REPORTED = "isReported";
 
     @PrimaryKey
     @Required
@@ -24,65 +24,33 @@ public class ReceivedMessage extends RealmObject {
     @Required
     private Boolean isReported;
 
-    private String mAlphaName;
-
-    private String mText;
-
     public ReceivedMessage() {
 
     }
 
-    public ReceivedMessage(@NonNull String id, @NonNull String name, @NonNull String text, @NonNull Date receivedAt) {
+    ReceivedMessage(@NonNull String id) {
         this.mId = id;
-        this.mAlphaName = name;
-        this.mText = text;
-        this.mReceivedAt = receivedAt;
-
-        setReported(false);
+        this.mReceivedAt = new Date();
+        this.isReported = false;
     }
 
-
     @NonNull
-    public String getId() {
+    String getId() {
         return mId;
     }
 
-    public void setId(@NonNull String id) {
-        this.mId = id;
-    }
-
     @NonNull
-    public Date getReceivedAt() {
+    Date getReceivedAt() {
         return mReceivedAt;
     }
 
-    public void setReceivedAt(@NonNull Date date) {
-        this.mReceivedAt = date;
-    }
-
     @NonNull
-    public Boolean isReported() {
+    Boolean isReported() {
         return isReported;
     }
 
-    public void setReported(@NonNull Boolean status) {
-        isReported = status;
-    }
-
-    public String getAlphaName() {
-        return mAlphaName;
-    }
-
-    public void setAlphaName(@NonNull String name) {
-        this.mAlphaName = name;
-    }
-
-    public String getText() {
-        return mText;
-    }
-
-    public void setText(@NonNull String text) {
-        this.mText = text;
+    void setReportedComplete() {
+        isReported = true;
     }
 
 }

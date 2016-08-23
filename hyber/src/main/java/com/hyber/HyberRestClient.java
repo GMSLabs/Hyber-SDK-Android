@@ -3,15 +3,12 @@ package com.hyber;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
-import com.facebook.stetho.okhttp3.StethoInterceptor;
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.orhanobut.hawk.Hawk;
 
 import java.io.IOException;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
@@ -25,7 +22,6 @@ import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
 import rx.schedulers.Schedulers;
-import timber.log.Timber;
 
 class HyberRestClient {
 
@@ -215,16 +211,20 @@ class HyberRestClient {
                 });
     }
 
-    static void getMessageHistory(@NonNull Long startDate, @NonNull final MessageHistoryHandler handler) {
+    static void getMessageHistory(@NonNull final Long startDate, @NonNull final MessageHistoryHandler handler) {
         getMessageHistoryObservable(new MessageHistoryReqModel(startDate))
-                .subscribe(new Action1<Response<MessageHistoryRespModel>>() {
+                .subscribe(new Action1<Response<MessageHistoryRespEnvelope>>() {
                     @Override
-                    public void call(Response<MessageHistoryRespModel> response) {
+                    public void call(Response<MessageHistoryRespEnvelope> response) {
                         Hyber.Log(Hyber.LOG_LEVEL.DEBUG, String.format(Locale.getDefault(),
                                 "Success - Message history complete.\nData:%s",
                                 response.message()));
                         if (response.isSuccessful()) {
-                            handler.onSuccess();
+                            if (response.body() != null) {
+                                handler.onSuccess(startDate, response.body());
+                            } else {
+                                handler.onFailure(response.code(), response.raw().toString(), null);
+                            }
                         } else {
                             String errorBody = null;
                             Throwable throwable = null;
@@ -300,7 +300,7 @@ class HyberRestClient {
                 .observeOn(AndroidSchedulers.mainThread());
     }
 
-    private static Observable<Response<MessageHistoryRespModel>> getMessageHistoryObservable(
+    private static Observable<Response<MessageHistoryRespEnvelope>> getMessageHistoryObservable(
             @NonNull MessageHistoryReqModel model) {
         return hyberApiService.getMessageHistoryObservable(model)
                 .subscribeOn(Schedulers.io())
@@ -339,7 +339,7 @@ class HyberRestClient {
     }
 
     interface MessageHistoryHandler {
-        void onSuccess();
+        void onSuccess(@NonNull Long startDate, @NonNull MessageHistoryRespEnvelope envelope);
 
         void onFailure(int statusCode, @Nullable String response, @Nullable Throwable throwable);
 

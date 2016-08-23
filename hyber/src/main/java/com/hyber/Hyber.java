@@ -8,10 +8,9 @@ import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import android.support.annotation.BoolRes;
+import android.os.Message;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.annotation.StringDef;
 import android.util.Log;
 
 import com.google.firebase.messaging.RemoteMessage;
@@ -32,7 +31,6 @@ import io.realm.Sort;
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
-import rx.functions.Func2;
 
 public class Hyber {
 
@@ -84,7 +82,7 @@ public class Hyber {
     }
 
     public interface MessageHistoryHandler {
-        void onSuccess();
+        void onSuccess(@NonNull Long recommendedNextTime);
         void onFailure(String message);
     }
 
@@ -253,7 +251,7 @@ public class Hyber {
                                                     .equalTo(ReceivedMessage.ID, messageId)
                                                     .findFirst();
                                             if (rm != null) {
-                                                rm.setReported(true);
+                                                rm.setReportedComplete();
                                                 Log(LOG_LEVEL.INFO, String.format(Locale.getDefault(),
                                                         "Message %s set delivery report status is %s",
                                                         rm.getId(), rm.isReported()));
@@ -448,8 +446,37 @@ public class Hyber {
         HyberRestClient.getMessageHistory(startDate,
                 new HyberRestClient.MessageHistoryHandler() {
                     @Override
-                    public void onSuccess() {
-                        handler.onSuccess();
+                    public void onSuccess(@NonNull final Long startDate, @NonNull final MessageHistoryRespEnvelope envelope) {
+
+                        if (!envelope.getMessages().isEmpty()) {
+                            Realm realm = Realm.getDefaultInstance();
+
+                            realm.executeTransaction(new Realm.Transaction() {
+                                @Override
+                                public void execute(Realm realm) {
+                                    MessageHistory messageHistory;
+
+                                    for (MessageRespModel respModel : envelope.getMessages()) {
+                                        messageHistory = respModel.toRealmMessageHistory();
+                                        if (messageHistory != null) {
+                                            realm.copyToRealmOrUpdate(messageHistory);
+                                        }
+                                    }
+
+                                    //TODO Need for upgrade algorithm of message history page paging
+                                    if (envelope.getMessages().size() < envelope.getLimitMessages()) {
+                                        handler.onSuccess(startDate + (TimeUnit.DAYS.toMillis(envelope.getLimitDays())));
+                                    } else if (envelope.getMessages().size() >= envelope.getLimitMessages()) {
+                                        final MessageHistory mh =
+                                                realm.where(MessageHistory.class)
+                                                        .findAllSorted(MessageHistory.TIME, Sort.DESCENDING)
+                                                        .first();
+                                        handler.onSuccess(mh.getTime().getTime());
+                                    }
+                                }
+                            });
+
+                        }
                     }
 
                     @Override
