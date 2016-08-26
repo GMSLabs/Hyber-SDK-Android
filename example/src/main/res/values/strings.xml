@@ -2,4 +2,8 @@
 
     <string name="app_name">Hyber Starter</string>
 
+    <string name="title_activity_messages">MessagesActivity</string>
+
+    <string name="action_settings">Settings</string>
+
 </resources>

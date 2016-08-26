@@ -8,7 +8,6 @@ import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import android.os.Message;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
@@ -16,7 +15,6 @@ import android.util.Log;
 import com.google.firebase.messaging.RemoteMessage;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -61,10 +59,10 @@ public class Hyber {
     private static String lastRegistrationId;
     private static boolean registerForPushFired;
 
-    private static ReceivedMessageBusinessModel receivedMessageBusinessModel;
+    private static MessageBusinessModel messageBusinessModel;
 
-    private static RealmChangeListener<RealmResults<ReceivedMessage>> receivedMessageChangeListener;
-    private static RealmResults<ReceivedMessage> receivedMessages;
+    private static RealmChangeListener<RealmResults<Message>> mMessageChangeListener;
+    private static RealmResults<Message> mMessageResults;
     private static HashMap<String, Boolean> drInQueue;
 
     public interface NotificationListener {
@@ -192,15 +190,15 @@ public class Hyber {
         clientApiKey = hyberClientApiKey;
         appContext = context.getApplicationContext();
 
-        receivedMessageBusinessModel = ReceivedMessageBusinessModel.getInstance();
+        messageBusinessModel = MessageBusinessModel.getInstance();
 
         drInQueue = new HashMap<>();
 
-        receivedMessageChangeListener = new RealmChangeListener<RealmResults<ReceivedMessage>>() {
+        mMessageChangeListener = new RealmChangeListener<RealmResults<Message>>() {
             @Override
-            public void onChange(RealmResults<ReceivedMessage> elements) {
+            public void onChange(RealmResults<Message> elements) {
 
-                for (ReceivedMessage message : elements) {
+                for (Message message : elements) {
                     if (!drInQueue.containsKey(message.getId())) {
                         drInQueue.put(message.getId(), false);
                     }
@@ -220,9 +218,9 @@ public class Hyber {
                             public void call(String messageId) {
                                 Hyber.Log(LOG_LEVEL.DEBUG, "Message " + messageId + " is changed");
                                 Realm realm = Realm.getDefaultInstance();
-                                ReceivedMessage receivedMessage =
-                                        realm.where(ReceivedMessage.class)
-                                                .equalTo(ReceivedMessage.ID, messageId)
+                                Message receivedMessage =
+                                        realm.where(Message.class)
+                                                .equalTo(Message.ID, messageId)
                                                 .findFirst();
 
                                 if (receivedMessage != null) {
@@ -235,8 +233,8 @@ public class Hyber {
                                             Realm realm = Realm.getDefaultInstance();
                                             Log(LOG_LEVEL.INFO, s);
                                             realm.beginTransaction();
-                                            ReceivedMessage rm = realm.where(ReceivedMessage.class)
-                                                    .equalTo(ReceivedMessage.ID, messageId)
+                                            Message rm = realm.where(Message.class)
+                                                    .equalTo(Message.ID, messageId)
                                                     .findFirst();
                                             if (rm != null) {
                                                 rm.setReportedComplete();
@@ -263,9 +261,9 @@ public class Hyber {
                                 } else {
                                     drInQueue.put(messageId, false);
                                 }
-                                receivedMessageChangeListener.onChange(realm.where(ReceivedMessage.class)
-                                        .equalTo(ReceivedMessage.IS_REPORTED, false)
-                                        .findAllSorted(ReceivedMessage.RECEIVED_AT, Sort.DESCENDING));
+                                mMessageChangeListener.onChange(realm.where(Message.class)
+                                        .equalTo(Message.IS_REPORTED, false)
+                                        .findAllSorted(Message.RECEIVED_AT, Sort.DESCENDING));
                                 realm.close();
                             }
                         }, new Action1<Throwable>() {
@@ -278,11 +276,11 @@ public class Hyber {
             }
         };
         Realm realm = Realm.getDefaultInstance();
-        receivedMessages = realm.where(ReceivedMessage.class)
-                .equalTo(ReceivedMessage.IS_REPORTED, false)
-                .findAllSorted(ReceivedMessage.RECEIVED_AT, Sort.DESCENDING);
+        mMessageResults = realm.where(Message.class)
+                .equalTo(Message.IS_REPORTED, false)
+                .findAllSorted(Message.RECEIVED_AT, Sort.DESCENDING);
         realm.close();
-        receivedMessages.addChangeListener(receivedMessageChangeListener);
+        mMessageResults.addChangeListener(mMessageChangeListener);
 
         initDone = true;
     }
@@ -442,12 +440,12 @@ public class Hyber {
                             realm.executeTransaction(new Realm.Transaction() {
                                 @Override
                                 public void execute(Realm realm) {
-                                    MessageHistory messageHistory;
+                                    Message message;
 
                                     for (MessageRespModel respModel : envelope.getMessages()) {
-                                        messageHistory = respModel.toRealmMessageHistory();
-                                        if (messageHistory != null) {
-                                            realm.copyToRealmOrUpdate(messageHistory);
+                                        message = respModel.toRealmMessageHistory();
+                                        if (message != null) {
+                                            realm.copyToRealmOrUpdate(message);
                                         }
                                     }
 
@@ -455,9 +453,9 @@ public class Hyber {
                                     if (envelope.getMessages().size() < envelope.getLimitMessages()) {
                                         handler.onSuccess(startDate + (TimeUnit.DAYS.toMillis(envelope.getLimitDays())));
                                     } else if (envelope.getMessages().size() >= envelope.getLimitMessages()) {
-                                        final MessageHistory mh =
-                                                realm.where(MessageHistory.class)
-                                                        .findAllSorted(MessageHistory.TIME, Sort.DESCENDING)
+                                        final Message mh =
+                                                realm.where(Message.class)
+                                                        .findAllSorted(Message.TIME, Sort.DESCENDING)
                                                         .first();
                                         handler.onSuccess(mh.getTime().getTime());
                                     }
@@ -579,15 +577,15 @@ public class Hyber {
         return context.getSharedPreferences(Hyber.class.getSimpleName(), Context.MODE_PRIVATE);
     }
 
-    static ReceivedMessageBusinessModel getReceivedMessageBusinessModel() {
-        return receivedMessageBusinessModel;
+    static MessageBusinessModel getMessageBusinessModel() {
+        return messageBusinessModel;
     }
 
-    static void saveMessage(ReceivedMessage message) {
-        getReceivedMessageBusinessModel().saveMessage(message)
-                .subscribe(new Action1<ReceivedMessage>() {
+    static void saveMessage(Message message) {
+        getMessageBusinessModel().saveMessage(message)
+                .subscribe(new Action1<Message>() {
                     @Override
-                    public void call(ReceivedMessage message) {
+                    public void call(Message message) {
 
                     }
                 }, new Action1<Throwable>() {

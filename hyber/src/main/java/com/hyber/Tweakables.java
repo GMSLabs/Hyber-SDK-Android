@@ -2,7 +2,7 @@ package com.hyber;
 
 public class Tweakables {
 
-    public static final String BASE_API_URL = "http://185.46.89.20/";
+    public static final String BASE_API_URL = "http://46.101.192.217/"; //185.46.89.20
     public static final int STANDARD_ADI_TIMEOUT_SECONDS = 3;
     public static final String X_Hyber_Client_API_Key = "X-Hyber-Client-API-Key";
     public static final String X_Hyber_App_Fingerprint = "X-Hyber-App-Fingerprint";
