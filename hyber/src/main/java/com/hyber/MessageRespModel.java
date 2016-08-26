@@ -66,16 +66,17 @@ public class MessageRespModel {
     }
 
     @Nullable
-    MessageHistory toRealmMessageHistory() {
+    Message toRealmMessageHistory() {
         if (mId != null && mPartner != null && mTime != null &&
                 mAlphaName != null && mText != null && mOrder != null) {
-            MessageHistory mh = new MessageHistory(mId, mPartner, new Date(mTime),
+            Message mh = new Message(mId, mPartner, new Date(mTime),
                     mAlphaName, mText, mOrder);
 
             if (mOptions != null)
                 mh.setOptions(mOptions.getImageUrl(), mOptions.getAction(),
                         mOptions.getCaption(), mOptions.getBiDirUrl());
 
+            mh.setAsFromHistory();
             return mh;
         } else {
             return null;

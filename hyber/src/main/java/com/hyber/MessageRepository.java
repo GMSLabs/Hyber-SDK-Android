@@ -13,19 +13,19 @@ import rx.Subscriber;
  *
  * @see <a href="http://martinfowler.com/eaaCatalog/repository.html">Repository pattern</a>
  */
-class ReceivedMessageRepository implements Closeable {
+class MessageRepository implements Closeable {
 
     private final Realm mRealm;
 
-    public ReceivedMessageRepository() {
+    public MessageRepository() {
         this.mRealm = Realm.getDefaultInstance();
     }
 
-    public Observable<ReceivedMessage> saveMessage(final ReceivedMessage message) {
+    public Observable<Message> saveReceivedMessage(final Message message) {
         Hyber.Log(Hyber.LOG_LEVEL.DEBUG, "Start saving message " + message.getId());
-        return Observable.create(new Observable.OnSubscribe<ReceivedMessage>() {
+        return Observable.create(new Observable.OnSubscribe<Message>() {
             @Override
-            public void call(final Subscriber<? super ReceivedMessage> subscriber) {
+            public void call(final Subscriber<? super Message> subscriber) {
                 mRealm.executeTransaction(new Realm.Transaction() {
                     @Override
                     public void execute(Realm realm) {

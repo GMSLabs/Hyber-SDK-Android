@@ -9,7 +9,7 @@ import io.realm.RealmObject;
 import io.realm.annotations.PrimaryKey;
 import io.realm.annotations.Required;
 
-public class MessageHistory extends RealmObject {
+public class Message extends RealmObject {
 
     public static final String ID = "mId";
     public static final String PARTNER = "mPartner";
@@ -21,6 +21,9 @@ public class MessageHistory extends RealmObject {
     public static final String ACTION = "mAction";
     public static final String CAPTION = "mCaption";
     public static final String BIDIRECTIONAL_URL = "mBiDirUrl";
+
+    public static final String RECEIVED_AT = "mReceivedAt";
+    public static final String IS_REPORTED = "isReported";
 
     @PrimaryKey
     @Required
@@ -49,12 +52,18 @@ public class MessageHistory extends RealmObject {
 
     private String mBiDirUrl;
 
-    public MessageHistory() {
+    @Required
+    private Date mReceivedAt;
+
+    @Required
+    private Boolean isReported;
+
+    public Message() {
 
     }
 
-    public MessageHistory(@NonNull String id, @NonNull String partner, @NonNull Date time,
-                          @NonNull String alphaName, @NonNull String text, @NonNull String order) {
+    public Message(@NonNull String id, @NonNull String partner, @NonNull Date time,
+                   @NonNull String alphaName, @NonNull String text, @NonNull String order) {
         this.mId = id;
         this.mPartner = partner;
         this.mTime = time;
@@ -118,6 +127,30 @@ public class MessageHistory extends RealmObject {
     @Nullable
     public String getBidirectionalUrl() {
         return mBiDirUrl;
+    }
+
+    @NonNull
+    Date getReceivedAt() {
+        return mReceivedAt;
+    }
+
+    @NonNull
+    Boolean isReported() {
+        return isReported;
+    }
+
+    void setAsFromHistory() {
+        this.mReceivedAt = this.mTime;
+        this.isReported = true;
+    }
+
+    void setAsNewReceived() {
+        this.mReceivedAt = new Date();
+        this.isReported = false;
+    }
+
+    void setReportedComplete() {
+        isReported = true;
     }
 
 }

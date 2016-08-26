@@ -50,12 +50,21 @@ class NotificationBundleProcessor {
             if (message != null) {
                 try {
                     FCMessageModel messageModel = new Gson().fromJson(message, FCMessageModel.class);
-                    ReceivedMessage receivedMessage =
-                            new ReceivedMessage(messageModel.getId());
-                    ReceivedMessageBusinessModel.newInstance().saveMessage(receivedMessage)
-                            .subscribe(new Action1<ReceivedMessage>() {
+                    Message receivedMessage =
+                            new Message(messageModel.getId(), "push", new Date(), messageModel.getAlpha(), messageModel.getText(), "");
+                    receivedMessage.setAsNewReceived();
+                    if (messageModel.getOptions() != null) {
+                        receivedMessage.setOptions(
+                                messageModel.getOptions().getImageUrl(),
+                                messageModel.getOptions().getActionUrl(),
+                                messageModel.getOptions().getCaptionText(),
+                                messageModel.getOptions().getBidirectionalUrl());
+                    }
+
+                    MessageBusinessModel.newInstance().saveMessage(receivedMessage)
+                            .subscribe(new Action1<Message>() {
                                 @Override
-                                public void call(ReceivedMessage message) {
+                                public void call(Message message) {
                                     Hyber.Log(Hyber.LOG_LEVEL.DEBUG, "message " + message.getId() + " is saved");
                                 }
                             }, new Action1<Throwable>() {

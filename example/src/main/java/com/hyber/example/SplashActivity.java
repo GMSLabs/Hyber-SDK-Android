@@ -1,10 +1,13 @@
 package com.hyber.example;
 
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.text.InputType;
 import android.view.View;
 import android.widget.Button;
@@ -15,16 +18,21 @@ import com.crashlytics.android.answers.Answers;
 import com.crashlytics.android.answers.CustomEvent;
 import com.google.firebase.messaging.RemoteMessage;
 import com.hyber.Hyber;
+import com.hyber.example.adapter.MyMessagesRVAdapter;
 
 import java.util.Date;
 
+import io.realm.Realm;
 import timber.log.Timber;
 
 public class SplashActivity extends AppCompatActivity {
 
     private TextView textView;
-    private Button button1, button2, button3;
+    private Button button1, button2, button3, button4;
     private Long mPhone;
+    private RecyclerView mRecyclerView;
+    private MyMessagesRVAdapter mAdapter;
+    private Realm realm;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,6 +44,13 @@ public class SplashActivity extends AppCompatActivity {
         button1 = (Button) findViewById(R.id.button1);
         button2 = (Button) findViewById(R.id.button2);
         button3 = (Button) findViewById(R.id.button3);
+        button4 = (Button) findViewById(R.id.button4);
+
+        mRecyclerView = (RecyclerView) findViewById(R.id.received_messages_RecyclerView);
+        mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+        realm = Realm.getDefaultInstance();
+        mAdapter = new MyMessagesRVAdapter(this, realm);
+        mRecyclerView.setAdapter(mAdapter);
 
         button1.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -137,6 +152,14 @@ public class SplashActivity extends AppCompatActivity {
             }
         });
 
+        button4.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent i = new Intent(SplashActivity.this, MessagesActivity.class);
+                startActivity(i);
+            }
+        });
+
         Hyber.notificationListener(new Hyber.NotificationListener() {
             @Override
             public void onMessageReceived(RemoteMessage remoteMessage) {
@@ -163,6 +186,7 @@ public class SplashActivity extends AppCompatActivity {
                 Answers.getInstance().logCustom(ce);
 
                 textView.setText(message);
+                mRecyclerView.smoothScrollToPosition(mAdapter.getItemCount() + 1);
             }
         });
     }
