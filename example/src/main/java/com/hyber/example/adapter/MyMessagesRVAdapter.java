@@ -26,7 +26,12 @@ import io.realm.Realm;
 
 public class MyMessagesRVAdapter extends MessageRVAbstractAdapter {
 
+    public interface OnMessageActionListener {
+        void onAction(@NonNull String action);
+    }
+
     private WeakReference<Context> mContextWeakReference;
+    private OnMessageActionListener onMessageActionListener;
 
     public MyMessagesRVAdapter(Context context, Realm realm) {
         super(realm);
@@ -40,6 +45,10 @@ public class MyMessagesRVAdapter extends MessageRVAbstractAdapter {
         return new MyHolder(itemView);
     }
 
+    public void setOnMessageActionListener(@NonNull OnMessageActionListener listener) {
+        this.onMessageActionListener = listener;
+    }
+
     private class MyHolder extends MessageViewHolder {
 
         private AppCompatTextView messageId;
@@ -49,6 +58,8 @@ public class MyMessagesRVAdapter extends MessageRVAbstractAdapter {
         private AppCompatButton messageButton;
         private AppCompatTextView messageDrStatus;
         private AppCompatTextView messageTime;
+
+        private String mAction;
 
         public MyHolder(View itemView) {
             super(itemView);
@@ -103,9 +114,18 @@ public class MyMessagesRVAdapter extends MessageRVAbstractAdapter {
         public void setMessageAction(@Nullable String action) {
             if (action == null) {
                 this.messageButton.setVisibility(View.GONE);
+                this.messageButton.setOnClickListener(null);
             } else {
                 this.messageButton.setVisibility(View.VISIBLE);
-                //TODO Create click listener with action url process
+                this.mAction = action;
+                this.messageButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        if (onMessageActionListener != null) {
+                            onMessageActionListener.onAction(mAction);
+                        }
+                    }
+                });
             }
         }
 
@@ -126,7 +146,7 @@ public class MyMessagesRVAdapter extends MessageRVAbstractAdapter {
 
         @Override
         public void setMessageDate(@NonNull Date date) {
-            SimpleDateFormat formatter = new SimpleDateFormat("hh:mm:ss.SSS", Locale.getDefault());
+            SimpleDateFormat formatter = new SimpleDateFormat("dd.MM.yyyy hh:mm:ss.SSS", Locale.getDefault());
             this.messageTime.setText(formatter.format(date));
         }
 

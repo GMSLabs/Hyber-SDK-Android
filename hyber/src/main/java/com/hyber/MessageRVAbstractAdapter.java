@@ -1,5 +1,6 @@
 package com.hyber;
 
+import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.view.ViewGroup;
 
@@ -36,7 +37,7 @@ public abstract class MessageRVAbstractAdapter extends RecyclerView.Adapter<Mess
         mRealmResults.addChangeListener(mRealmChangeListener);
     }
 
-    public void setOnChangeListener(OnChangeListener listener) {
+    public void setOnChangeListener(@NonNull OnChangeListener listener) {
         this.mChangeListener = listener;
     }
 
