@@ -21,44 +21,39 @@
             android:gravity="center_horizontal">
 
             <TextView
-                android:id="@+id/textview"
+                android:id="@+id/statusTextView"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:minHeight="50dp"
+                android:minHeight="100dp"
                 android:text="Hello World!" />
-
-            <android.support.v7.widget.RecyclerView
-                android:id="@+id/received_messages_RecyclerView"
-                android:layout_width="match_parent"
-                android:layout_height="300dp"/>
 
             <Button
                 android:id="@+id/button1"
                 android:layout_width="200dp"
                 android:layout_height="wrap_content"
                 android:text="register new device"
-                android:layout_marginTop="50dp" />
+                android:layout_marginTop="30dp" />
 
             <Button
                 android:id="@+id/button2"
                 android:layout_width="200dp"
                 android:layout_height="wrap_content"
                 android:text="update device data"
-                android:layout_marginTop="50dp" />
+                android:layout_marginTop="30dp" />
 
             <Button
                 android:id="@+id/button3"
                 android:layout_width="200dp"
                 android:layout_height="wrap_content"
                 android:text="get message history"
-                android:layout_marginTop="50dp" />
+                android:layout_marginTop="30dp" />
 
             <Button
                 android:id="@+id/button4"
                 android:layout_width="200dp"
                 android:layout_height="wrap_content"
                 android:text="message history"
-                android:layout_marginTop="50dp" />
+                android:layout_marginTop="30dp" />
 
         </android.support.v7.widget.LinearLayoutCompat>
 
