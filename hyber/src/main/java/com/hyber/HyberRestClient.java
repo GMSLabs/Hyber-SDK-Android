@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
+import io.realm.Realm;
 import okhttp3.OkHttpClient;
 import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Response;
@@ -60,23 +61,46 @@ class HyberRestClient {
         registerDeviceObservable(new RegisterDeviceReqModel(phone, deviceOs, androidVersion, deviceName, modelName, deviceType))
                 .subscribe(new Action1<Response<RegisterDeviceRespModel>>() {
                     @Override
-                    public void call(Response<RegisterDeviceRespModel> response) {
+                    public void call(final Response<RegisterDeviceRespModel> response) {
                         Hyber.Log(Hyber.LOG_LEVEL.DEBUG, String.format(Locale.getDefault(),
                                 "Success - Registration complete.\nData:%s",
                                 response.message()));
                         if (response.isSuccessful()) {
-                            SessionRespItemModel session = response.body().getSession();
-                            if (session != null) {
-                                if (session.getToken() != null) {
-                                    Hawk.put(Tweakables.HAWK_HyberAuthToken, session.getToken());
+                            try {
+                                final Long phone = Long.parseLong(response.body().getPhone());
+                                Realm realm = Realm.getDefaultInstance();
+                                realm.executeTransaction(new Realm.Transaction() {
+                                    @Override
+                                    public void execute(Realm realm) {
+                                        Profile profile = realm
+                                                .where(Profile.class)
+                                                .equalTo(Profile.PHONE, phone)
+                                                .findFirst();
+
+                                        if (profile == null) {
+                                            profile = new Profile(response.body().getPhone(), phone);
+                                            realm.copyToRealm(profile);
+                                        }
+                                    }
+                                });
+
+                                SessionRespItemModel session = response.body().getSession();
+                                if (session != null) {
+                                    if (session.getToken() != null) {
+                                        Hawk.put(Tweakables.HAWK_HyberAuthToken, session.getToken());
+                                    }
+                                    if (session.getRefreshToken() != null) {
+                                        Hawk.put(Tweakables.HAWK_HyberRefreshToken, session.getRefreshToken());
+                                    }
+                                    if (session.getExpirationDate() != null) {
+                                        Hawk.put(Tweakables.HAWK_HyberTokenExpDate, session.getExpirationDate());
+                                    }
                                 }
-                                if (session.getRefreshToken() != null) {
-                                    Hawk.put(Tweakables.HAWK_HyberRefreshToken, session.getRefreshToken());
-                                }
-                                if (session.getExpirationDate() != null) {
-                                    Hawk.put(Tweakables.HAWK_HyberTokenExpDate, session.getExpirationDate());
-                                }
+                            } catch (Exception e) {
+                                Hyber.Log(Hyber.LOG_LEVEL.ERROR, e.getLocalizedMessage());
+                                handler.onFailure(response.code(), e.getLocalizedMessage(), e);
                             }
+
                             handler.onSuccess();
                         } else {
                             String errorBody = null;
