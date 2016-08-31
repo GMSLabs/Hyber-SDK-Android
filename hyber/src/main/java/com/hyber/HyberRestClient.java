@@ -203,6 +203,11 @@ class HyberRestClient {
     static void updateDevice(@NonNull String deviceOs, @NonNull String androidVersion,
                              @NonNull String deviceName, @NonNull String modelName,
                              @NonNull String deviceType, @NonNull final DeviceUpdateHandler handler) {
+        String authToken = Hawk.get(Tweakables.HAWK_HyberAuthToken, "");
+        if (authToken.isEmpty()) {
+            handler.onFailure(-1, "HyberAuthToken not exists", null);
+            return;
+        }
         updateDeviceObservable(new UpdateDeviceReqModel(FirebaseInstanceId.getInstance().getToken(),
                 deviceOs, androidVersion, deviceName, modelName, deviceType))
                 .subscribe(new Action1<Response<UpdateDeviceRespModel>>() {

@@ -12,9 +12,6 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
-import com.crashlytics.android.answers.Answers;
-import com.crashlytics.android.answers.CustomEvent;
-import com.google.firebase.messaging.RemoteMessage;
 import com.hyber.Hyber;
 
 import butterknife.BindView;
@@ -54,34 +51,6 @@ public class SplashActivity extends AppCompatActivity {
             }
         });
 
-        Hyber.notificationListener(new Hyber.NotificationListener() {
-            @Override
-            public void onMessageReceived(RemoteMessage remoteMessage) {
-
-                CustomEvent ce = new CustomEvent("RemoteMessage");
-
-                String message = "";
-                message += "From: " + remoteMessage.getFrom();
-
-                ce.putCustomAttribute("From", remoteMessage.getFrom());
-
-                // Check if message contains a data payload.
-                if (remoteMessage.getData().size() > 0) {
-                    ce.putCustomAttribute("Message data payload", "exists");
-                    message += "\nMessage data payload: " + remoteMessage.getData();
-                }
-
-                // Check if message contains a notification payload.
-                if (remoteMessage.getNotification() != null) {
-                    ce.putCustomAttribute("Message Notification Body", "exists");
-                    message += "\nMessage Notification Body: " + remoteMessage.getNotification().getBody();
-                }
-
-                Answers.getInstance().logCustom(ce);
-
-                statusTextView.setText(message);
-            }
-        });
     }
 
     private void userRegistration() {

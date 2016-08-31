@@ -14,18 +14,16 @@ import rx.functions.Action1;
 
 class NotificationBundleProcessor {
 
-    private static Subscriber<? super RemoteMessage> mRemoteMessageSubscriber;
+    private static Subscriber<? super HyberMessageModel> mRemoteMessageSubscriber;
 
-    static Observable<RemoteMessage> remoteMessageObservable = Observable.create(new Observable.OnSubscribe<RemoteMessage>() {
+    static Observable<HyberMessageModel> remoteMessageObservable = Observable.create(new Observable.OnSubscribe<HyberMessageModel>() {
         @Override
-        public void call(Subscriber<? super RemoteMessage> subscriber) {
+        public void call(Subscriber<? super HyberMessageModel> subscriber) {
             mRemoteMessageSubscriber = subscriber;
         }
     });
 
     static void ProcessFromFCMIntentService(Context context, RemoteMessage remoteMessage) {
-        if (mRemoteMessageSubscriber != null)
-            mRemoteMessageSubscriber.onNext(remoteMessage);
 
         Hyber.Log(Hyber.LOG_LEVEL.DEBUG, "From: " + remoteMessage.getFrom());
 
@@ -49,7 +47,11 @@ class NotificationBundleProcessor {
             String message = data.get("message");
             if (message != null) {
                 try {
-                    FCMessageModel messageModel = new Gson().fromJson(message, FCMessageModel.class);
+                    HyberMessageModel messageModel = new Gson().fromJson(message, HyberMessageModel.class);
+
+                    if (mRemoteMessageSubscriber != null)
+                        mRemoteMessageSubscriber.onNext(messageModel);
+
                     Message receivedMessage =
                             new Message(messageModel.getId(), "push", new Date(), messageModel.getAlpha(), messageModel.getText(), "");
                     receivedMessage.setAsNewReceived();

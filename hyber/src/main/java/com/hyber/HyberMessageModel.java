@@ -4,7 +4,7 @@ import android.support.annotation.Nullable;
 
 import com.google.gson.annotations.SerializedName;
 
-public class FCMessageModel {
+public class HyberMessageModel {
 
     @SerializedName("mess_id")
     private String mId;
