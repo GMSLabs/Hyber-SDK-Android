@@ -1,9 +1,13 @@
 package com.hyber.example;
 
 import android.app.Application;
+import android.app.NotificationManager;
+import android.support.v4.app.NotificationCompat;
 
 import com.hyber.Hyber;
 import com.crashlytics.android.Crashlytics;
+import com.hyber.HyberMessageModel;
+
 import io.fabric.sdk.android.Fabric;
 
 public class MyApp extends Application {
@@ -19,6 +23,25 @@ public class MyApp extends Application {
         //Initialisation Hyber SDK
         Hyber.startInit(this)
                 .init();
+
+        Hyber.notificationListener(new Hyber.NotificationListener() {
+            @Override
+            public void onMessageReceived(HyberMessageModel hyberMessageModel) {
+
+                NotificationCompat.Builder mBuilder =
+                        new NotificationCompat.Builder(MyApp.this)
+                                .setContentTitle(hyberMessageModel.getAlpha())
+                                .setContentText(hyberMessageModel.getId() + " ==> " + hyberMessageModel.getText());
+
+                // Sets an ID for the notification
+                int mNotificationId = Integer.parseInt(hyberMessageModel.getId());
+                // Gets an instance of the NotificationManager service
+                NotificationManager mNotifyMgr =
+                        (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+                // Builds the notification and issues it.
+                mNotifyMgr.notify(mNotificationId, mBuilder.build());
+            }
+        });
     }
 
 }

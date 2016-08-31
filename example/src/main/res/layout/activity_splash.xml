@@ -28,31 +28,10 @@
                 android:text="Hello World!" />
 
             <Button
-                android:id="@+id/button1"
+                android:id="@+id/userRegisterButton"
                 android:layout_width="200dp"
                 android:layout_height="wrap_content"
                 android:text="register new device"
-                android:layout_marginTop="30dp" />
-
-            <Button
-                android:id="@+id/button2"
-                android:layout_width="200dp"
-                android:layout_height="wrap_content"
-                android:text="update device data"
-                android:layout_marginTop="30dp" />
-
-            <Button
-                android:id="@+id/button3"
-                android:layout_width="200dp"
-                android:layout_height="wrap_content"
-                android:text="get message history"
-                android:layout_marginTop="30dp" />
-
-            <Button
-                android:id="@+id/button4"
-                android:layout_width="200dp"
-                android:layout_height="wrap_content"
-                android:text="message history"
                 android:layout_marginTop="30dp" />
 
         </android.support.v7.widget.LinearLayoutCompat>

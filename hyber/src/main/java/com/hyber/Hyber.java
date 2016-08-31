@@ -66,7 +66,7 @@ public class Hyber {
     private static HashMap<String, Boolean> drInQueue;
 
     public interface NotificationListener {
-        void onMessageReceived(RemoteMessage remoteMessage);
+        void onMessageReceived(HyberMessageModel hyberMessageModel);
     }
 
     public interface UserRegistrationHandler {
@@ -558,10 +558,10 @@ public class Hyber {
     public static void notificationListener(final NotificationListener listener) {
         NotificationBundleProcessor.remoteMessageObservable
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Action1<RemoteMessage>() {
+                .subscribe(new Action1<HyberMessageModel>() {
                     @Override
-                    public void call(RemoteMessage remoteMessage) {
-                        listener.onMessageReceived(remoteMessage);
+                    public void call(HyberMessageModel hyberMessageModel) {
+                        listener.onMessageReceived(hyberMessageModel);
                     }
                 });
     }
