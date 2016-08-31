@@ -1,6 +1,8 @@
 <resources>
 
     <string name="app_name">Hyber Starter</string>
+    <string name="app_name_dev">Hyber Starter DEV</string>
+    <string name="app_name_td">Hyber Starter TD</string>
 
     <string name="action_settings">Settings</string>
     <string name="title_activity_main">MainActivity</string>

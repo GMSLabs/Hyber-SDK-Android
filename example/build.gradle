@@ -22,11 +22,6 @@ android {
     defaultConfig {
         applicationId "com.hyber.example"
 
-        // TODO: Please update the Google Project number and Hyber client and app Id below to yours.
-        manifestPlaceholders = [manifestApplicationId      : "${applicationId}",
-                                hyber_client_api_key       : "b5a5b6f4-5af7-11e6-8b77-86f30ca893d3",
-                                hyber_google_project_number: "703322644261"]
-
         minSdkVersion 16
         targetSdkVersion 24
         versionCode 6
@@ -37,7 +32,7 @@ android {
     }
     buildTypes {
         release {
-            minifyEnabled false
+            minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
         debug {
@@ -46,6 +41,32 @@ android {
     }
     lintOptions {
         abortOnError false
+    }
+    productFlavors {
+        dev {
+            applicationId "com.hyber.example.dev"
+
+            // TODO: Please update the Google Project number and Hyber client and app Id below to yours.
+            manifestPlaceholders = [manifestApplicationId      : "${applicationId}",
+                                    hyber_client_api_key       : "b5a5b6f4-5af7-11e6-8b77-86f30ca893d3",
+                                    hyber_google_project_number: "703322644261"]
+        }
+        td {
+            applicationId "com.hyber.example.td"
+
+            // TODO: Please update the Google Project number and Hyber client and app Id below to yours.
+            manifestPlaceholders = [manifestApplicationId      : "${applicationId}",
+                                    hyber_client_api_key       : "b5a5b6f4-5af7-11e6-8b77-86f30ca893d3",
+                                    hyber_google_project_number: "703322644261"]
+        }
+        prod {
+            applicationId "com.hyber.example.prod"
+
+            // TODO: Please update the Google Project number and Hyber client and app Id below to yours.
+            manifestPlaceholders = [manifestApplicationId      : "${applicationId}",
+                                    hyber_client_api_key       : "b5a5b6f4-5af7-11e6-8b77-86f30ca893d3",
+                                    hyber_google_project_number: "703322644261"]
+        }
     }
 }
 
@@ -56,7 +77,9 @@ dependencies {
     })
     testCompile 'junit:junit:4.12'
 
-    compile project(':hyber')
+    devCompile project(path: ':hyber', configuration: 'hyber_devRelease')
+    tdCompile project(path: ':hyber', configuration: 'hyber_tdRelease')
+    prodCompile project(path: ':hyber', configuration: 'hyber_prodRelease')
 
     compile 'com.google.firebase:firebase-messaging:9.4.0'
 

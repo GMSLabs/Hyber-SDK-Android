@@ -33,9 +33,9 @@ class HyberRestClient {
                 //.addInterceptor(new StethoInterceptor())
                 .addInterceptor(new HyberInterceptor())
                 .addInterceptor(new HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY))
-                .connectTimeout(Tweakables.STANDARD_ADI_TIMEOUT_SECONDS, TimeUnit.SECONDS)
-                .readTimeout(Tweakables.STANDARD_ADI_TIMEOUT_SECONDS, TimeUnit.SECONDS)
-                .writeTimeout(Tweakables.STANDARD_ADI_TIMEOUT_SECONDS, TimeUnit.SECONDS)
+                .connectTimeout(Tweakables.STANDARD_API_TIMEOUT_SECONDS, TimeUnit.SECONDS)
+                .readTimeout(Tweakables.STANDARD_API_TIMEOUT_SECONDS, TimeUnit.SECONDS)
+                .writeTimeout(Tweakables.STANDARD_API_TIMEOUT_SECONDS, TimeUnit.SECONDS)
                 .build();
 
         Gson gson = new GsonBuilder()
@@ -43,7 +43,7 @@ class HyberRestClient {
                 .create();
 
         Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl(Tweakables.BASE_API_URL)
+                .baseUrl(BuildConfig.HOST)
                 .client(okHttpClient)
                 .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
                 .addConverterFactory(GsonConverterFactory.create(gson))
