@@ -10,7 +10,95 @@
       "client_info": {
         "mobilesdk_app_id": "1:93688176680:android:e1g1ac06167be8a7",
         "android_client_info": {
-          "package_name": "com.hyber.example"
+          "package_name": "com.hyber.example.dev"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "936881676680-f1dfb3dn2cgjm2kj73jt82jmeh06qd2o.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.hyber.example",
+            "certificate_hash": "16137ED332A1E684EA29C4F07E2G73C1D2E9B802"
+          }
+        },
+        {
+          "client_id": "936881676680-f1dfb3dn2cgjm2kj73jt82jmeh06qd2o.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAFQaINn46mAzz8iGhQWDVlQFIgnmgVHLo"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "936881676680-f1dfb3dn2cgjm2kj73jt82jmeh06qd2o.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:93688176680:android:e1g1ac06167be8a7",
+        "android_client_info": {
+          "package_name": "com.hyber.example.td"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "936881676680-f1dfb3dn2cgjm2kj73jt82jmeh06qd2o.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.hyber.example",
+            "certificate_hash": "16137ED332A1E684EA29C4F07E2G73C1D2E9B802"
+          }
+        },
+        {
+          "client_id": "936881676680-f1dfb3dn2cgjm2kj73jt82jmeh06qd2o.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAFQaINn46mAzz8iGhQWDVlQFIgnmgVHLo"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "936881676680-f1dfb3dn2cgjm2kj73jt82jmeh06qd2o.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:93688176680:android:e1g1ac06167be8a7",
+        "android_client_info": {
+          "package_name": "com.hyber.example.prod"
         }
       },
       "oauth_client": [

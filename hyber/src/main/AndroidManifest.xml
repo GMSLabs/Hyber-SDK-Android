@@ -17,7 +17,29 @@
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
     <application>
-        <!--TODO Add receiver for FCM-->
+        <meta-data
+            android:name="hyber_client_api_key"
+            android:value="${hyber_client_api_key}" />
+        <meta-data
+            android:name="hyber_google_project_number"
+            android:value="str:${hyber_google_project_number}" />
+
+        <!-- [START firebase_service] -->
+        <service
+            android:name=".FCMService">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT"/>
+            </intent-filter>
+        </service>
+        <!-- [END firebase_service] -->
+        <!-- [START firebase_iid_service] -->
+        <service
+            android:name=".FirebaseInstanceIDService">
+            <intent-filter>
+                <action android:name="com.google.firebase.INSTANCE_ID_EVENT"/>
+            </intent-filter>
+        </service>
+        <!-- [END firebase_iid_service] -->
     </application>
 
 </manifest>

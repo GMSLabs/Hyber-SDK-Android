@@ -1,0 +1,3 @@
+dev_api_host="http://.../"
+td_api_host="http://.../"
+prod_api_host="http://.../"

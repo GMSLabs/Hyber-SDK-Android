@@ -3,6 +3,12 @@
 # Exit on error
 set -e
 
+# Copy mock gradle.properties file in hyber sdk module
+if [ ! -f ./hyber/gradle.properties ]; then
+  echo "Using mock gradle.properties for hyber sdk module"
+  cp ./hyber/gradle.properties.dist ./hyber/gradle.properties
+fi
+
 # List of all samples
 samples=( example )
 
