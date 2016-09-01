@@ -1,11 +1,7 @@
 package com.hyber;
 
-import android.support.annotation.Nullable;
-
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.iid.FirebaseInstanceIdService;
-
-import java.util.Locale;
 
 public class FirebaseInstanceIDService extends FirebaseInstanceIdService {
 
@@ -39,24 +35,18 @@ public class FirebaseInstanceIDService extends FirebaseInstanceIdService {
      * @param token The new token.
      */
     private void sendRegistrationToServer(String token) {
-        HyberRestClient.updateFcmToken(token, new HyberRestClient.DeviceUpdateHandler() {
-            @Override
-            public void onSuccess() {
-                Hyber.Log(Hyber.LOG_LEVEL.DEBUG, "onSuccess");
-            }
+        MainApiBusinessModel.getInstance(this)
+                .sendPushToken(new MainApiBusinessModel.SendPushTokenListener() {
+                    @Override
+                    public void onSent() {
+                        Hyber.Log(Hyber.LOG_LEVEL.DEBUG, "Refreshed token is sent.");
+                    }
 
-            @Override
-            public void onFailure(int statusCode, @Nullable String response, @Nullable Throwable throwable) {
-                Hyber.Log(Hyber.LOG_LEVEL.ERROR, response, throwable);
-            }
-
-            @Override
-            public void onThrowable(@Nullable Throwable throwable) {
-                String err = String.format(Locale.US, "error %s",
-                        throwable != null ? throwable.getLocalizedMessage() : "");
-                Hyber.Log(Hyber.LOG_LEVEL.ERROR, err, throwable);
-            }
-        });
+                    @Override
+                    public void onSendingError(SendPushTokenErrorStatus status) {
+                        Hyber.Log(Hyber.LOG_LEVEL.WARN, status.getDescription());
+                    }
+                });
     }
 
 }

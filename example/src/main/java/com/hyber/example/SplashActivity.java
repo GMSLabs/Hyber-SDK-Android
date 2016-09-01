@@ -35,7 +35,7 @@ public class SplashActivity extends AppCompatActivity {
         Hyber.deviceUpdate(new Hyber.DeviceUpdateHandler() {
             @Override
             public void onSuccess() {
-                updateDeviceData();
+                updatePushToken();
             }
 
             @Override
@@ -57,26 +57,26 @@ public class SplashActivity extends AppCompatActivity {
         Hyber.userRegistration(mPhone, new Hyber.UserRegistrationHandler() {
             @Override
             public void onSuccess() {
-                String s = "User registration onSuccess\nWith phone " + mPhone;
+                String s = "HyberUser registration onSuccess\nWith phone " + mPhone;
                 Timber.d(s);
                 statusTextView.setText(s);
-                updateDeviceData();
+                updatePushToken();
             }
 
             @Override
             public void onFailure(String message) {
-                String s = "User registration onFailure\nWith phone " + mPhone;
+                String s = "HyberUser registration onFailure\nWith phone " + mPhone;
                 Timber.e("%s\n%s", s, message);
                 statusTextView.setText(s + "\n" + message);
             }
         });
     }
 
-    private void updateDeviceData() {
-        Hyber.deviceUpdate(new Hyber.DeviceUpdateHandler() {
+    private void updatePushToken() {
+        Hyber.pushTokenUpdate(new Hyber.PushTokenUpdateHandler() {
             @Override
             public void onSuccess() {
-                String s = "Device update onSuccess";
+                String s = "Push token update onSuccess";
                 Timber.d(s);
                 statusTextView.setText(s);
                 startActivity(new Intent(SplashActivity.this, MainActivity.class));
@@ -84,7 +84,7 @@ public class SplashActivity extends AppCompatActivity {
 
             @Override
             public void onFailure(String message) {
-                String s = "Device update onFailure";
+                String s = "Push token update onFailure";
                 Timber.e("%s\n%s", s, message);
                 statusTextView.setText(s + "\n" + message);
             }
