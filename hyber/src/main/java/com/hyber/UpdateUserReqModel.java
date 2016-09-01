@@ -2,7 +2,7 @@ package com.hyber;
 
 import com.google.gson.annotations.SerializedName;
 
-public class UpdateDeviceReqModel {
+public class UpdateUserReqModel {
 
     @SerializedName("fcmToken")
     private String mFcmToken;
@@ -25,15 +25,23 @@ public class UpdateDeviceReqModel {
     @SerializedName("deviceType")
     private String mDeviceType;
 
-    public UpdateDeviceReqModel() {
+    public UpdateUserReqModel() {
 
     }
 
-    public UpdateDeviceReqModel(String mFcmToken) {
+    public UpdateUserReqModel(String mFcmToken) {
         this.mFcmToken = mFcmToken;
     }
 
-    public UpdateDeviceReqModel(String mFcmToken, String mOsType, String mOsVersion, String mDeviceName, String mModelName, String mDeviceType) {
+    public UpdateUserReqModel(String mOsType, String mOsVersion, String mDeviceName, String mModelName, String mDeviceType) {
+        this.mOsType = mOsType;
+        this.mOsVersion = mOsVersion;
+        this.mDeviceName = mDeviceName;
+        this.mModelName = mModelName;
+        this.mDeviceType = mDeviceType;
+    }
+
+    public UpdateUserReqModel(String mFcmToken, String mOsType, String mOsVersion, String mDeviceName, String mModelName, String mDeviceType) {
         this.mFcmToken = mFcmToken;
         this.mOsType = mOsType;
         this.mOsVersion = mOsVersion;
@@ -42,7 +50,7 @@ public class UpdateDeviceReqModel {
         this.mDeviceType = mDeviceType;
     }
 
-    public UpdateDeviceReqModel(String mFcmToken, Integer mPriority, String mOsType, String mOsVersion, String mDeviceName, String mModelName, String mDeviceType) {
+    public UpdateUserReqModel(String mFcmToken, Integer mPriority, String mOsType, String mOsVersion, String mDeviceName, String mModelName, String mDeviceType) {
         this.mFcmToken = mFcmToken;
         this.mPriority = mPriority;
         this.mOsType = mOsType;

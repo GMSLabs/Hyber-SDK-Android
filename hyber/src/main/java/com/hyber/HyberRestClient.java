@@ -12,7 +12,6 @@ import java.io.IOException;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
-import io.realm.Realm;
 import okhttp3.OkHttpClient;
 import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Response;
@@ -49,79 +48,6 @@ class HyberRestClient {
                 .addConverterFactory(GsonConverterFactory.create(gson))
                 .build();
         hyberApiService = retrofit.create(HyberApiService.class);
-    }
-
-    static void registerDevice(@NonNull Long phone,
-                               @NonNull String deviceOs, @NonNull String androidVersion,
-                               @NonNull String deviceName, @NonNull String modelName,
-                               @NonNull String deviceType, @NonNull final UserRegisterHandler handler) {
-
-        Hawk.remove(Tweakables.HAWK_HyberAuthToken);
-
-        registerDeviceObservable(new RegisterDeviceReqModel(phone, deviceOs, androidVersion, deviceName, modelName, deviceType))
-                .subscribe(new Action1<Response<RegisterDeviceRespModel>>() {
-                    @Override
-                    public void call(final Response<RegisterDeviceRespModel> response) {
-                        Hyber.Log(Hyber.LOG_LEVEL.DEBUG, String.format(Locale.getDefault(),
-                                "Success - Registration complete.\nData:%s",
-                                response.message()));
-                        if (response.isSuccessful()) {
-                            try {
-                                final Long phone = Long.parseLong(response.body().getPhone());
-                                Realm realm = Realm.getDefaultInstance();
-                                realm.executeTransaction(new Realm.Transaction() {
-                                    @Override
-                                    public void execute(Realm realm) {
-                                        Profile profile = realm
-                                                .where(Profile.class)
-                                                .equalTo(Profile.PHONE, phone)
-                                                .findFirst();
-
-                                        if (profile == null) {
-                                            profile = new Profile(response.body().getPhone(), phone);
-                                            realm.copyToRealm(profile);
-                                        }
-                                    }
-                                });
-
-                                SessionRespItemModel session = response.body().getSession();
-                                if (session != null) {
-                                    if (session.getToken() != null) {
-                                        Hawk.put(Tweakables.HAWK_HyberAuthToken, session.getToken());
-                                    }
-                                    if (session.getRefreshToken() != null) {
-                                        Hawk.put(Tweakables.HAWK_HyberRefreshToken, session.getRefreshToken());
-                                    }
-                                    if (session.getExpirationDate() != null) {
-                                        Hawk.put(Tweakables.HAWK_HyberTokenExpDate, session.getExpirationDate());
-                                    }
-                                }
-                            } catch (Exception e) {
-                                Hyber.Log(Hyber.LOG_LEVEL.ERROR, e.getLocalizedMessage());
-                                handler.onFailure(response.code(), e.getLocalizedMessage(), e);
-                            }
-
-                            handler.onSuccess();
-                        } else {
-                            String errorBody = null;
-                            Throwable throwable = null;
-                            try {
-                                errorBody = response.errorBody().string();
-                            } catch (IOException e) {
-                                throwable = e;
-                            }
-                            handler.onFailure(response.code(), errorBody, throwable);
-                        }
-                    }
-                }, new Action1<Throwable>() {
-                    @Override
-                    public void call(Throwable throwable) {
-                        Hyber.Log(Hyber.LOG_LEVEL.WARN, String.format(Locale.getDefault(),
-                                "Failure: Registration unsuccessful.\nError:%s",
-                                throwable.toString()));
-                        handler.onThrowable(throwable);
-                    }
-                });
     }
 
     static void refreshToken(@NonNull String refreshToken, @NonNull final RefreshTokenHandler handler) {
@@ -162,78 +88,6 @@ class HyberRestClient {
                     public void call(Throwable throwable) {
                         Hyber.Log(Hyber.LOG_LEVEL.WARN, String.format(Locale.getDefault(),
                                 "Failure: Refresh token unsuccessful.\nError:%s",
-                                throwable.toString()));
-                        handler.onThrowable(throwable);
-                    }
-                });
-    }
-
-    static void updateFcmToken(@NonNull String fcmToken, @NonNull final DeviceUpdateHandler handler) {
-        updateDeviceObservable(new UpdateDeviceReqModel(fcmToken))
-                .subscribe(new Action1<Response<UpdateDeviceRespModel>>() {
-                    @Override
-                    public void call(Response<UpdateDeviceRespModel> response) {
-                        Hyber.Log(Hyber.LOG_LEVEL.DEBUG, String.format(Locale.getDefault(),
-                                "Success - FCM Token update complete.\nData:%s",
-                                response.message()));
-                        if (response.isSuccessful()) {
-                            handler.onSuccess();
-                        } else {
-                            String errorBody = null;
-                            Throwable throwable = null;
-                            try {
-                                errorBody = response.errorBody().string();
-                            } catch (IOException e) {
-                                throwable = e;
-                            }
-                            handler.onFailure(response.code(), errorBody, throwable);
-                        }
-                    }
-                }, new Action1<Throwable>() {
-                    @Override
-                    public void call(Throwable throwable) {
-                        Hyber.Log(Hyber.LOG_LEVEL.WARN, String.format(Locale.getDefault(),
-                                "Failure: FCM Token update unsuccessful.\nError:%s",
-                                throwable.toString()));
-                        handler.onThrowable(throwable);
-                    }
-                });
-    }
-
-    static void updateDevice(@NonNull String deviceOs, @NonNull String androidVersion,
-                             @NonNull String deviceName, @NonNull String modelName,
-                             @NonNull String deviceType, @NonNull final DeviceUpdateHandler handler) {
-        String authToken = Hawk.get(Tweakables.HAWK_HyberAuthToken, "");
-        if (authToken.isEmpty()) {
-            handler.onFailure(-1, "HyberAuthToken not exists", null);
-            return;
-        }
-        updateDeviceObservable(new UpdateDeviceReqModel(FirebaseInstanceId.getInstance().getToken(),
-                deviceOs, androidVersion, deviceName, modelName, deviceType))
-                .subscribe(new Action1<Response<UpdateDeviceRespModel>>() {
-                    @Override
-                    public void call(Response<UpdateDeviceRespModel> response) {
-                        Hyber.Log(Hyber.LOG_LEVEL.DEBUG, String.format(Locale.getDefault(),
-                                "Success - Device update complete.\nData:%s",
-                                response.message()));
-                        if (response.isSuccessful()) {
-                            handler.onSuccess();
-                        } else {
-                            String errorBody = null;
-                            Throwable throwable = null;
-                            try {
-                                errorBody = response.errorBody().string();
-                            } catch (IOException e) {
-                                throwable = e;
-                            }
-                            handler.onFailure(response.code(), errorBody, throwable);
-                        }
-                    }
-                }, new Action1<Throwable>() {
-                    @Override
-                    public void call(Throwable throwable) {
-                        Hyber.Log(Hyber.LOG_LEVEL.WARN, String.format(Locale.getDefault(),
-                                "Failure: Device update unsuccessful.\nError:%s",
                                 throwable.toString()));
                         handler.onThrowable(throwable);
                     }
@@ -308,9 +162,9 @@ class HyberRestClient {
                 });
     }
 
-    private static Observable<Response<RegisterDeviceRespModel>> registerDeviceObservable(
-            @NonNull RegisterDeviceReqModel model) {
-        return hyberApiService.registerDeviceObservable(model)
+    static Observable<Response<RegisterUserRespModel>> registerUserObservable(
+            @NonNull RegisterUserReqModel model) {
+        return hyberApiService.registerUserObservable(model)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread());
     }
@@ -322,8 +176,8 @@ class HyberRestClient {
                 .observeOn(AndroidSchedulers.mainThread());
     }
 
-    private static Observable<Response<UpdateDeviceRespModel>> updateDeviceObservable(
-            @NonNull UpdateDeviceReqModel model) {
+    static Observable<Response<UpdateUserRespModel>> updateUserObservable(
+            @NonNull UpdateUserReqModel model) {
         return hyberApiService.updateDeviceObservable(model)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread());

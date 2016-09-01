@@ -1,6 +1,10 @@
 package com.hyber.example;
 
 import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.UriMatcher;
+import android.content.UriPermission;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
@@ -74,24 +78,9 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void onMessageActionInteraction(@NonNull String action) {
-        if (mMessageActionDialog != null)
-            mMessageActionDialog.dismiss();
-        if (URLUtil.isValidUrl(action)) {
-            WebView webView = new WebView(MainActivity.this);
-            webView.loadUrl(action);
-            mMessageActionDialog = new AlertDialog.Builder(MainActivity.this)
-                    .setView(webView)
-                    .setPositiveButton("Close", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialogInterface, int i) {
-                            dialogInterface.dismiss();
-                        }
-                    })
-                    .create();
-            mMessageActionDialog.show();
-        } else {
-            Toast.makeText(MainActivity.this, action, Toast.LENGTH_SHORT).show();
-        }
+        Intent intent = new Intent(Intent.ACTION_VIEW);
+        intent.setData(Uri.parse(action));
+        startActivity(intent);
     }
 
     @Override

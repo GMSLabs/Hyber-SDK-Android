@@ -8,13 +8,13 @@ import rx.Observable;
 interface HyberApiService {
 
     @POST("mobile-abonents/register/device")
-    Observable<Response<RegisterDeviceRespModel>> registerDeviceObservable(@Body RegisterDeviceReqModel body);
+    Observable<Response<RegisterUserRespModel>> registerUserObservable(@Body RegisterUserReqModel body);
 
     @POST("mobile-abonents/refreshtoken/device")
     Observable<Response<RefreshTokenRespModel>> refreshTokenObservable(@Body RefreshTokenReqModel body);
 
     @POST("mobile-abonents/update/device")
-    Observable<Response<UpdateDeviceRespModel>> updateDeviceObservable(@Body UpdateDeviceReqModel body);
+    Observable<Response<UpdateUserRespModel>> updateDeviceObservable(@Body UpdateUserReqModel body);
 
     @POST("mobile-abonents/messages/history")
     Observable<Response<MessageHistoryRespEnvelope>> getMessageHistoryObservable(@Body MessageHistoryReqModel body);

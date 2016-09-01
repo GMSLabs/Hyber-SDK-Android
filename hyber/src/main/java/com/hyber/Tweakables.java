@@ -9,6 +9,7 @@ public class Tweakables {
 
     public static final String X_Hyber_Auth_Token = "X-Hyber-Auth-Token";
 
+    public static final String HAWK_HyberSentPushToken = "sentPushToken";
     public static final String HAWK_HyberAuthToken = "authToken";
     public static final String HAWK_HyberRefreshToken = "refreshToken";
     public static final String HAWK_HyberTokenExpDate = "expirationDate";

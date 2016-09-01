@@ -9,7 +9,7 @@ import io.realm.RealmObject;
 import io.realm.annotations.PrimaryKey;
 import io.realm.annotations.Required;
 
-public class Profile extends RealmObject {
+public class HyberUser extends RealmObject {
 
     public static final String ID = "mId";
     public static final String PHONE = "mPhone";
@@ -21,11 +21,11 @@ public class Profile extends RealmObject {
     @Required
     private Long mPhone;
 
-    public Profile() {
+    public HyberUser() {
 
     }
 
-    public Profile(@NonNull String id, @NonNull Long phone) {
+    public HyberUser(@NonNull String id, @NonNull Long phone) {
         this.mId = id;
         this.mPhone = phone;
     }

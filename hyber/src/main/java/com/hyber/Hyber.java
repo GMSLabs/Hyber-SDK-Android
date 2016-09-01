@@ -12,8 +12,6 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
-import com.google.firebase.messaging.RemoteMessage;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -43,8 +41,8 @@ public class Hyber {
     private static LOG_LEVEL visualLogLevel = LOG_LEVEL.NONE;
     private static LOG_LEVEL logCatLevel = LOG_LEVEL.WARN;
 
-    private static OSUtils.DeviceType deviceType;
-    private static OSUtils osUtils;
+    private static OsUtils.DeviceType deviceType;
+    private static OsUtils osUtils;
 
     static Context appContext;
     static String clientApiKey;
@@ -59,7 +57,8 @@ public class Hyber {
     private static String lastRegistrationId;
     private static boolean registerForPushFired;
 
-    private static MessageBusinessModel messageBusinessModel;
+    private static MainApiBusinessModel mMainApiBusinessModel;
+    private static MessageBusinessModel mMessageBusinessModel;
 
     private static RealmChangeListener<RealmResults<Message>> mMessageChangeListener;
     private static RealmResults<Message> mMessageResults;
@@ -70,6 +69,11 @@ public class Hyber {
     }
 
     public interface UserRegistrationHandler {
+        void onSuccess();
+        void onFailure(String message);
+    }
+
+    public interface PushTokenUpdateHandler {
         void onSuccess();
         void onFailure(String message);
     }
@@ -141,7 +145,7 @@ public class Hyber {
         if (mInitBuilder == null)
             mInitBuilder = new Hyber.Builder();
 
-        osUtils = new OSUtils();
+        osUtils = new OsUtils();
 
         deviceType = osUtils.getDeviceType();
 
@@ -160,7 +164,7 @@ public class Hyber {
         if ("b2f7f966-d8cc-11e4-bed1-df8f05be55ba".equals(hyberClientApiKey))
             Log(LOG_LEVEL.WARN, "Hyber Example ClientID detected, please update to your client's id found on Hyber.com");
 
-        if (deviceType == OSUtils.DeviceType.FCM) {
+        if (deviceType == OsUtils.DeviceType.FCM) {
             //TODO Validate integration params
         }
 
@@ -190,7 +194,8 @@ public class Hyber {
         clientApiKey = hyberClientApiKey;
         appContext = context.getApplicationContext();
 
-        messageBusinessModel = MessageBusinessModel.getInstance();
+        mMainApiBusinessModel = MainApiBusinessModel.getInstance(context);
+        mMessageBusinessModel = MessageBusinessModel.getInstance();
 
         drInQueue = new HashMap<>();
 
@@ -351,81 +356,45 @@ public class Hyber {
     }
 
     public static void userRegistration(@NonNull Long phone, final UserRegistrationHandler handler) {
-        HyberRestClient.registerDevice(phone,
-                osUtils.getDeviceOs(), osUtils.getAndroidVersion(),
-                osUtils.getDeviceName(), osUtils.getModelName(),
-                osUtils.getDeviceFormat(appContext),
-                new HyberRestClient.UserRegisterHandler() {
-                    @Override
-                    public void onSuccess() {
-                        handler.onSuccess();
-                    }
+        mMainApiBusinessModel.authorize(phone, new MainApiBusinessModel.AuthorizationListener() {
+            @Override
+            public void onAuthorized() {
+                handler.onSuccess();
+            }
 
-                    @Override
-                    public void onFailure(int statusCode, @Nullable String response, @Nullable Throwable throwable) {
-                        String err = String.format(Locale.US, "statusCode %d, response %s, error %s", statusCode, response,
-                                throwable != null ? throwable.getCause().getLocalizedMessage() : "");
-                        Hyber.Log(LOG_LEVEL.ERROR, err, throwable);
-                        handler.onFailure(err);
-                    }
+            @Override
+            public void onAuthorizationError(AuthErrorStatus status) {
+                handler.onFailure(status.getDescription());
+            }
+        });
+    }
 
-                    @Override
-                    public void onThrowable(@Nullable Throwable throwable) {
-                        String err = "";
+    public static void pushTokenUpdate(final PushTokenUpdateHandler handler) {
+        mMainApiBusinessModel.sendPushToken(new MainApiBusinessModel.SendPushTokenListener() {
+            @Override
+            public void onSent() {
+                handler.onSuccess();
+            }
 
-                        if (throwable != null) {
-                            if (throwable.getCause() != null) {
-                                err = String.format(Locale.US, "error %s",
-                                        throwable.getCause().getLocalizedMessage());
-                            } else {
-                                err = String.format(Locale.US, "error %s",
-                                        throwable.getLocalizedMessage());
-                            }
-                        }
-
-                        Hyber.Log(LOG_LEVEL.ERROR, err, throwable);
-                        handler.onFailure(err);
-                    }
-                });
+            @Override
+            public void onSendingError(SendPushTokenErrorStatus status) {
+                handler.onFailure(status.getDescription());
+            }
+        });
     }
 
     public static void deviceUpdate(final DeviceUpdateHandler handler) {
-        HyberRestClient.updateDevice(
-                osUtils.getDeviceOs(), osUtils.getAndroidVersion(),
-                osUtils.getDeviceName(), osUtils.getModelName(),
-                osUtils.getDeviceFormat(appContext),
-                new HyberRestClient.DeviceUpdateHandler() {
-                    @Override
-                    public void onSuccess() {
-                        handler.onSuccess();
-                    }
+        mMainApiBusinessModel.sendDeviceData(new MainApiBusinessModel.SendDeviceDataListener() {
+            @Override
+            public void onSent() {
+                handler.onSuccess();
+            }
 
-                    @Override
-                    public void onFailure(int statusCode, @Nullable String response, @Nullable Throwable throwable) {
-                        String err = String.format(Locale.US, "statusCode %d, response %s, error %s", statusCode, response,
-                                throwable != null ? throwable.getCause().getLocalizedMessage() : "");
-                        Hyber.Log(LOG_LEVEL.ERROR, err, throwable);
-                        handler.onFailure(err);
-                    }
-
-                    @Override
-                    public void onThrowable(@Nullable Throwable throwable) {
-                        String err = "";
-
-                        if (throwable != null) {
-                            if (throwable.getCause() != null) {
-                                err = String.format(Locale.US, "error %s",
-                                        throwable.getCause().getLocalizedMessage());
-                            } else {
-                                err = String.format(Locale.US, "error %s",
-                                        throwable.getLocalizedMessage());
-                            }
-                        }
-
-                        Hyber.Log(LOG_LEVEL.ERROR, err, throwable);
-                        handler.onFailure(err);
-                    }
-                });
+            @Override
+            public void onSendingError(SendDeviceDataErrorStatus status) {
+                handler.onFailure(status.getDescription());
+            }
+        });
     }
 
     public static void getMessageHistory(@NonNull Long startDate, final MessageHistoryHandler handler) {
@@ -577,12 +546,12 @@ public class Hyber {
         return context.getSharedPreferences(Hyber.class.getSimpleName(), Context.MODE_PRIVATE);
     }
 
-    static MessageBusinessModel getMessageBusinessModel() {
-        return messageBusinessModel;
+    static MessageBusinessModel getmMessageBusinessModel() {
+        return mMessageBusinessModel;
     }
 
     static void saveMessage(Message message) {
-        getMessageBusinessModel().saveMessage(message)
+        getmMessageBusinessModel().saveMessage(message)
                 .subscribe(new Action1<Message>() {
                     @Override
                     public void call(Message message) {

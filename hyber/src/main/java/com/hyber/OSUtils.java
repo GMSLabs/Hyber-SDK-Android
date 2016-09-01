@@ -12,7 +12,7 @@ import android.telephony.TelephonyManager;
 
 import java.util.Locale;
 
-class OSUtils {
+class OsUtils {
 
     enum DeviceType {
         FCM, GCM, ADM
@@ -79,23 +79,23 @@ class OSUtils {
         return "".equals(carrierName) ? null : carrierName;
     }
 
-    String getDeviceOs() {
+    static String getDeviceOs() {
         return "Android";
     }
 
-    String getDeviceName() {
+    static String getDeviceName() {
         return Build.DEVICE;
     }
 
-    String getModelName() {
+    static String getModelName() {
         return Build.MODEL;
     }
 
-    String getAndroidVersion() {
+    static String getAndroidVersion() {
         return Build.VERSION.RELEASE;
     }
 
-    String getDeviceFormat(Context context) {
+    static String getDeviceFormat(Context context) {
         return isTablet(context) ? "tablet" : "phone";
     }
 
