@@ -11,7 +11,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.hyber.MessageRVAbstractAdapter;
 import com.hyber.MessageViewHolder;
 import com.hyber.example.R;
 import com.squareup.picasso.Callback;
@@ -22,9 +21,9 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 
-import io.realm.Realm;
+import io.realm.HyberMessageHistoryBaseRecyclerViewAdapter;
 
-public class MyMessagesRVAdapter extends MessageRVAbstractAdapter {
+public class MyMessagesRVAdapter extends HyberMessageHistoryBaseRecyclerViewAdapter {
 
     public interface OnMessageActionListener {
         void onAction(@NonNull String action);
@@ -33,8 +32,8 @@ public class MyMessagesRVAdapter extends MessageRVAbstractAdapter {
     private WeakReference<Context> mContextWeakReference;
     private OnMessageActionListener onMessageActionListener;
 
-    public MyMessagesRVAdapter(Context context, Realm realm) {
-        super(realm);
+    public MyMessagesRVAdapter(Context context) {
+        super(true, true);
         this.mContextWeakReference = new WeakReference<>(context);
     }
 
