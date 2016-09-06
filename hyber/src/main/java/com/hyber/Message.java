@@ -130,12 +130,12 @@ public class Message extends RealmObject {
     }
 
     @NonNull
-    Date getReceivedAt() {
+    public Date getReceivedAt() {
         return mReceivedAt;
     }
 
     @NonNull
-    Boolean isReported() {
+    public Boolean isReported() {
         return isReported;
     }
 
