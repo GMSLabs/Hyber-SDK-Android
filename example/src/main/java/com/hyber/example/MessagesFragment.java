@@ -30,6 +30,7 @@ public class MessagesFragment extends Fragment {
     @BindView(R.id.messages_RecyclerView)
     RecyclerView mRecyclerView;
     private MyMessagesRVAdapter mAdapter;
+    private LinearLayoutManager mLayoutManager;
 
     private OnMessagesFragmentInteractionListener mListener;
 
@@ -68,7 +69,10 @@ public class MessagesFragment extends Fragment {
 
         unbinder = ButterKnife.bind(this, view);
 
-        mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+        mLayoutManager = new LinearLayoutManager(getActivity());
+        mLayoutManager.setStackFromEnd(true);
+
+        mRecyclerView.setLayoutManager(mLayoutManager);
         mAdapter = new MyMessagesRVAdapter(getActivity());
         mRecyclerView.setAdapter(mAdapter);
         mAdapter.setOnChangeListener(new HyberMessageHistoryBaseRecyclerViewAdapter.OnChangeListener() {

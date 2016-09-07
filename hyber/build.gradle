@@ -21,9 +21,6 @@ android {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard.pro'
         }
-        debug {
-            minifyEnabled false
-        }
     }
     publishNonDefault true
     productFlavors {

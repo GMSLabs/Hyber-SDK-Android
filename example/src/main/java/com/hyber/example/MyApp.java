@@ -30,8 +30,12 @@ public class MyApp extends Application {
 
                 NotificationCompat.Builder mBuilder =
                         new NotificationCompat.Builder(MyApp.this)
+                                .setSmallIcon(R.mipmap.ic_launcher)
                                 .setContentTitle(hyberMessageModel.getAlpha())
-                                .setContentText(hyberMessageModel.getId() + " ==> " + hyberMessageModel.getText());
+                                .setContentText(hyberMessageModel.getId() + " ==> " + hyberMessageModel.getText())
+                                .setAutoCancel(true)
+                                .setPriority(NotificationCompat.PRIORITY_MAX)
+                                .setCategory(NotificationCompat.CATEGORY_MESSAGE);
 
                 // Sets an ID for the notification
                 int mNotificationId = Integer.parseInt(hyberMessageModel.getId());

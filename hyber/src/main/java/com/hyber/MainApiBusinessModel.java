@@ -3,6 +3,7 @@ package com.hyber;
 import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.annotation.StringDef;
 
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.orhanobut.hawk.Hawk;
@@ -68,84 +69,139 @@ class MainApiBusinessModel implements IAuthorizationModel {
                             }
                         } else {
                             Hyber.Log(Hyber.LOG_LEVEL.ERROR, "Response for user registration api is unsuccessful!");
+                            listener.onAuthorizationError(AuthErrorStatus.USER_SESSION_DATA_IS_NOT_PROVIDED);
                         }
                     }
                 }, new Action1<Throwable>() {
                     @Override
                     public void call(Throwable throwable) {
                         Hyber.Log(Hyber.LOG_LEVEL.FATAL, "Error in user registration api request!", throwable);
+                        listener.onAuthorizationError(AuthErrorStatus.USER_SESSION_DATA_IS_NOT_PROVIDED);
                     }
                 });
+    }
+
+    @Override
+    public void refreshToken(@NonNull final RefreshTokenListener listener) {
+        Hyber.Log(Hyber.LOG_LEVEL.DEBUG, "Start refresh token.");
+        if (isRefreshTokenExists()) {
+            RefreshTokenReqModel reqModel = new RefreshTokenReqModel(getRefreshToken());
+            HyberRestClient.refreshTokenObservable(reqModel)
+                    .subscribe(new Action1<Response<RefreshTokenRespModel>>() {
+                        @Override
+                        public void call(Response<RefreshTokenRespModel> response) {
+                            if (response.isSuccessful()) {
+                                Hyber.Log(Hyber.LOG_LEVEL.DEBUG, "Request for refresh user auth token is success.");
+                                SessionRespItemModel session = response.body().getSession();
+                                updateUserSession(session.getToken(), session.getRefreshToken(), session.getExpirationDate());
+                                listener.onRefreshed();
+                            } else {
+                                Hyber.Log(Hyber.LOG_LEVEL.ERROR, "Response for refresh user auth token api is unsuccessful!");
+                                listener.onRefreshingError(AuthErrorStatus.USER_SESSION_DATA_IS_NOT_PROVIDED);
+                            }
+                        }
+                    }, new Action1<Throwable>() {
+                        @Override
+                        public void call(Throwable throwable) {
+                            Hyber.Log(Hyber.LOG_LEVEL.FATAL, "Error in refresh user auth token api request!", throwable);
+                            listener.onRefreshingError(AuthErrorStatus.USER_SESSION_DATA_IS_NOT_PROVIDED);
+                        }
+                    });
+        } else {
+            Hyber.Log(Hyber.LOG_LEVEL.DEBUG, "User authorization data is not exists.");
+            listener.onRefreshingError(AuthErrorStatus.USER_SESSION_DATA_IS_NOT_PROVIDED);
+        }
     }
 
     @Override
     public void sendPushToken(@NonNull final SendPushTokenListener listener) {
         Hyber.Log(Hyber.LOG_LEVEL.DEBUG, "Start sending user push token.");
 
-        final String pushToken = FirebaseInstanceId.getInstance().getToken();
-        if (pushToken == null) {
-            return;
-        }
+        if (isAuthTokenExists()) {
+            final String pushToken = FirebaseInstanceId.getInstance().getToken();
+            if (pushToken == null) {
+                Hyber.Log(Hyber.LOG_LEVEL.DEBUG, "Now Firebase Cloud Messaging Token is not exists.");
+                return;
+            }
 
-        UpdateUserReqModel reqModel = new UpdateUserReqModel(pushToken);
-        HyberRestClient.updateUserObservable(reqModel)
-                .subscribe(new Action1<Response<UpdateUserRespModel>>() {
-                    @Override
-                    public void call(Response<UpdateUserRespModel> response) {
-                        if (response.isSuccessful()) {
-                            Hyber.Log(Hyber.LOG_LEVEL.DEBUG, "Request for update user push token is success.");
-                            if (response.body().getError() == null) {
-                                updateSentPushToken(pushToken);
-                                listener.onSent();
+            UpdateUserReqModel reqModel = new UpdateUserReqModel(pushToken);
+            HyberRestClient.updateUserObservable(reqModel)
+                    .subscribe(new Action1<Response<UpdateUserRespModel>>() {
+                        @Override
+                        public void call(Response<UpdateUserRespModel> response) {
+                            if (response.isSuccessful()) {
+                                Hyber.Log(Hyber.LOG_LEVEL.DEBUG, "Request for update user push token is success.");
+                                if (response.body().getError() == null) {
+                                    updateSentPushToken(pushToken);
+                                    listener.onSent();
+                                } else {
+                                    Hyber.Log(Hyber.LOG_LEVEL.ERROR, "Response for update user push token api with error!\n" +
+                                            response.body().getError().getDescription());
+                                    listener.onSendingError(SendPushTokenErrorStatus.SENDING_UNSUCCESSFUL);
+                                }
                             } else {
-                                Hyber.Log(Hyber.LOG_LEVEL.ERROR, "Response for update user push token api with error!\n" +
-                                        response.body().getError().getDescription());
+                                Hyber.Log(Hyber.LOG_LEVEL.ERROR, "Response for update user push token api request is unsuccessful!");
                                 listener.onSendingError(SendPushTokenErrorStatus.SENDING_UNSUCCESSFUL);
                             }
-                        } else {
-                            Hyber.Log(Hyber.LOG_LEVEL.ERROR, "Response for update user push token api request is unsuccessful!");
                         }
-                    }
-                }, new Action1<Throwable>() {
-                    @Override
-                    public void call(Throwable throwable) {
-                        Hyber.Log(Hyber.LOG_LEVEL.FATAL, "Error in update user push token api request!", throwable);
-                    }
-                });
+                    }, new Action1<Throwable>() {
+                        @Override
+                        public void call(Throwable throwable) {
+                            Hyber.Log(Hyber.LOG_LEVEL.FATAL, "Error in update user push token api request!", throwable);
+                            listener.onSendingError(SendPushTokenErrorStatus.SENDING_UNSUCCESSFUL);
+                        }
+                    });
+        } else if (isRefreshTokenExists()){
+            //TODO Update user auth data by refresh token
+        } else {
+            Hyber.Log(Hyber.LOG_LEVEL.DEBUG, "User authorization data is not exists.");
+            listener.onSendingError(SendPushTokenErrorStatus.SENDING_UNSUCCESSFUL);
+        }
+
     }
 
     @Override
     public void sendDeviceData(@NonNull final SendDeviceDataListener listener) {
         Hyber.Log(Hyber.LOG_LEVEL.DEBUG, "Start sending user device data.");
 
-        UpdateUserReqModel reqModel = new UpdateUserReqModel(
-                OsUtils.getDeviceOs(), OsUtils.getAndroidVersion(),
-                OsUtils.getDeviceName(), OsUtils.getModelName(),
-                OsUtils.getDeviceFormat(mContextWeakReference.get()));
+        if (isAuthTokenExists()) {
+            UpdateUserReqModel reqModel = new UpdateUserReqModel(
+                    OsUtils.getDeviceOs(), OsUtils.getAndroidVersion(),
+                    OsUtils.getDeviceName(), OsUtils.getModelName(),
+                    OsUtils.getDeviceFormat(mContextWeakReference.get()));
 
-        HyberRestClient.updateUserObservable(reqModel)
-                .subscribe(new Action1<Response<UpdateUserRespModel>>() {
-                    @Override
-                    public void call(Response<UpdateUserRespModel> response) {
-                        if (response.isSuccessful()) {
-                            Hyber.Log(Hyber.LOG_LEVEL.DEBUG, "Request for update user device data is success.");
-                            if (response.body().getError() == null) {
-                                listener.onSent();
+            HyberRestClient.updateUserObservable(reqModel)
+                    .subscribe(new Action1<Response<UpdateUserRespModel>>() {
+                        @Override
+                        public void call(Response<UpdateUserRespModel> response) {
+                            if (response.isSuccessful()) {
+                                Hyber.Log(Hyber.LOG_LEVEL.DEBUG, "Request for update user device data is success.");
+                                if (response.body().getError() == null) {
+                                    listener.onSent();
+                                } else {
+                                    Hyber.Log(Hyber.LOG_LEVEL.ERROR, "Response for update user device data api with error!\n" +
+                                            response.body().getError().getDescription());
+                                    listener.onSendingError(SendDeviceDataErrorStatus.SENDING_UNSUCCESSFUL);
+                                }
                             } else {
-                                Hyber.Log(Hyber.LOG_LEVEL.ERROR, "Response for update user device data api with error!\n" +
-                                        response.body().getError().getDescription());
+                                Hyber.Log(Hyber.LOG_LEVEL.ERROR, "Response for update user device data api request is unsuccessful!");
                                 listener.onSendingError(SendDeviceDataErrorStatus.SENDING_UNSUCCESSFUL);
                             }
-                        } else {
-                            Hyber.Log(Hyber.LOG_LEVEL.ERROR, "Response for update user device data api request is unsuccessful!");
                         }
-                    }
-                }, new Action1<Throwable>() {
-                    @Override
-                    public void call(Throwable throwable) {
-                        Hyber.Log(Hyber.LOG_LEVEL.FATAL, "Error in update user device data api request!", throwable);
-                    }
-                });
+                    }, new Action1<Throwable>() {
+                        @Override
+                        public void call(Throwable throwable) {
+                            Hyber.Log(Hyber.LOG_LEVEL.FATAL, "Error in update user device data api request!", throwable);
+                            listener.onSendingError(SendDeviceDataErrorStatus.SENDING_UNSUCCESSFUL);
+                        }
+                    });
+        } else if (isRefreshTokenExists()){
+            //TODO Update user auth data by refresh token
+        } else {
+            Hyber.Log(Hyber.LOG_LEVEL.DEBUG, "User authorization data is not exists.");
+            listener.onSendingError(SendDeviceDataErrorStatus.SENDING_UNSUCCESSFUL);
+        }
+
     }
 
     private void clearUserDataIfExists(@NonNull Realm realm, @NonNull Long phone) {
@@ -202,10 +258,28 @@ class MainApiBusinessModel implements IAuthorizationModel {
         Hyber.Log(Hyber.LOG_LEVEL.DEBUG, "User session data is cleaned.");
     }
 
+    private boolean isAuthTokenExists() {
+        return Hawk.contains(Tweakables.HAWK_HyberAuthToken);
+    }
+
+    private boolean isRefreshTokenExists() {
+        return Hawk.contains(Tweakables.HAWK_HyberRefreshToken);
+    }
+
+    private String getRefreshToken() {
+        return Hawk.get(Tweakables.HAWK_HyberRefreshToken);
+    }
+
     interface AuthorizationListener {
         void onAuthorized();
 
         void onAuthorizationError(AuthErrorStatus status);
+    }
+
+    interface RefreshTokenListener {
+        void onRefreshed();
+
+        void onRefreshingError(@NonNull AuthErrorStatus status);
     }
 
     interface SendPushTokenListener {

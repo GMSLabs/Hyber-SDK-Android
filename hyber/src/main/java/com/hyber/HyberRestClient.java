@@ -50,50 +50,6 @@ class HyberRestClient {
         hyberApiService = retrofit.create(HyberApiService.class);
     }
 
-    static void refreshToken(@NonNull String refreshToken, @NonNull final RefreshTokenHandler handler) {
-        refreshTokenObservable(new RefreshTokenReqModel(refreshToken))
-                .subscribe(new Action1<Response<RefreshTokenRespModel>>() {
-                    @Override
-                    public void call(Response<RefreshTokenRespModel> response) {
-                        Hyber.Log(Hyber.LOG_LEVEL.DEBUG, String.format(Locale.getDefault(),
-                                "Success - Refresh token complete.\nData:%s",
-                                response.message()));
-                        if (response.isSuccessful()) {
-                            SessionRespItemModel session = response.body().getSession();
-                            if (session != null) {
-                                if (session.getToken() != null) {
-                                    Hawk.put(Tweakables.HAWK_HyberAuthToken, session.getToken());
-                                }
-                                if (session.getRefreshToken() != null) {
-                                    Hawk.put(Tweakables.HAWK_HyberRefreshToken, session.getRefreshToken());
-                                }
-                                if (session.getExpirationDate() != null) {
-                                    Hawk.put(Tweakables.HAWK_HyberTokenExpDate, session.getExpirationDate());
-                                }
-                            }
-                            handler.onSuccess();
-                        } else {
-                            String errorBody = null;
-                            Throwable throwable = null;
-                            try {
-                                errorBody = response.errorBody().string();
-                            } catch (IOException e) {
-                                throwable = e;
-                            }
-                            handler.onFailure(response.code(), errorBody, throwable);
-                        }
-                    }
-                }, new Action1<Throwable>() {
-                    @Override
-                    public void call(Throwable throwable) {
-                        Hyber.Log(Hyber.LOG_LEVEL.WARN, String.format(Locale.getDefault(),
-                                "Failure: Refresh token unsuccessful.\nError:%s",
-                                throwable.toString()));
-                        handler.onThrowable(throwable);
-                    }
-                });
-    }
-
     static void getMessageHistory(@NonNull final Long startDate, @NonNull final MessageHistoryHandler handler) {
         getMessageHistoryObservable(new MessageHistoryReqModel(startDate))
                 .subscribe(new Action1<Response<MessageHistoryRespEnvelope>>() {
@@ -169,7 +125,7 @@ class HyberRestClient {
                 .observeOn(AndroidSchedulers.mainThread());
     }
 
-    private static Observable<Response<RefreshTokenRespModel>> refreshTokenObservable(
+    static Observable<Response<RefreshTokenRespModel>> refreshTokenObservable(
             @NonNull RefreshTokenReqModel model) {
         return hyberApiService.refreshTokenObservable(model)
                 .subscribeOn(Schedulers.io())
@@ -195,30 +151,6 @@ class HyberRestClient {
         return hyberApiService.sendPushDeliveryReportObservable(model)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread());
-    }
-
-    interface UserRegisterHandler {
-        void onSuccess();
-
-        void onFailure(int statusCode, @Nullable String response, @Nullable Throwable throwable);
-
-        void onThrowable(@Nullable Throwable throwable);
-    }
-
-    interface RefreshTokenHandler {
-        void onSuccess();
-
-        void onFailure(int statusCode, @Nullable String response, @Nullable Throwable throwable);
-
-        void onThrowable(@Nullable Throwable throwable);
-    }
-
-    interface DeviceUpdateHandler {
-        void onSuccess();
-
-        void onFailure(int statusCode, @Nullable String response, @Nullable Throwable throwable);
-
-        void onThrowable(@Nullable Throwable throwable);
     }
 
     interface MessageHistoryHandler {
