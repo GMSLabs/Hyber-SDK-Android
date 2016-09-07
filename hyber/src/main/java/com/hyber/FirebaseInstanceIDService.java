@@ -22,7 +22,7 @@ public class FirebaseInstanceIDService extends FirebaseInstanceIdService {
         // If you want to send messages to this application instance or
         // manage this apps subscriptions on the server side, send the
         // Instance ID token to your app server.
-        sendRegistrationToServer(refreshedToken);
+        sendRegistrationToServer();
     }
     // [END refresh_token]
 
@@ -31,19 +31,17 @@ public class FirebaseInstanceIDService extends FirebaseInstanceIdService {
      *
      * Modify this method to associate the user's FCM InstanceID token with any server-side account
      * maintained by your application.
-     *
-     * @param token The new token.
      */
-    private void sendRegistrationToServer(String token) {
+    private void sendRegistrationToServer() {
         MainApiBusinessModel.getInstance(this)
-                .sendPushToken(new MainApiBusinessModel.SendPushTokenListener() {
+                .sendDeviceData(new MainApiBusinessModel.SendDeviceDataListener() {
                     @Override
                     public void onSent() {
                         Hyber.Log(Hyber.LOG_LEVEL.DEBUG, "Refreshed token is sent.");
                     }
 
                     @Override
-                    public void onSendingError(SendPushTokenErrorStatus status) {
+                    public void onSendingError(SendDeviceDataErrorStatus status) {
                         Hyber.Log(Hyber.LOG_LEVEL.WARN, status.getDescription());
                     }
                 });

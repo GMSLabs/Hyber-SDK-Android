@@ -369,20 +369,6 @@ public class Hyber {
         });
     }
 
-    public static void pushTokenUpdate(final PushTokenUpdateHandler handler) {
-        mMainApiBusinessModel.sendPushToken(new MainApiBusinessModel.SendPushTokenListener() {
-            @Override
-            public void onSent() {
-                handler.onSuccess();
-            }
-
-            @Override
-            public void onSendingError(SendPushTokenErrorStatus status) {
-                handler.onFailure(status.getDescription());
-            }
-        });
-    }
-
     public static void deviceUpdate(final DeviceUpdateHandler handler) {
         mMainApiBusinessModel.sendDeviceData(new MainApiBusinessModel.SendDeviceDataListener() {
             @Override
