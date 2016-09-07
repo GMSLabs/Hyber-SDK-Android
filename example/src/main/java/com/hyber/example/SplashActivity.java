@@ -32,17 +32,7 @@ public class SplashActivity extends AppCompatActivity {
 
         ButterKnife.bind(this);
 
-        Hyber.deviceUpdate(new Hyber.DeviceUpdateHandler() {
-            @Override
-            public void onSuccess() {
-                updatePushToken();
-            }
-
-            @Override
-            public void onFailure(String message) {
-                showRegisterDialog(SplashActivity.this);
-            }
-        });
+        deviceDataUpdate();
 
         userRegisterButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -53,6 +43,20 @@ public class SplashActivity extends AppCompatActivity {
 
     }
 
+    private void deviceDataUpdate() {
+        Hyber.deviceUpdate(new Hyber.DeviceUpdateHandler() {
+            @Override
+            public void onSuccess() {
+                startActivity(new Intent(SplashActivity.this, MainActivity.class));
+            }
+
+            @Override
+            public void onFailure(String message) {
+                showRegisterDialog(SplashActivity.this);
+            }
+        });
+    }
+
     private void userRegistration() {
         Hyber.userRegistration(mPhone, new Hyber.UserRegistrationHandler() {
             @Override
@@ -60,31 +64,12 @@ public class SplashActivity extends AppCompatActivity {
                 String s = "HyberUser registration onSuccess\nWith phone " + mPhone;
                 Timber.d(s);
                 statusTextView.setText(s);
-                updatePushToken();
+                deviceDataUpdate();
             }
 
             @Override
             public void onFailure(String message) {
                 String s = "HyberUser registration onFailure\nWith phone " + mPhone;
-                Timber.e("%s\n%s", s, message);
-                statusTextView.setText(s + "\n" + message);
-            }
-        });
-    }
-
-    private void updatePushToken() {
-        Hyber.pushTokenUpdate(new Hyber.PushTokenUpdateHandler() {
-            @Override
-            public void onSuccess() {
-                String s = "Push token update onSuccess";
-                Timber.d(s);
-                statusTextView.setText(s);
-                startActivity(new Intent(SplashActivity.this, MainActivity.class));
-            }
-
-            @Override
-            public void onFailure(String message) {
-                String s = "Push token update onFailure";
                 Timber.e("%s\n%s", s, message);
                 statusTextView.setText(s + "\n" + message);
             }
