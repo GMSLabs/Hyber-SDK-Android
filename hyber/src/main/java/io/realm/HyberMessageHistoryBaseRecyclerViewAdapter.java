@@ -4,6 +4,7 @@ import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.view.ViewGroup;
 
+import com.hyber.Hyber;
 import com.hyber.Message;
 import com.hyber.MessageViewHolder;
 
@@ -112,7 +113,8 @@ public abstract class HyberMessageHistoryBaseRecyclerViewAdapter extends Recycle
         viewHolder.setMessageImageUrl(messageItem.getImageUrl());
         viewHolder.setMessageAction(messageItem.getAction());
         viewHolder.setMessageCaption(messageItem.getCaption());
-        viewHolder.setMessageBidirectionalUrl(messageItem.getBidirectionalUrl());
+
+        viewHolder.isMessageBidirectionalAvailable(Hyber.isBidirectionalAvailable());
 
         viewHolder.setMessageDate(messageItem.getReceivedAt());
         viewHolder.setDeliveryReportStatus(messageItem.isReported());

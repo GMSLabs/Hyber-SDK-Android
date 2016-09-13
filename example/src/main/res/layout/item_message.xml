@@ -9,46 +9,95 @@
     <android.support.v7.widget.LinearLayoutCompat
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:gravity="center_horizontal"
-        android:layout_margin="5dp">
+        android:layout_margin="5dp"
+        android:orientation="vertical">
 
         <android.support.v7.widget.AppCompatTextView
             android:id="@+id/messageId"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:gravity="start"
             android:textSize="14sp"
             android:textStyle="normal"
-            android:gravity="start"
-            tools:text="73457635"/>
+            tools:text="73457635" />
 
-        <android.support.v7.widget.AppCompatTextView
-            android:id="@+id/messageAlphaName"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textSize="16sp"
-            android:textStyle="bold"
-            tools:text="GMSU"/>
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <android.support.v7.widget.AppCompatTextView
+                android:id="@+id/messageAlphaName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerHorizontal="true"
+                android:layout_centerVertical="true"
+                android:gravity="center"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                tools:text="GMSU" />
+
+            <android.support.v7.widget.AppCompatImageButton
+                android:id="@+id/answerButton"
+                android:layout_width="35dp"
+                android:layout_height="35dp"
+                android:layout_alignParentEnd="true"
+                android:layout_alignParentRight="true"
+                android:layout_centerVertical="true"
+                android:background="@android:drawable/ic_menu_send" />
+
+        </RelativeLayout>
 
         <android.support.v7.widget.AppCompatTextView
             android:id="@+id/messageText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_gravity="center"
             android:textSize="14sp"
             android:textStyle="normal"
-            tools:text="New features!"/>
+            tools:text="New features!" />
 
         <android.support.v7.widget.AppCompatImageView
             android:id="@+id/messageImage"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            tools:src="@mipmap/ic_launcher"/>
+            android:layout_gravity="center"
+            tools:src="@mipmap/ic_launcher" />
 
         <android.support.v7.widget.AppCompatButton
             android:id="@+id/messageButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            tools:text="Text"/>
+            android:layout_gravity="center"
+            tools:text="Text" />
+
+        <RelativeLayout
+            android:id="@+id/messageAnswerLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:visibility="gone"
+            android:gravity="bottom">
+
+            <android.support.v7.widget.AppCompatEditText
+                android:id="@+id/messageInputAnswerEditText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_toLeftOf="@+id/messageSendAnswerAppCompatImageButton"
+                android:layout_toStartOf="@+id/messageSendAnswerAppCompatImageButton"
+                android:background="@color/colorIcons"
+                android:minHeight="50dp"
+                android:padding="7dp"
+                tools:text="test" />
+
+            <android.support.v7.widget.AppCompatImageButton
+                android:id="@+id/messageSendAnswerAppCompatImageButton"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:layout_alignParentEnd="true"
+                android:layout_alignParentRight="true"
+                android:background="@android:drawable/ic_menu_send" />
+
+        </RelativeLayout>
 
         <android.support.v7.widget.LinearLayoutCompat
             android:layout_width="match_parent"
@@ -60,23 +109,23 @@
                 android:id="@+id/messageDrStatus"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:textSize="14sp"
-                android:textStyle="italic"
-                android:textAllCaps="true"
                 android:layout_weight="1"
                 android:gravity="start"
+                android:textAllCaps="true"
+                android:textSize="14sp"
+                android:textStyle="italic"
                 tools:text="unreported"
-                tools:textColor="@android:color/holo_red_dark"/>
+                tools:textColor="@android:color/holo_red_dark" />
 
             <android.support.v7.widget.AppCompatTextView
                 android:id="@+id/messageTime"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:textSize="12sp"
-                android:textStyle="italic|bold"
                 android:layout_weight="1"
                 android:gravity="end"
-                tools:text="25.08.2016 12:34:37.243"/>
+                android:textSize="12sp"
+                android:textStyle="italic|bold"
+                tools:text="25.08.2016 12:34:37.243" />
 
         </android.support.v7.widget.LinearLayoutCompat>
 

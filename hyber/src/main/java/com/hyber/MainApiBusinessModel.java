@@ -160,6 +160,36 @@ class MainApiBusinessModel implements IAuthorizationModel {
 
     }
 
+    @Override
+    public void sendBidirectionalAnswer(@NonNull final String messageId, @NonNull String answerText, @NonNull final SendBidirectionalAnswerListener listener) {
+        Hyber.Log(Hyber.LOG_LEVEL.DEBUG, "Start sending bidirectional answer.");
+
+        final BidirectionalAnswerReqModel reqModel = new BidirectionalAnswerReqModel(
+                messageId,
+                answerText,
+                new Date().getTime());
+
+        HyberRestClient.sendBidirectionalAnswerObservable(reqModel)
+                .subscribe(new Action1<Response<Void>>() {
+                    @Override
+                    public void call(Response<Void> response) {
+                        if (response.isSuccessful()) {
+                            Hyber.Log(Hyber.LOG_LEVEL.DEBUG, "Request for sending bidirectional answer is success.");
+                            listener.onSent(messageId);
+                        } else {
+                            Hyber.Log(Hyber.LOG_LEVEL.ERROR, "Response for sending bidirectional answer api request is unsuccessful with code " + response.code() + "!");
+                            listener.onSendingError();
+                        }
+                    }
+                }, new Action1<Throwable>() {
+                    @Override
+                    public void call(Throwable throwable) {
+                        Hyber.Log(Hyber.LOG_LEVEL.FATAL, "Error in sending bidirectional answer api request!", throwable);
+                        listener.onSendingError();
+                    }
+                });
+    }
+
     private void clearUserDataIfExists(@NonNull Realm realm, @NonNull Long phone) {
         Hyber.Log(Hyber.LOG_LEVEL.DEBUG, "User data cleaning.");
         cleanUserSession();
@@ -244,6 +274,12 @@ class MainApiBusinessModel implements IAuthorizationModel {
         void onSent();
 
         void onSendingError(SendDeviceDataErrorStatus status);
+    }
+
+    interface SendBidirectionalAnswerListener {
+        void onSent(@NonNull String messageId);
+
+        void onSendingError();
     }
 
 }

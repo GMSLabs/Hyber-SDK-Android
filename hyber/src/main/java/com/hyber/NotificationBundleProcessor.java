@@ -59,8 +59,7 @@ class NotificationBundleProcessor {
                         receivedMessage.setOptions(
                                 messageModel.getOptions().getImageUrl(),
                                 messageModel.getOptions().getActionUrl(),
-                                messageModel.getOptions().getCaptionText(),
-                                messageModel.getOptions().getBidirectionalUrl());
+                                messageModel.getOptions().getCaptionText());
                     }
 
                     MessageBusinessModel.newInstance().saveMessage(receivedMessage)

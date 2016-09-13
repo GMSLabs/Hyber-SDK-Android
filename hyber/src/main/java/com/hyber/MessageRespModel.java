@@ -74,7 +74,7 @@ public class MessageRespModel {
 
             if (mOptions != null)
                 mh.setOptions(mOptions.getImageUrl(), mOptions.getAction(),
-                        mOptions.getCaption(), mOptions.getBiDirUrl());
+                        mOptions.getCaption());
 
             mh.setAsFromHistory();
             return mh;
