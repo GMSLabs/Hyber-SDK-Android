@@ -15,9 +15,6 @@ public class FCMessageOptionsModel {
     @SerializedName("img_url")
     private String mImageUrl;
 
-    @SerializedName("bidirectional_url")
-    private String mBidirectionalUrl;
-
 
     @Nullable
     public String getCaptionText() {
@@ -32,11 +29,6 @@ public class FCMessageOptionsModel {
     @Nullable
     public String getImageUrl() {
         return mImageUrl;
-    }
-
-    @Nullable
-    public String getBidirectionalUrl() {
-        return mBidirectionalUrl;
     }
 
 }

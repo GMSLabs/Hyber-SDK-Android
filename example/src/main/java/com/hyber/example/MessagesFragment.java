@@ -4,16 +4,22 @@ import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
+import android.support.v7.widget.AppCompatEditText;
+import android.support.v7.widget.AppCompatImageButton;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.RelativeLayout;
+import android.widget.Toast;
 
+import com.hyber.Hyber;
 import com.hyber.example.adapter.MyMessagesRVAdapter;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
 import butterknife.Unbinder;
 import io.realm.HyberMessageHistoryBaseRecyclerViewAdapter;
 
@@ -35,6 +41,13 @@ public class MessagesFragment extends Fragment {
     private OnMessagesFragmentInteractionListener mListener;
 
     private Unbinder unbinder;
+
+    @BindView(R.id.answerLayout)
+    RelativeLayout mAnswerLayout;
+    @BindView(R.id.inputAnswerEditTextView)
+    AppCompatEditText mInputAnswer;
+    @BindView(R.id.sendAnswerAppCompatImageButton)
+    AppCompatImageButton mSendAnswer;
 
     public MessagesFragment() {
         // Required empty public constructor
@@ -98,7 +111,36 @@ public class MessagesFragment extends Fragment {
             }
         });
 
+        if (Hyber.isBidirectionalAvailable()) {
+            mAnswerLayout.setVisibility(View.VISIBLE);
+            mAdapter.setOnMessageAnswerListener(new MyMessagesRVAdapter.OnMessageAnswerListener() {
+                @Override
+                public void onAction(@NonNull final String messageId, @NonNull final String answerText) {
+                    Toast.makeText(getActivity(), "messageId: " + messageId + "\n" + "answerText: " + answerText, Toast.LENGTH_SHORT).show();
+                    Hyber.sendBidirectionalAnswer(messageId, answerText, new Hyber.SendBidirectionalAnswerHandler() {
+                        @Override
+                        public void onSuccess() {
+                            Toast.makeText(getActivity(), "Success sended!\nmessageId: " + messageId + "\n" + "answerText: " + answerText, Toast.LENGTH_SHORT).show();
+                        }
+
+                        @Override
+                        public void onFailure(String message) {
+                            Toast.makeText(getActivity(), "Failure sended!\nmessageId: " + messageId + "\n" + "answerText: " + answerText + "\n" + message, Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                }
+            });
+        } else {
+            mAnswerLayout.setVisibility(View.GONE);
+            mAdapter.setOnMessageAnswerListener(null);
+        }
+
         return view;
+    }
+
+    @OnClick(R.id.sendAnswerAppCompatImageButton)
+    public void onClickSendAnswerAppCompatImageButton() {
+        Toast.makeText(getActivity(), mInputAnswer.getText().toString(), Toast.LENGTH_SHORT).show();
     }
 
     public void onMessageAction(@NonNull String action) {

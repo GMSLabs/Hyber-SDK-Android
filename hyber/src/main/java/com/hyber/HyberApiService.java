@@ -22,4 +22,7 @@ interface HyberApiService {
     @POST("push-dr-receiver/sdk_api/dr")
     Observable<Response<Void>> sendPushDeliveryReportObservable(@Body PushDeliveryReportReqModel body);
 
+    @POST("push-callback-receiver/api/callback")
+    Observable<Response<Void>> sendBidirectionalAnswerObservable(@Body BidirectionalAnswerReqModel body);
+
 }

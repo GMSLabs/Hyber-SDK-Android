@@ -4,10 +4,45 @@
     android:layout_height="match_parent"
     tools:context="com.hyber.example.MessagesFragment">
 
-    <android.support.v7.widget.RecyclerView
-        android:id="@+id/messages_RecyclerView"
+    <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_gravity="bottom"/>
+        android:layout_height="match_parent">
+
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/messages_RecyclerView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_above="@+id/answerLayout"
+            android:layout_gravity="bottom" />
+
+        <RelativeLayout
+            android:id="@+id/answerLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:gravity="bottom">
+
+            <android.support.v7.widget.AppCompatEditText
+                android:id="@+id/inputAnswerEditTextView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_toLeftOf="@+id/sendAnswerAppCompatImageButton"
+                android:layout_toStartOf="@+id/sendAnswerAppCompatImageButton"
+                android:background="@color/colorIcons"
+                android:minHeight="50dp"
+                android:padding="7dp"
+                tools:text="test" />
+
+            <android.support.v7.widget.AppCompatImageButton
+                android:id="@+id/sendAnswerAppCompatImageButton"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:layout_alignParentEnd="true"
+                android:layout_alignParentRight="true"
+                android:background="@android:drawable/ic_menu_send" />
+
+        </RelativeLayout>
+
+    </RelativeLayout>
 
 </FrameLayout>

@@ -20,7 +20,6 @@ public class Message extends RealmObject {
     public static final String IMAGE_URL = "mImageUrl";
     public static final String ACTION = "mAction";
     public static final String CAPTION = "mCaption";
-    public static final String BIDIRECTIONAL_URL = "mBiDirUrl";
 
     public static final String RECEIVED_AT = "mReceivedAt";
     public static final String IS_REPORTED = "isReported";
@@ -49,8 +48,6 @@ public class Message extends RealmObject {
     private String mAction;
 
     private String mCaption;
-
-    private String mBiDirUrl;
 
     @Required
     private Date mReceivedAt;
@@ -102,11 +99,10 @@ public class Message extends RealmObject {
         return mOrder;
     }
 
-    public void setOptions(String imageUrl, String action, String caption, String biDirUrl) {
+    public void setOptions(String imageUrl, String action, String caption) {
         this.mImageUrl = imageUrl;
         this.mAction = action;
         this.mCaption = caption;
-        this.mBiDirUrl = biDirUrl;
     }
 
     @Nullable
@@ -122,11 +118,6 @@ public class Message extends RealmObject {
     @Nullable
     public String getCaption() {
         return mCaption;
-    }
-
-    @Nullable
-    public String getBidirectionalUrl() {
-        return mBiDirUrl;
     }
 
     @NonNull

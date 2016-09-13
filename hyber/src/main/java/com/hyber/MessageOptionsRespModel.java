@@ -15,9 +15,6 @@ public class MessageOptionsRespModel {
     @SerializedName("caption")
     private String mCaption;
 
-    @SerializedName("pushBidirectionalUrl")
-    private String mBiDirUrl;
-
 
     @Nullable
     public String getImageUrl() {
@@ -32,11 +29,6 @@ public class MessageOptionsRespModel {
     @Nullable
     public String getCaption() {
         return mCaption;
-    }
-
-    @Nullable
-    public String getBiDirUrl() {
-        return mBiDirUrl;
     }
 
 }

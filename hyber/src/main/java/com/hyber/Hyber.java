@@ -48,6 +48,8 @@ public class Hyber {
     static String clientApiKey;
     static String installationID, fingerprint;
 
+    static boolean isBidirectionalAvailable = false;
+
     static Hyber.Builder mInitBuilder;
     static boolean initDone;
     private static boolean startedRegistration;
@@ -79,6 +81,11 @@ public class Hyber {
     }
 
     public interface DeviceUpdateHandler {
+        void onSuccess();
+        void onFailure(String message);
+    }
+
+    public interface SendBidirectionalAnswerHandler {
         void onSuccess();
         void onFailure(String message);
     }
@@ -151,6 +158,8 @@ public class Hyber {
 
         installationID = Installation.id(context);
         fingerprint = Fingerprint.keyHash(context);
+
+        isBidirectionalAvailable = /*TODO Add Bidirectional support controller*/ true;
 
         // START: Init validation
         try {
@@ -290,6 +299,10 @@ public class Hyber {
         initDone = true;
     }
 
+    public static boolean isBidirectionalAvailable() {
+        return isBidirectionalAvailable;
+    }
+
     public static void setLogLevel(LOG_LEVEL inLogCatLevel, LOG_LEVEL inVisualLogLevel) {
         logCatLevel = inLogCatLevel;
         visualLogLevel = inVisualLogLevel;
@@ -379,6 +392,20 @@ public class Hyber {
             @Override
             public void onSendingError(SendDeviceDataErrorStatus status) {
                 handler.onFailure(status.getDescription());
+            }
+        });
+    }
+
+    public static void sendBidirectionalAnswer(@NonNull String messageId, @NonNull String answerText, final SendBidirectionalAnswerHandler handler) {
+        mMainApiBusinessModel.sendBidirectionalAnswer(messageId, answerText, new MainApiBusinessModel.SendBidirectionalAnswerListener() {
+            @Override
+            public void onSent(@NonNull String messageId) {
+                handler.onSuccess();
+            }
+
+            @Override
+            public void onSendingError() {
+                handler.onFailure(/*TODO*/ "TODO");
             }
         });
     }

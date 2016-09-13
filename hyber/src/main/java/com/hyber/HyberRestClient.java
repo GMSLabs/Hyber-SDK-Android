@@ -139,6 +139,13 @@ class HyberRestClient {
                 .observeOn(AndroidSchedulers.mainThread());
     }
 
+    static Observable<Response<Void>> sendBidirectionalAnswerObservable(
+            @NonNull BidirectionalAnswerReqModel model) {
+        return hyberApiService.sendBidirectionalAnswerObservable(model)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread());
+    }
+
     private static Observable<Response<MessageHistoryRespEnvelope>> getMessageHistoryObservable(
             @NonNull MessageHistoryReqModel model) {
         return hyberApiService.getMessageHistoryObservable(model)

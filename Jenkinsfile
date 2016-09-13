@@ -5,10 +5,15 @@ node {
   }
 
   stage ('Update Android SDK') {
+    //IMPORTANT call android-update-sdk NOT parallel in first time
+    sh "android-update-sdk \
+          --components=platform-tools \
+          --accept-licenses=android-sdk-license-.+"
+
     parallel(
       tools: {
         sh "android-update-sdk \
-              --components=platform-tools,tools,build-tools-24.0.2 \
+              --components=tools,build-tools-24.0.2 \
               --accept-licenses=android-sdk-license-.+"
       },
       android: {
