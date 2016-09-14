@@ -166,8 +166,7 @@ class MainApiBusinessModel implements IAuthorizationModel {
 
         final BidirectionalAnswerReqModel reqModel = new BidirectionalAnswerReqModel(
                 messageId,
-                answerText,
-                new Date().getTime());
+                answerText);
 
         HyberRestClient.sendBidirectionalAnswerObservable(reqModel)
                 .subscribe(new Action1<Response<Void>>() {
