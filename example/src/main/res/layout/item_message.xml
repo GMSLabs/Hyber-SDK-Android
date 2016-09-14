@@ -4,7 +4,10 @@
     android:id="@+id/card_massages"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_margin="3dp">
+    android:layout_margin="3dp"
+    android:descendantFocusability="beforeDescendants"
+    android:focusable="true"
+    android:focusableInTouchMode="true">
 
     <android.support.v7.widget.LinearLayoutCompat
         android:layout_width="match_parent"
@@ -75,19 +78,29 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_alignParentBottom="true"
-            android:visibility="gone"
+            android:focusable="true"
+            android:focusableInTouchMode="true"
             android:gravity="bottom">
 
-            <android.support.v7.widget.AppCompatEditText
-                android:id="@+id/messageInputAnswerEditText"
-                android:layout_width="match_parent"
+            <android.support.design.widget.TextInputLayout
+                android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:layout_toLeftOf="@+id/messageSendAnswerAppCompatImageButton"
-                android:layout_toStartOf="@+id/messageSendAnswerAppCompatImageButton"
-                android:background="@color/colorIcons"
-                android:minHeight="50dp"
-                android:padding="7dp"
-                tools:text="test" />
+                android:layout_toStartOf="@+id/messageSendAnswerAppCompatImageButton">
+
+                <android.support.design.widget.TextInputEditText
+                    android:id="@+id/messageInputAnswerEditText"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_toLeftOf="@+id/messageSendAnswerAppCompatImageButton"
+                    android:layout_toStartOf="@+id/messageSendAnswerAppCompatImageButton"
+                    android:background="@color/colorIcons"
+                    android:hint="input your answer"
+                    android:minHeight="50dp"
+                    android:padding="7dp"
+                    tools:text="test" />
+
+            </android.support.design.widget.TextInputLayout>
 
             <android.support.v7.widget.AppCompatImageButton
                 android:id="@+id/messageSendAnswerAppCompatImageButton"
@@ -95,6 +108,7 @@
                 android:layout_height="50dp"
                 android:layout_alignParentEnd="true"
                 android:layout_alignParentRight="true"
+                android:layout_centerVertical="true"
                 android:background="@android:drawable/ic_menu_send" />
 
         </RelativeLayout>
