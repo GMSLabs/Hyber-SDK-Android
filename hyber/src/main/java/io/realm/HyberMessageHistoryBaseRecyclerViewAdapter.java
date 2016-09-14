@@ -125,6 +125,10 @@ public abstract class HyberMessageHistoryBaseRecyclerViewAdapter extends Recycle
         return mRealmResults.size();
     }
 
+    public String getMessageId(int position) {
+        return mRealmResults.get(position).getId();
+    }
+
     public void updateRealmResults(RealmResults<Message> queryResults) {
         if (mRealmChangeListener != null && mRealmResults != null) {
             mRealmResults.removeChangeListener(mRealmChangeListener);
