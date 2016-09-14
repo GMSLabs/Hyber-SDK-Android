@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.Color;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.design.widget.TextInputEditText;
 import android.support.v7.widget.AppCompatButton;
 import android.support.v7.widget.AppCompatEditText;
 import android.support.v7.widget.AppCompatImageButton;
@@ -74,7 +75,7 @@ public class MyMessagesRVAdapter extends HyberMessageHistoryBaseRecyclerViewAdap
 
         private boolean isAnswerMode = false;
         private RelativeLayout messageAnswerLayout;
-        private AppCompatEditText messageInputAnswerEditText;
+        private TextInputEditText messageInputAnswerEditText;
         private AppCompatImageButton messageSendAnswerAppCompatImageButton;
 
         private String mAction;
@@ -91,7 +92,7 @@ public class MyMessagesRVAdapter extends HyberMessageHistoryBaseRecyclerViewAdap
             this.messageTime = (AppCompatTextView) itemView.findViewById(R.id.messageTime);
 
             this.messageAnswerLayout = (RelativeLayout) itemView.findViewById(R.id.messageAnswerLayout);
-            this.messageInputAnswerEditText = (AppCompatEditText) itemView.findViewById(R.id.messageInputAnswerEditText);
+            this.messageInputAnswerEditText = (TextInputEditText) itemView.findViewById(R.id.messageInputAnswerEditText);
             this.messageSendAnswerAppCompatImageButton = (AppCompatImageButton) itemView.findViewById(R.id.messageSendAnswerAppCompatImageButton);
         }
 
@@ -165,23 +166,28 @@ public class MyMessagesRVAdapter extends HyberMessageHistoryBaseRecyclerViewAdap
 
         @Override
         public void isMessageBidirectionalAvailable(@NonNull Boolean isBiDirMessage) {
+            messageAnswerLayout.setVisibility(View.GONE);
             if (isBiDirMessage) {
                 this.answerButton.setVisibility(View.VISIBLE);
                 this.answerButton.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
                         if (isAnswerMode) {
+                            isAnswerMode = false;
                             messageAnswerLayout.setVisibility(View.GONE);
                         } else {
+                            isAnswerMode = true;
                             messageAnswerLayout.setVisibility(View.VISIBLE);
+                            messageInputAnswerEditText.requestFocus();
                             messageSendAnswerAppCompatImageButton.setOnClickListener(new View.OnClickListener() {
                                 @Override
                                 public void onClick(View view) {
                                     String answerMessage = messageInputAnswerEditText.getText().toString();
                                     if (answerMessage.isEmpty()) {
-
                                     } else {
                                         if (onMessageAnswerListener != null) {
+                                            isAnswerMode = false;
+                                            messageAnswerLayout.setVisibility(View.GONE);
                                             onMessageAnswerListener.onAction(mMessageId, answerMessage);
                                         }
                                     }
