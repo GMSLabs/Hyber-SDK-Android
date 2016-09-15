@@ -11,6 +11,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 
@@ -139,8 +140,26 @@ public class MessagesFragment extends Fragment {
     }
 
     @OnClick(R.id.sendAnswerAppCompatImageButton)
-    public void onClickSendAnswerAppCompatImageButton() {
-        Toast.makeText(getActivity(), mInputAnswer.getText().toString(), Toast.LENGTH_SHORT).show();
+    public void onClickSendAnswerAppCompatImageButton(View v) {
+        InputMethodManager imm =  (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+        imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
+        final String messageId = mAdapter.getMessageId(mAdapter.getItemCount() - 1);
+        final String answerText = mInputAnswer.getText().toString();
+        if (!answerText.isEmpty()) {
+            Hyber.sendBidirectionalAnswer(messageId, answerText, new Hyber.SendBidirectionalAnswerHandler() {
+                @Override
+                public void onSuccess() {
+                    Toast.makeText(getActivity(), "Success sended!\nmessageId: " + messageId + "\n" + "answerText: " + answerText, Toast.LENGTH_SHORT).show();
+                    mInputAnswer.setText("");
+                    mInputAnswer.clearFocus();
+                }
+
+                @Override
+                public void onFailure(String message) {
+                    Toast.makeText(getActivity(), "Failure sended!\nmessageId: " + messageId + "\n" + "answerText: " + answerText + "\n" + message, Toast.LENGTH_SHORT).show();
+                }
+            });
+        }
     }
 
     public void onMessageAction(@NonNull String action) {
