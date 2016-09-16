@@ -162,16 +162,10 @@ public class Hyber {
         isBidirectionalAvailable = /*TODO Add Bidirectional support controller*/ true;
 
         // START: Init validation
-        try {
-            //noinspection ResultOfMethodCallIgnored
-            UUID.fromString(hyberClientApiKey);
-        } catch (Throwable t) {
-            Log(LOG_LEVEL.FATAL, "Hyber ClientId format is invalid.\nExample: 'b2f7f966-d8cc-11e4-bed1-df8f05be55ba'\n", t);
+        if (hyberClientApiKey == null || hyberClientApiKey.isEmpty()) {
+            Log(LOG_LEVEL.FATAL, "Hyber Client Api Key format is invalid.");
             return;
         }
-
-        if ("b2f7f966-d8cc-11e4-bed1-df8f05be55ba".equals(hyberClientApiKey))
-            Log(LOG_LEVEL.WARN, "Hyber Example ClientID detected, please update to your client's id found on Hyber.com");
 
         if (deviceType == OsUtils.DeviceType.FCM) {
             //TODO Validate integration params
@@ -195,8 +189,8 @@ public class Hyber {
 
             return;
         }
-
         // END: Init validation
+
         boolean contextIsActivity = (context instanceof Activity);
 
         foreground = contextIsActivity;
