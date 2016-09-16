@@ -11,21 +11,21 @@ node {
           --accept-licenses=android-sdk-license-.+"
 
     parallel(
-      tools: {
+      tools: { node {
         sh "android-update-sdk \
               --components=tools,build-tools-24.0.2 \
               --accept-licenses=android-sdk-license-.+"
-      },
-      android: {
+      }},
+      android: { node {
         sh "android-update-sdk \
               --components=android-24 \
               --accept-licenses=android-sdk-license-.+"
-      },
-      extra: {
+      }},
+      extra: { node {
         sh "android-update-sdk \
               --components=extra-android-support,extra-android-m2repository,extra-google-google_play_services,extra-google-m2repository \
               --accept-licenses=android-sdk-license-.+"
-      }
+      }}
     )
   }
 

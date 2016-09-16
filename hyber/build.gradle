@@ -1,73 +1,164 @@
 apply plugin: 'com.android.library'
 apply plugin: 'realm-android'
 
-android {
-    compileSdkVersion 24
-    buildToolsVersion "24.0.2"
-
-    defaultConfig {
-        minSdkVersion 16
-        targetSdkVersion 24
-        versionCode 5
-        versionName "0.1.0-alpha" + versionCode
-
-        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
-    }
-    lintOptions {
-        abortOnError false
-    }
-    buildTypes {
-        release {
-            minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard.pro'
-        }
-    }
-    publishNonDefault true
-    productFlavors {
-        hyber_dev {
-            buildConfigField 'String', 'HOST', dev_api_host
-        }
-        hyber_td {
-            buildConfigField 'String', 'HOST', td_api_host
-        }
-        hyber_prod {
-            buildConfigField 'String', 'HOST', prod_api_host
-        }
-    }
+repositories {
+    mavenCentral()
 }
 
+project.group = 'com.hyber.android'
+
 dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
-    androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
-        exclude group: 'com.android.support', module: 'support-annotations'
-    })
-    testCompile 'junit:junit:4.12'
+    // Hyber Dependencies
+    compile 'com.android.support:recyclerview-v7:24.2.0'
 
     compile 'com.google.android.gms:play-services-base:9.4.0'
     compile 'com.google.firebase:firebase-messaging:9.4.0'
 
-    compile 'com.android.support:recyclerview-v7:24.2.0'
-
-    //Reactive dependencies
     compile 'io.reactivex:rxandroid:1.2.1'
-    // Because RxAndroid releases are few and far between, it is recommended you also
-    // explicitly depend on RxJava's latest version for bug fixes and new features.
     compile 'io.reactivex:rxjava:1.1.6'
 
-    //Network dependencies
     compile 'com.squareup.retrofit2:retrofit:2.1.0'
     compile 'com.squareup.retrofit2:converter-gson:2.1.0'
     compile 'com.squareup.retrofit2:adapter-rxjava:2.1.0'
+
     compile 'com.squareup.okhttp3:okhttp:3.4.1'
     compile 'com.squareup.okhttp3:logging-interceptor:3.4.1'
 
-    //Data utils dependencies
     compile 'com.github.orhanobut:hawk:1.23'
     compile 'com.googlecode.java-diff-utils:diffutils:1.3.0'
 
-    //Debug dependencies
     compile 'com.facebook.stetho:stetho:1.3.1'
     compile 'com.facebook.stetho:stetho-okhttp3:1.3.1'
     compile 'com.uphyca:stetho_realm:0.9.0'
 
+    // Unit Tests
+    testCompile 'junit:junit:4.12'
+
+    // Connected Tests
+    androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
+        exclude group: 'com.android.support', module: 'support-annotations'
+    })
+}
+
+android {
+    compileSdkVersion rootProject.ext.compileSdkVersion
+    buildToolsVersion rootProject.ext.buildToolsVersion
+
+    defaultConfig {
+        minSdkVersion rootProject.ext.minSdkVersion
+        targetSdkVersion rootProject.ext.targetSdkVersion
+        consumerProguardFiles 'proguard.pro'
+
+        buildConfigField 'String', 'HOST', api_host
+    }
+
+    lintOptions {
+        abortOnError false
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_7
+        targetCompatibility JavaVersion.VERSION_1_7
+    }
+}
+
+apply plugin: 'maven'
+apply plugin: 'signing'
+
+def isSnapshot = version.endsWith('-SNAPSHOT')
+def ossrhUsername = hasProperty('NEXUS_USERNAME') ? NEXUS_USERNAME : System.getenv('CI_NEXUS_USERNAME')
+def ossrhPassword = hasProperty('NEXUS_PASSWORD') ? NEXUS_PASSWORD : System.getenv('CI_NEXUS_PASSWORD')
+
+task setVersion {
+    // The version will be derived from source
+    project.version = null
+    def sdkVersionFile = file('src/main/java/com/hyber/HyberSdkVersion.java')
+    sdkVersionFile.eachLine{
+        def matcher = (it =~ /(?:.*BUILD = \")(.*)(?:\".*)/)
+        if (matcher.matches()) {
+            project.version = matcher[0][1]
+            return
+        }
+    }
+    if (project.version.is('unspecified')) {
+        throw new GradleScriptException('Version could not be found.', null)
+    }
+}
+
+uploadArchives {
+    repositories.mavenDeployer {
+        beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
+
+        repository(url: "file://${project.buildDir}/../releases") {
+            authentication(userName: ossrhUsername, password: ossrhPassword)
+        }
+
+        snapshotRepository(url: "file://${project.buildDir}/../snapshots") {
+            authentication(userName: ossrhUsername, password: ossrhPassword)
+        }
+
+        pom.project {
+            name 'Hyber-Android-SDK'
+            artifactId = 'hyber-android-sdk'
+            packaging 'aar'
+            description 'A library that gives you access to the powerful Hyber messaging cloud platform from your Android app.'
+            url 'https://github.com/Incuube/Hyber-SDK-Android'
+
+            scm {
+                connection 'scm:git@github.com:Incuube/Hyber-SDK-Android.git'
+                developerConnection 'scm:git@github.com:Incuube/Hyber-SDK-Android.git'
+                url 'https://github.com/Incuube/Hyber-SDK-Android'
+            }
+
+            licenses {
+                license {
+                    name 'Apache License'
+                    url 'https://github.com/Incuube/Hyber-SDK-Android/blob/master-2.0/LICENSE'
+                    distribution 'repo'
+                }
+            }
+
+            developers {
+                developer {
+                    id 'hyber'
+                    name 'Hyber'
+                }
+            }
+        }
+    }
+}
+
+uploadArchives.dependsOn(setVersion)
+
+signing {
+    required { !isSnapshot && gradle.taskGraph.hasTask("uploadArchives") }
+    sign configurations.archives
+}
+
+task androidJavadocs(type: Javadoc) {
+    source = android.sourceSets.main.java.srcDirs
+    classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
+    // JDK 1.8 is more strict then 1.7. Have JDK 1.8 behave like 1.7 for javadoc generation
+    if (org.gradle.internal.jvm.Jvm.current().getJavaVersion() == JavaVersion.VERSION_1_8) {
+        options.addStringOption('Xdoclint:none', '-quiet')
+    }
+}
+
+task androidJavadocsJar(type: Jar, dependsOn: androidJavadocs) {
+    classifier = 'javadoc'
+    from androidJavadocs.destinationDir
+}
+
+task androidSourcesJar(type: Jar) {
+    classifier = 'sources'
+    from android.sourceSets.main.java.sourceFiles
+}
+
+artifacts {
+    archives androidSourcesJar
+    archives androidJavadocsJar
+}
+
+afterEvaluate {
+    androidJavadocs.classpath += project.android.libraryVariants.toList().first().javaCompile.classpath
 }
