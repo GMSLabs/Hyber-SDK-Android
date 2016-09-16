@@ -49,7 +49,9 @@ android {
         targetSdkVersion rootProject.ext.targetSdkVersion
         consumerProguardFiles 'proguard.pro'
 
-        buildConfigField 'String', 'HOST', api_host
+        buildConfigField 'String', 'HOST_mobile_abonents', api_host_mobile_abonents
+        buildConfigField 'String', 'HOST_push_dr_receiver', api_host_push_dr_receiver
+        buildConfigField 'String', 'HOST_push_callback_receiver', api_host_push_callback_receiver
     }
 
     lintOptions {

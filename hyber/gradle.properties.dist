@@ -1,1 +1,3 @@
-api_host="http://.../"
+api_host_mobile_abonents="http://.../"
+api_host_push_dr_receiver="http://.../"
+api_host_push_callback_receiver="http://.../"
