@@ -23,7 +23,8 @@ android:
     - 'android-sdk-license-.+'
 
 before_script:
-    - chmod +x build.sh
+    - chmod +x ./gradlew
 
 script:
-    - ./build.sh
+    - ./gradlew hyber:testReleaseUnitTest -Dorg.gradle.jvmargs="-Xmx2048m -XX:+HeapDumpOnOutOfMemoryError"
+    - ./gradlew example:test -Dorg.gradle.jvmargs="-Xmx2048m -XX:+HeapDumpOnOutOfMemoryError"
