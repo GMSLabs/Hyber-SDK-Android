@@ -26,7 +26,7 @@ class HyberDataSourceController {
         Realm.setDefaultConfiguration(realmConfiguration);
 
         Hawk.init(context)
-                .setPassword("kfhdhfeksjfkesglfkjeslkjfgsrljfnekjfh")
+                .setPassword(Hyber.fingerprint)
                 .setEncryptionMethod(HawkBuilder.EncryptionMethod.HIGHEST)
                 .setStorage(HawkBuilder.newSharedPrefStorage(context))
                 .setLogLevel(LogLevel.FULL)
