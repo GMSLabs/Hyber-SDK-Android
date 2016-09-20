@@ -1,8 +1,8 @@
 node {
 
-  def gradleOptions='-Dorg.gradle.jvmargs="-Xmx2048m -XX:+HeapDumpOnOutOfMemoryError"'
-
   env.ANDROID_HOME="${pwd()}/android-sdk"
+
+  def gradleOptions='-Dorg.gradle.jvmargs="-Xmx2048m -XX:+HeapDumpOnOutOfMemoryError"'
 
   stage ('Preparation') {
     // Get some code from a GitHub repository
