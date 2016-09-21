@@ -5,10 +5,12 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 import com.google.firebase.iid.FirebaseInstanceId;
+import com.google.gson.Gson;
 import com.orhanobut.hawk.Hawk;
 
 import java.lang.ref.WeakReference;
 import java.util.Date;
+import java.util.Locale;
 
 import io.realm.Realm;
 import io.realm.RealmResults;
@@ -17,7 +19,7 @@ import rx.Observable;
 import rx.functions.Action1;
 import rx.functions.Func1;
 
-class MainApiBusinessModel implements IAuthorizationModel {
+class MainApiBusinessModel implements IMainApiBusinessModel {
 
     private static MainApiBusinessModel mInstance;
     private WeakReference<Context> mContextWeakReference;
@@ -109,6 +111,7 @@ class MainApiBusinessModel implements IAuthorizationModel {
     public void sendDeviceData(@NonNull final SendDeviceDataListener listener) {
         Hyber.Log(Hyber.LOG_LEVEL.DEBUG, "Start sending user device data.");
 
+
         final UpdateUserReqModel reqModel = new UpdateUserReqModel(
                 FirebaseInstanceId.getInstance().getToken(),
                 OsUtils.getDeviceOs(), OsUtils.getAndroidVersion(),
@@ -185,6 +188,77 @@ class MainApiBusinessModel implements IAuthorizationModel {
                     public void call(Throwable throwable) {
                         Hyber.Log(Hyber.LOG_LEVEL.FATAL, "Error in sending bidirectional answer api request!", throwable);
                         listener.onSendingError();
+                    }
+                });
+    }
+
+    @Override
+    public void sendPushDeliveryReport(@NonNull final String messageId, @NonNull Long receivedAt, @NonNull final SendPushDeliveryReportListener listener) {
+        Hyber.Log(Hyber.LOG_LEVEL.DEBUG, "Start sending push delivery report.");
+
+        final PushDeliveryReportReqModel reqModel = new PushDeliveryReportReqModel(messageId, receivedAt);
+
+        HyberRestClient.sendPushDeliveryReportObservable(reqModel)
+                .subscribe(new Action1<Response<Void>>() {
+                    @Override
+                    public void call(Response<Void> response) {
+                        if (response.isSuccessful()) {
+                            Hyber.Log(Hyber.LOG_LEVEL.DEBUG, "Request for sending push delivery report is success.");
+                            listener.onSuccess(messageId);
+                        } else {
+                            Hyber.Log(Hyber.LOG_LEVEL.ERROR, "Response for sending push delivery report api request is unsuccessful with code " + response.code() + "!");
+                            listener.onFailure();
+                        }
+                    }
+                }, new Action1<Throwable>() {
+                    @Override
+                    public void call(Throwable throwable) {
+                        Hyber.Log(Hyber.LOG_LEVEL.FATAL, "Error in sending push delivery report api request!", throwable);
+                        listener.onFailure();
+                    }
+                });
+    }
+
+    @Override
+    public void getMessageHistory(@NonNull final Long startDate, @NonNull final MessageHistoryListener listener) {
+        Hyber.Log(Hyber.LOG_LEVEL.DEBUG, "Start downloading message history.");
+
+        final MessageHistoryReqModel reqModel = new MessageHistoryReqModel(startDate);
+
+        HyberRestClient.getMessageHistoryObservable(reqModel)
+                .subscribe(new Action1<Response<MessageHistoryRespEnvelope>>() {
+                    @Override
+                    public void call(Response<MessageHistoryRespEnvelope> response) {
+                        if (response.isSuccessful()) {
+                            Hyber.Log(Hyber.LOG_LEVEL.DEBUG, "Request for downloading message history is success.");
+                            Hyber.Log(Hyber.LOG_LEVEL.DEBUG, String.format(Locale.getDefault(), "Downloaded %d messages.",
+                                    response.body().getMessages().size()));
+                            if (response.body().getMessages() != null && response.body().getMessages().size() > 0) {
+                                Hyber.Log(Hyber.LOG_LEVEL.DEBUG, String.format(Locale.getDefault(),
+                                        "LimitDays %d" +
+                                                "\nLimitMessages %d" +
+                                                "\nTimeLastMessage %d" +
+                                                "\nFirst MessageId %s DrTime %d" +
+                                                "\nLast MessageId %s DrTime %d",
+                                        response.body().getLimitDays(),
+                                        response.body().getLimitMessages(),
+                                        response.body().getTimeLastMessage(),
+                                        response.body().getMessages().get(0).getId(),
+                                        response.body().getMessages().get(0).getTime(),
+                                        response.body().getMessages().get(response.body().getMessages().size() - 1).getId(),
+                                        response.body().getMessages().get(response.body().getMessages().size() - 1).getTime()));
+                            }
+                            listener.onSuccess(startDate, response.body());
+                        } else {
+                            Hyber.Log(Hyber.LOG_LEVEL.ERROR, "Response for downloading message history api request is unsuccessful with code " + response.code() + "!");
+                            listener.onFailure();
+                        }
+                    }
+                }, new Action1<Throwable>() {
+                    @Override
+                    public void call(Throwable throwable) {
+                        Hyber.Log(Hyber.LOG_LEVEL.FATAL, "Error in downloading message history api request!", throwable);
+                        listener.onFailure();
                     }
                 });
     }
@@ -281,4 +355,15 @@ class MainApiBusinessModel implements IAuthorizationModel {
         void onSendingError();
     }
 
+    interface MessageHistoryListener {
+        void onSuccess(@NonNull Long startDate, @NonNull MessageHistoryRespEnvelope envelope);
+
+        void onFailure();
+    }
+
+    interface SendPushDeliveryReportListener {
+        void onSuccess(@NonNull String messageId);
+
+        void onFailure();
+    }
 }

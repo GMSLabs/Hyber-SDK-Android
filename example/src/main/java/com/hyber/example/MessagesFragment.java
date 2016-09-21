@@ -50,6 +50,9 @@ public class MessagesFragment extends Fragment {
     @BindView(R.id.sendAnswerAppCompatImageButton)
     AppCompatImageButton mSendAnswer;
 
+    private int MAX_HISTORY_REQUESTS = 5;
+    private Long time_for_next_history_request;
+
     public MessagesFragment() {
         // Required empty public constructor
     }
@@ -136,7 +139,27 @@ public class MessagesFragment extends Fragment {
             mAdapter.setOnMessageAnswerListener(null);
         }
 
+        time_for_next_history_request = System.currentTimeMillis();
+        getMessagesFromHistory(time_for_next_history_request);
+
         return view;
+    }
+
+    private void getMessagesFromHistory(long historyFromThisTimeToPast){
+        MAX_HISTORY_REQUESTS -= 1;
+        Hyber.getMessageHistory(historyFromThisTimeToPast, new Hyber.MessageHistoryHandler() {
+            @Override
+            public void onSuccess(@NonNull Long recommendedNextTime) {
+                time_for_next_history_request = recommendedNextTime;
+                if (MAX_HISTORY_REQUESTS > 0)
+                    getMessagesFromHistory(time_for_next_history_request);
+            }
+
+            @Override
+            public void onFailure(String message) {
+                Toast.makeText(getActivity(), message, Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     @OnClick(R.id.sendAnswerAppCompatImageButton)
