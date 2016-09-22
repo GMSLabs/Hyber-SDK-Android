@@ -13,6 +13,10 @@ node {
     sh "./mocking.sh"
   }
 
+  stage ('Env test') {
+    sh "printenv"
+  }
+
   stage ('Providing Android SDK') {
     sh "android-sdk-producer android-sdk_r24.4.1-linux.tgz"
   }
