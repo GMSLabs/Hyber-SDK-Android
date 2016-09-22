@@ -58,6 +58,17 @@ node {
     sh "./gradlew example:clean example:assembleDevDebug"
   }
 
+  stage ('Publication Hyber DEV to Fabric') {
+    if (env.BRANCH_NAME == 'master-2.0') {
+      env.FABRIC_GROUP="Hyber DEV"
+      env.FABRIC_NOTES="${BRANCH_NAME}"
+
+      sh "./gradlew example:fabricGenerateResourcesDevDebug example:crashlyticsUploadDistributionDevDebug"
+    } else {
+      sh "echo ${env.BRANCH_NAME} is not master-2.0"
+    }
+  }
+
   stage ('Clean-up') {
     deleteDir()
   }

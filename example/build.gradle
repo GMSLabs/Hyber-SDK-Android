@@ -37,6 +37,9 @@ android {
         }
         debug {
             minifyEnabled false
+            ext.betaDistributionGroupAliases=System.getenv('FABRIC_GROUP')
+            ext.betaDistributionReleaseNotes=System.getenv('FABRIC_NOTES')
+            ext.betaDistributionNotifications=true
         }
     }
     lintOptions {
