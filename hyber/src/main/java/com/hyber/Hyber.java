@@ -429,11 +429,7 @@ public class Hyber {
                     });
                 }
 
-                if (envelope.getMessages().isEmpty() || envelope.getMessages().size() >= envelope.getLimitMessages()) {
-                    handler.onSuccess(envelope.getTimeLastMessage());
-                } else {
-                    handler.onSuccess(startDate - (TimeUnit.DAYS.toMillis(envelope.getLimitDays())));
-                }
+                handler.onSuccess(envelope.getTimeLastMessage());
             }
 
             @Override
