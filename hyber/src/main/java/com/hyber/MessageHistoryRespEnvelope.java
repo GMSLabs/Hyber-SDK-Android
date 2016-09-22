@@ -1,6 +1,5 @@
 package com.hyber;
 
-import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 import com.google.gson.annotations.SerializedName;
@@ -15,20 +14,28 @@ public class MessageHistoryRespEnvelope extends BaseResponce {
     @SerializedName("limitMessages")
     private Integer mLimitMessages;
 
+    @SerializedName("timeLastMessage")
+    private Long mTimeLastMessage;
+
     @SerializedName("messages")
     private List<MessageRespModel> mMessages;
 
-    @NonNull
+    @Nullable
     Integer getLimitDays() {
         return mLimitDays;
     }
 
-    @NonNull
+    @Nullable
     Integer getLimitMessages() {
         return mLimitMessages;
     }
 
-    @NonNull
+    @Nullable
+    public Long getTimeLastMessage() {
+        return mTimeLastMessage;
+    }
+
+    @Nullable
     List<MessageRespModel> getMessages() {
         return mMessages;
     }

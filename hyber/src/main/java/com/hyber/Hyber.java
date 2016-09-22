@@ -9,7 +9,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.util.Log;
 
 import java.util.ArrayList;
@@ -17,7 +16,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 import io.realm.Realm;
@@ -72,32 +70,38 @@ public class Hyber {
 
     public interface UserRegistrationHandler {
         void onSuccess();
+
         void onFailure(String message);
     }
 
     public interface PushTokenUpdateHandler {
         void onSuccess();
+
         void onFailure(String message);
     }
 
     public interface DeviceUpdateHandler {
         void onSuccess();
+
         void onFailure(String message);
     }
 
     public interface SendBidirectionalAnswerHandler {
         void onSuccess();
+
         void onFailure(String message);
     }
 
     public interface MessageHistoryHandler {
         void onSuccess(@NonNull Long recommendedNextTime);
+
         void onFailure(String message);
     }
 
     public interface PushDeliveryReportHandler {
         void onSuccess(@NonNull String messageId);
-        void onFailure(@NonNull String messageId, String message);
+
+        void onFailure(@NonNull String messageId);
     }
 
     public static class Builder {
@@ -259,9 +263,8 @@ public class Hyber {
                                         }
 
                                         @Override
-                                        public void onFailure(@NonNull String messageId, String message) {
-                                            String s = "Push delivery report onFailure" +
-                                                    "\n" + message;
+                                        public void onFailure(@NonNull String messageId) {
+                                            String s = "Push delivery report onFailure";
                                             Log(LOG_LEVEL.WARN, s);
                                             drInQueue.remove(messageId);
                                         }
@@ -405,104 +408,53 @@ public class Hyber {
     }
 
     public static void getMessageHistory(@NonNull Long startDate, final MessageHistoryHandler handler) {
-        HyberRestClient.getMessageHistory(startDate,
-                new HyberRestClient.MessageHistoryHandler() {
-                    @Override
-                    public void onSuccess(@NonNull final Long startDate, @NonNull final MessageHistoryRespEnvelope envelope) {
+        mMainApiBusinessModel.getMessageHistory(startDate, new MainApiBusinessModel.MessageHistoryListener() {
+            @Override
+            public void onSuccess(@NonNull final Long startDate, @NonNull final MessageHistoryRespEnvelope envelope) {
+                Realm realm = null;
+                if (!envelope.getMessages().isEmpty()) {
+                    realm = Realm.getDefaultInstance();
+                    realm.executeTransaction(new Realm.Transaction() {
+                        @Override
+                        public void execute(Realm realm) {
+                            Message message;
 
-                        if (!envelope.getMessages().isEmpty()) {
-                            Realm realm = Realm.getDefaultInstance();
-
-                            realm.executeTransaction(new Realm.Transaction() {
-                                @Override
-                                public void execute(Realm realm) {
-                                    Message message;
-
-                                    for (MessageRespModel respModel : envelope.getMessages()) {
-                                        message = respModel.toRealmMessageHistory();
-                                        if (message != null) {
-                                            realm.copyToRealmOrUpdate(message);
-                                        }
-                                    }
-
-                                    //TODO Need for upgrade algorithm of message history page paging
-                                    if (envelope.getMessages().size() < envelope.getLimitMessages()) {
-                                        handler.onSuccess(startDate + (TimeUnit.DAYS.toMillis(envelope.getLimitDays())));
-                                    } else if (envelope.getMessages().size() >= envelope.getLimitMessages()) {
-                                        final Message mh =
-                                                realm.where(Message.class)
-                                                        .findAllSorted(Message.TIME, Sort.DESCENDING)
-                                                        .first();
-                                        handler.onSuccess(mh.getTime().getTime());
-                                    }
+                            for (MessageRespModel respModel : envelope.getMessages()) {
+                                message = respModel.toRealmMessageHistory();
+                                if (message != null) {
+                                    realm.copyToRealmOrUpdate(message);
                                 }
-                            });
-
-                        }
-                    }
-
-                    @Override
-                    public void onFailure(int statusCode, @Nullable String response, @Nullable Throwable throwable) {
-                        String err = String.format(Locale.US, "statusCode %d, response %s, error %s", statusCode, response,
-                                throwable != null ? throwable.getCause().getLocalizedMessage() : "");
-                        Hyber.Log(LOG_LEVEL.ERROR, err, throwable);
-                        handler.onFailure(err);
-                    }
-
-                    @Override
-                    public void onThrowable(@Nullable Throwable throwable) {
-                        String err = "";
-
-                        if (throwable != null) {
-                            if (throwable.getCause() != null) {
-                                err = String.format(Locale.US, "error %s",
-                                        throwable.getCause().getLocalizedMessage());
-                            } else {
-                                err = String.format(Locale.US, "error %s",
-                                        throwable.getLocalizedMessage());
                             }
                         }
+                    });
+                }
 
-                        Hyber.Log(LOG_LEVEL.ERROR, err, throwable);
-                        handler.onFailure(err);
-                    }
-                });
+                if (envelope.getMessages().isEmpty() || envelope.getMessages().size() >= envelope.getLimitMessages()) {
+                    handler.onSuccess(envelope.getTimeLastMessage());
+                } else {
+                    handler.onSuccess(startDate - (TimeUnit.DAYS.toMillis(envelope.getLimitDays())));
+                }
+            }
+
+            @Override
+            public void onFailure() {
+                handler.onFailure(/*TODO*/ "TODO");
+            }
+        });
     }
 
-    public static void sendPushDeliveryReport(@NonNull String messageId, @NonNull Long receivedAt, final PushDeliveryReportHandler handler) {
-        HyberRestClient.sendPushDeliveryReport(messageId, receivedAt,
-                new HyberRestClient.PushDeliveryReportHandler() {
-                    @Override
-                    public void onSuccess(@NonNull String messageId) {
-                        handler.onSuccess(messageId);
-                    }
+    private static void sendPushDeliveryReport(@NonNull final String messageId, @NonNull Long receivedAt, final PushDeliveryReportHandler handler) {
+        mMainApiBusinessModel.sendPushDeliveryReport(messageId, receivedAt, new MainApiBusinessModel.SendPushDeliveryReportListener() {
+            @Override
+            public void onSuccess(@NonNull String messageId) {
+                handler.onSuccess(messageId);
+            }
 
-                    @Override
-                    public void onFailure(@NonNull String messageId, int statusCode, @Nullable String response, @Nullable Throwable throwable) {
-                        String err = String.format(Locale.US, "statusCode %d, response %s, error %s", statusCode, response,
-                                throwable != null ? throwable.getCause().getLocalizedMessage() : "");
-                        Hyber.Log(LOG_LEVEL.ERROR, err, throwable);
-                        handler.onFailure(messageId, err);
-                    }
-
-                    @Override
-                    public void onThrowable(@NonNull String messageId, @Nullable Throwable throwable) {
-                        String err = "";
-
-                        if (throwable != null) {
-                            if (throwable.getCause() != null) {
-                                err = String.format(Locale.US, "error %s",
-                                        throwable.getCause().getLocalizedMessage());
-                            } else {
-                                err = String.format(Locale.US, "error %s",
-                                        throwable.getLocalizedMessage());
-                            }
-                        }
-
-                        Hyber.Log(LOG_LEVEL.ERROR, err, throwable);
-                        handler.onFailure(messageId, err);
-                    }
-                });
+            @Override
+            public void onFailure() {
+                handler.onFailure(messageId);
+            }
+        });
     }
 
     private static void startRegistrationOrOnSession() throws Throwable {
