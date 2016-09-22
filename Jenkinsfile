@@ -1,8 +1,9 @@
 node {
 
-  def gradleOptions='-Dorg.gradle.jvmargs="-Xmx2048m -XX:+HeapDumpOnOutOfMemoryError"'
+  def gradleOptions='-Dorg.gradle.jvmargs="-Xmx1024m -XX:+HeapDumpOnOutOfMemoryError"'
 
   env.ANDROID_HOME="${pwd()}/android-sdk"
+  env.GRADLE_OPTS="${gradleOptions}"
 
   stage ('Preparation') {
     // Get some code from a GitHub repository
@@ -28,28 +29,33 @@ node {
               --components=android-24 \
               --accept-licenses=android-sdk-license-.+"
       },
-      extra: {
+      extraandroid: {
         sh "android-update-sdk \
-              --components=extra-android-support,extra-android-m2repository,extra-google-google_play_services,extra-google-m2repository \
+              --components=extra-android-support,extra-android-m2repository \
+              --accept-licenses=android-sdk-license-.+"
+      },
+      extragoogle: {
+        sh "android-update-sdk \
+              --components=extra-google-google_play_services,extra-google-m2repository \
               --accept-licenses=android-sdk-license-.+"
       }
     )
   }
 
   stage ('Test Hyber SDK') {
-    sh "GRADLE_OPTS=${gradleOptions} ./gradlew hyber:testReleaseUnitTest"
+    sh "./gradlew hyber:testReleaseUnitTest"
   }
 
   stage ('Build Hyber SDK') {
-    sh "GRADLE_OPTS=${gradleOptions} ./gradlew hyber:clean hyber:assembleRelease"
+    sh "./gradlew hyber:clean hyber:assembleRelease"
   }
 
   stage ('Test example app') {
-    sh "GRADLE_OPTS=${gradleOptions} ./gradlew example:test"
+    sh "./gradlew example:testDevDebugUnitTest"
   }
 
   stage ('Build example app') {
-    sh "GRADLE_OPTS=${gradleOptions} ./gradlew example:assembleDebug"
+    sh "./gradlew example:clean example:assembleDevDebug"
   }
 
   stage ('Clean-up') {
