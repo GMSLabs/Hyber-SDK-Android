@@ -8,10 +8,6 @@
     <!-- Required, makes sure notifications are delivered on time. -->
     <uses-permission android:name="android.permission.WAKE_LOCK" />
 
-    <!-- Required so the device vibrates on receiving a push notification.
-         Vibration settings of the device still apply. -->
-    <uses-permission android:name="android.permission.VIBRATE" />
-
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
@@ -20,9 +16,6 @@
         <meta-data
             android:name="hyber_client_api_key"
             android:value="${hyber_client_api_key}" />
-        <meta-data
-            android:name="hyber_google_project_number"
-            android:value="str:${hyber_google_project_number}" />
 
         <!-- [START firebase_service] -->
         <service

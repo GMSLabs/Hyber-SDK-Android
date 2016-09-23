@@ -33,9 +33,6 @@ public class Hyber {
      */
     static final String TAG = "Hyber";
 
-    public static String sdkType = "native";
-    public static final String sdkVersion = "000001";
-
     private static LOG_LEVEL visualLogLevel = LOG_LEVEL.NONE;
     private static LOG_LEVEL logCatLevel = LOG_LEVEL.WARN;
 
