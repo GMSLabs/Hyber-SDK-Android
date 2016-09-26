@@ -51,7 +51,7 @@ android {
 
             // TODO: Please update the Google Project number and Hyber client and app Id below to yours.
             manifestPlaceholders = [manifestApplicationId      : "${applicationId}",
-                                    hyber_client_api_key       : "b5a5b6f4-5af7-11e6-8b77-86f30ca893d3",
+                                    hyber_client_api_key       : "${hyber_client_api_key}",
                                     hyber_google_project_number: "703322644261"]
         }
         td {
@@ -59,7 +59,7 @@ android {
 
             // TODO: Please update the Google Project number and Hyber client and app Id below to yours.
             manifestPlaceholders = [manifestApplicationId      : "${applicationId}",
-                                    hyber_client_api_key       : "b5a5b6f4-5af7-11e6-8b77-86f30ca893d3",
+                                    hyber_client_api_key       : "${hyber_client_api_key}",
                                     hyber_google_project_number: "703322644261"]
         }
     }
