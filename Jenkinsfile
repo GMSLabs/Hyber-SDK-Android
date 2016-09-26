@@ -60,13 +60,16 @@ node {
 
   stage ('Publication Hyber DEV to Fabric') {
     sh "printenv"
+    sh "chmod +x ./provide_deploy_prop.sh"
+    sh "./provide_deploy_prop.sh Hyber-SDK-Android-propreties.zip dev"
 
     if (env.BRANCH_NAME == 'master-2.0') {
       env.FABRIC_GROUP="Hyber DEV"
       env.FABRIC_NOTES="${env.BRANCH_NAME}"
 
       sh "echo ${env.BRANCH_NAME} is branch for crashlytics upload distribution Dev build"
-      // sh "./gradlew example:fabricGenerateResourcesDevDebug example:crashlyticsUploadDistributionDevDebug"
+      sh "./gradlew hyber:clean example:clean example:assembleDevDebug"
+      sh "./gradlew example:fabricGenerateResourcesDevDebug example:crashlyticsUploadDistributionDevDebug"
     } else {
       sh "echo ${env.BRANCH_NAME} is not branch for crashlytics upload distribution Dev build"
     }
