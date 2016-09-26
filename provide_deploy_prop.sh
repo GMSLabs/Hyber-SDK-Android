@@ -27,7 +27,7 @@ then
     echo "This script will not work without a PROP_FILE_NAME - first argument"
     exit 1 # terminate and indicate error
 else
-    echo "JENKINS_HOME watch to ${JENKINS_HOME}"
+    echo "PROP_FILE_NAME is ${PROP_FILE_NAME}"
 fi
 
 if [ "$BUILD_TYPE" = "$TYPE_DEV" ] || [ "$BUILD_TYPE" = "$TYPE_TD" ] || [ "$BUILD_TYPE" = "$TYPE_PROD" ]
@@ -54,6 +54,7 @@ else
     exit 1 # terminate and indicate error
 fi
 
+rm -rf ./Hyber-SDK-Android-propreties
 unzip ${PROP_FOLDER}/${PROP_FILE_NAME} -d ./
 
 # List of all modules
@@ -66,18 +67,18 @@ do
     # Provide google-services.json file if one is exists in ./Hyber-SDK-Android-propreties/${module}
     if [ -f ./Hyber-SDK-Android-propreties/${module}/google-services.json ]; then
         echo "Providing google-services.json to ${module}/google-services.json"
-        cp -R ./Hyber-SDK-Android-propreties/${module}/google-services.json ./${module}/google-services.json
+        cp -f ./Hyber-SDK-Android-propreties/${module}/google-services.json ./${module}/google-services.json
     fi
 
     # Provide fabric.properties file if one is exists in ./Hyber-SDK-Android-propreties/${module}
     if [ -f ./Hyber-SDK-Android-propreties/${module}/fabric.properties ]; then
         echo "Providing fabric.properties to ${module}/fabric.properties"
-        cp -R ./Hyber-SDK-Android-propreties/${module}/fabric.properties ./${module}/fabric.properties
+        cp -f ./Hyber-SDK-Android-propreties/${module}/fabric.properties ./${module}/fabric.properties
     fi
 
     # Provide gradle.properties.${BUILD_TYPE} file if one is exists in ./Hyber-SDK-Android-propreties/${module}
     if [ -f ./Hyber-SDK-Android-propreties/${module}/gradle.properties.${BUILD_TYPE} ]; then
         echo "Providing gradle.properties.${BUILD_TYPE} to ${module}/gradle.properties"
-        cp -R ./Hyber-SDK-Android-propreties/${module}/gradle.properties.${BUILD_TYPE} ./${module}/gradle.properties
+        cp -f ./Hyber-SDK-Android-propreties/${module}/gradle.properties.${BUILD_TYPE} ./${module}/gradle.properties
     fi
 done

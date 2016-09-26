@@ -64,8 +64,11 @@ node {
     sh "./provide_deploy_prop.sh Hyber-SDK-Android-propreties.zip dev"
 
     if (env.BRANCH_NAME == 'master-2.0') {
-      env.FABRIC_GROUP="Hyber DEV"
-      env.FABRIC_NOTES="${env.BRANCH_NAME}"
+      env.FABRIC_GROUP='hyber-dev'
+      env.FABRIC_NOTES='${BRANCH_NAME}'
+
+      sh "echo FABRIC_GROUP is ${FABRIC_GROUP}"
+      sh "echo FABRIC_NOTES is ${FABRIC_NOTES}"
 
       sh "echo ${env.BRANCH_NAME} is branch for crashlytics upload distribution Dev build"
       sh "./gradlew hyber:clean example:clean example:assembleDevDebug"
