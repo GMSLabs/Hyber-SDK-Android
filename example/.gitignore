@@ -1,3 +1,4 @@
 /build
-/libs
 google-services.json
+*.properties
+*.keystore

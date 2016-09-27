@@ -19,7 +19,7 @@ fi
 # Defaults
 PROP_FILE_NAME="$1"
 BUILD_TYPE="$2"
-PROP_FOLDER="${JENKINS_HOME}/properties"
+PROP_FOLDER="${JENKINS_HOME}/privates/Hyber-SDK-Android/properties"
 
 if [ -z ${PROP_FILE_NAME// } ]
 then
@@ -54,7 +54,7 @@ else
     exit 1 # terminate and indicate error
 fi
 
-rm -rf ./Hyber-SDK-Android-propreties
+rm -rf ./properties
 unzip ${PROP_FOLDER}/${PROP_FILE_NAME} -d ./
 
 # List of all modules
@@ -64,21 +64,21 @@ for module in "${modules[@]}"
 do
     echo "Providing properties for ${module}"
 
-    # Provide google-services.json file if one is exists in ./Hyber-SDK-Android-propreties/${module}
-    if [ -f ./Hyber-SDK-Android-propreties/${module}/google-services.json ]; then
+    # Provide google-services.json file if one is exists in ./properties/${module}
+    if [ -f ./properties/${module}/google-services.json ]; then
         echo "Providing google-services.json to ${module}/google-services.json"
-        cp -f ./Hyber-SDK-Android-propreties/${module}/google-services.json ./${module}/google-services.json
+        cp -f ./properties/${module}/google-services.json ./${module}/google-services.json
     fi
 
-    # Provide fabric.properties file if one is exists in ./Hyber-SDK-Android-propreties/${module}
-    if [ -f ./Hyber-SDK-Android-propreties/${module}/fabric.properties ]; then
+    # Provide fabric.properties file if one is exists in ./properties/${module}
+    if [ -f ./properties/${module}/fabric.properties ]; then
         echo "Providing fabric.properties to ${module}/fabric.properties"
-        cp -f ./Hyber-SDK-Android-propreties/${module}/fabric.properties ./${module}/fabric.properties
+        cp -f ./properties/${module}/fabric.properties ./${module}/fabric.properties
     fi
 
-    # Provide gradle.properties.${BUILD_TYPE} file if one is exists in ./Hyber-SDK-Android-propreties/${module}
-    if [ -f ./Hyber-SDK-Android-propreties/${module}/gradle.properties.${BUILD_TYPE} ]; then
+    # Provide gradle.properties.${BUILD_TYPE} file if one is exists in ./properties/${module}
+    if [ -f ./properties/${module}/gradle.properties.${BUILD_TYPE} ]; then
         echo "Providing gradle.properties.${BUILD_TYPE} to ${module}/gradle.properties"
-        cp -f ./Hyber-SDK-Android-propreties/${module}/gradle.properties.${BUILD_TYPE} ./${module}/gradle.properties
+        cp -f ./properties/${module}/gradle.properties.${BUILD_TYPE} ./${module}/gradle.properties
     fi
 done

@@ -16,25 +16,51 @@ repositories {
 }
 
 android {
-    compileSdkVersion rootProject.ext.compileSdkVersion
-    buildToolsVersion rootProject.ext.buildToolsVersion
+    compileSdkVersion Integer.parseInt(project.ANDROID_BUILD_SDK_VERSION)
+    buildToolsVersion project.ANDROID_BUILD_TOOLS_VERSION
 
     defaultConfig {
         applicationId "com.hyber.example"
 
-        minSdkVersion rootProject.ext.minSdkVersion
-        targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 9
-        versionName "0.1-alpha" + versionCode
+        minSdkVersion Integer.parseInt(project.ANDROID_BUILD_MIN_SDK_VERSION)
+        targetSdkVersion Integer.parseInt(project.ANDROID_BUILD_TARGET_SDK_VERSION)
+        versionCode 10
+        versionName "0.2"
 
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
 
     }
-    buildTypes {
-        release {
-            minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+
+    sourceSets {
+        main {
+            manifest.srcFile 'src/main/AndroidManifest.xml'
+            java.srcDirs = ['src/main/java']
         }
+    }
+
+    signingConfigs {
+        debug {
+            def Properties props = new Properties()
+            def propFile = new File('./example/debug.keystore.properties')
+            if (propFile.canRead()){
+                props.load(new FileInputStream(propFile))
+
+                if (props!=null && props.containsKey('key.store') && props.containsKey('key.store.password') &&
+                        props.containsKey('key.alias') && props.containsKey('key.alias.password')) {
+                    storeFile = file(props['key.store'])
+                    storePassword = props['key.store.password']
+                    keyAlias = props['key.alias']
+                    keyPassword = props['key.alias.password']
+                } else {
+                    println 'debug.keystore.properties found but some entries are missing'
+                }
+            }else {
+                println 'debug.keystore.properties not found'
+            }
+        }
+    }
+
+    buildTypes {
         debug {
             minifyEnabled false
             ext.betaDistributionGroupAliases=System.getenv('FABRIC_GROUP')
@@ -42,9 +68,11 @@ android {
             ext.betaDistributionNotifications=true
         }
     }
+
     lintOptions {
         abortOnError false
     }
+
     productFlavors {
         dev {
             applicationId "com.hyber.example.dev"
@@ -53,6 +81,8 @@ android {
             manifestPlaceholders = [manifestApplicationId      : "${applicationId}",
                                     hyber_client_api_key       : "${hyber_client_api_key}",
                                     hyber_google_project_number: "703322644261"]
+
+            signingConfig signingConfigs.debug
         }
         td {
             applicationId "com.hyber.example.td"
@@ -61,6 +91,18 @@ android {
             manifestPlaceholders = [manifestApplicationId      : "${applicationId}",
                                     hyber_client_api_key       : "${hyber_client_api_key}",
                                     hyber_google_project_number: "703322644261"]
+
+            signingConfig signingConfigs.debug
+        }
+        prod {
+            applicationId "com.hyber.example.prod"
+
+            // TODO: Please update the Google Project number and Hyber client and app Id below to yours.
+            manifestPlaceholders = [manifestApplicationId      : "${applicationId}",
+                                    hyber_client_api_key       : "${hyber_client_api_key}",
+                                    hyber_google_project_number: "703322644261"]
+
+            signingConfig signingConfigs.debug
         }
     }
 }
