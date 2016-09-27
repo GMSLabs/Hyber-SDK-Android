@@ -10,7 +10,8 @@ build/
 
 # Gradle files
 .gradle
-gradle.properties
 
 # Configuration files
-*.properties
+local.properties
+/properties
+/keystores

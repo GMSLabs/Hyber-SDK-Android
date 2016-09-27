@@ -10,6 +10,9 @@ node {
     checkout scm
 
     sh "chmod +x ./mocking.sh"
+    sh "chmod +x ./provide_properties.sh"
+    sh "chmod +x ./provide_keystore.sh"
+
     sh "./mocking.sh"
   }
 
@@ -46,26 +49,18 @@ node {
     sh "./gradlew hyber:testReleaseUnitTest"
   }
 
-  stage ('Build Hyber SDK') {
-    sh "./gradlew hyber:clean hyber:assembleRelease"
-  }
-
   stage ('Test example app') {
     sh "./gradlew example:testDevDebugUnitTest"
   }
 
-  stage ('Build example app') {
-    sh "./gradlew example:clean example:assembleDevDebug"
-  }
-
   stage ('Publication Hyber DEV to Fabric') {
     sh "printenv"
-    sh "chmod +x ./provide_deploy_prop.sh"
-    sh "./provide_deploy_prop.sh Hyber-SDK-Android-propreties.zip dev"
+    sh "./provide_properties.sh properties.zip dev"
+    sh "./provide_keystore.sh keystores.zip dev"
 
     if (env.BRANCH_NAME == 'master-2.0') {
       env.FABRIC_GROUP='hyber-dev'
-      env.FABRIC_NOTES='${BRANCH_NAME}'
+      env.FABRIC_NOTES='DEV BUILD from branch ${env.BRANCH_NAME}\n'
 
       sh "echo FABRIC_GROUP is ${FABRIC_GROUP}"
       sh "echo FABRIC_NOTES is ${FABRIC_NOTES}"
@@ -75,6 +70,46 @@ node {
       sh "./gradlew example:fabricGenerateResourcesDevDebug example:crashlyticsUploadDistributionDevDebug"
     } else {
       sh "echo ${env.BRANCH_NAME} is not branch for crashlytics upload distribution Dev build"
+    }
+  }
+
+  stage ('Publication Hyber TD to Fabric') {
+    sh "printenv"
+    sh "./provide_properties.sh properties.zip td"
+    sh "./provide_keystore.sh keystores.zip td"
+
+    if (env.BRANCH_NAME == 'master-2.0') {
+      env.FABRIC_GROUP='hyber-td'
+      env.FABRIC_NOTES='TD BUILD from branch ${env.BRANCH_NAME}\n'
+
+      sh "echo FABRIC_GROUP is ${FABRIC_GROUP}"
+      sh "echo FABRIC_NOTES is ${FABRIC_NOTES}"
+
+      sh "echo ${env.BRANCH_NAME} is branch for crashlytics upload distribution Td build"
+      sh "./gradlew hyber:clean example:clean example:assembleTdDebug"
+      sh "./gradlew example:fabricGenerateResourcesTdDebug example:crashlyticsUploadDistributionTdDebug"
+    } else {
+      sh "echo ${env.BRANCH_NAME} is not branch for crashlytics upload distribution Td build"
+    }
+  }
+
+  stage ('Publication Hyber PROD to Fabric') {
+    sh "printenv"
+    sh "./provide_properties.sh properties.zip prod"
+    sh "./provide_keystore.sh keystores.zip prod"
+
+    if (env.BRANCH_NAME == 'master-2.0') {
+      env.FABRIC_GROUP='hyber-prod'
+      env.FABRIC_NOTES='PROD BUILD from branch ${env.BRANCH_NAME}\n'
+
+      sh "echo FABRIC_GROUP is ${FABRIC_GROUP}"
+      sh "echo FABRIC_NOTES is ${FABRIC_NOTES}"
+
+      sh "echo ${env.BRANCH_NAME} is branch for crashlytics upload distribution Prod build"
+      sh "./gradlew hyber:clean example:clean example:assembleProdDebug"
+      sh "./gradlew example:fabricGenerateResourcesProdDebug example:crashlyticsUploadDistributionProdDebug"
+    } else {
+      sh "echo ${env.BRANCH_NAME} is not branch for crashlytics upload distribution Prod build"
     }
   }
 
