@@ -64,7 +64,7 @@ android {
         debug {
             minifyEnabled false
             ext.betaDistributionGroupAliases=System.getenv('FABRIC_GROUP')
-            ext.betaDistributionReleaseNotes=System.getenv('FABRIC_NOTES')
+            ext.betaDistributionReleaseNotes=System.getenv('FABRIC_NOTES') + "\n" + System.getenv('FABRIC_DESCRIPTION')
             ext.betaDistributionNotifications=true
         }
     }

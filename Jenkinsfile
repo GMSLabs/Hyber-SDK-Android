@@ -60,7 +60,8 @@ node {
 
     if (env.BRANCH_NAME == 'master-2.0') {
       env.FABRIC_GROUP='hyber-dev'
-      env.FABRIC_NOTES='DEV BUILD from branch ${env.BRANCH_NAME}\n'
+      env.FABRIC_NOTES='DEV BUILD from branch ${env.BRANCH_NAME}'
+      env.FABRIC_DESCRIPTION='This build powered by Jenkins CI'
 
       sh "echo FABRIC_GROUP is ${FABRIC_GROUP}"
       sh "echo FABRIC_NOTES is ${FABRIC_NOTES}"
@@ -80,7 +81,8 @@ node {
 
     if (env.BRANCH_NAME == 'master-2.0') {
       env.FABRIC_GROUP='hyber-td'
-      env.FABRIC_NOTES='TD BUILD from branch ${env.BRANCH_NAME}\n'
+      env.FABRIC_NOTES='TD BUILD from branch ${env.BRANCH_NAME}'
+      env.FABRIC_DESCRIPTION='This build powered by Jenkins CI'
 
       sh "echo FABRIC_GROUP is ${FABRIC_GROUP}"
       sh "echo FABRIC_NOTES is ${FABRIC_NOTES}"
@@ -100,7 +102,8 @@ node {
 
     if (env.BRANCH_NAME == 'master-2.0') {
       env.FABRIC_GROUP='hyber-prod'
-      env.FABRIC_NOTES='PROD BUILD from branch ${env.BRANCH_NAME}\n'
+      env.FABRIC_NOTES='PROD BUILD from branch ${env.BRANCH_NAME}'
+      env.FABRIC_DESCRIPTION='This build powered by Jenkins CI'
 
       sh "echo FABRIC_GROUP is ${FABRIC_GROUP}"
       sh "echo FABRIC_NOTES is ${FABRIC_NOTES}"
