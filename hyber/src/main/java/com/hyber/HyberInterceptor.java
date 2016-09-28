@@ -8,7 +8,7 @@ import okhttp3.Interceptor;
 import okhttp3.Request;
 import okhttp3.Response;
 
-public class HyberInterceptor implements Interceptor {
+class HyberInterceptor implements Interceptor {
 
     @Override
     public Response intercept(Chain chain) throws IOException {
@@ -16,16 +16,16 @@ public class HyberInterceptor implements Interceptor {
 
         // Request customization: add request headers
         Request.Builder requestBuilder = original.newBuilder()
-                .header(Tweakables.X_Hyber_SDK_Version, HyberSdkVersion.BUILD)
-                .header(Tweakables.X_Hyber_Client_API_Key, Hyber.clientApiKey)
-                .header(Tweakables.X_Hyber_App_Fingerprint, Hyber.fingerprint)
-                .header(Tweakables.X_Hyber_Installation_Id, Hyber.installationID);
+                .header(Tweakables.X_HYBER_SDK_VERSION, HyberSdkVersion.BUILD)
+                .header(Tweakables.X_HYBER_CLIENT_API_KEY, Hyber.getClientApiKey())
+                .header(Tweakables.X_HYBER_APP_FINGERPRINT, Hyber.getFingerprint())
+                .header(Tweakables.X_HYBER_INSTALLATION_ID, Hyber.getInstallationID());
 
-        String token = Hawk.get(Tweakables.HAWK_HyberAuthToken, "");
+        String token = Hawk.get(Tweakables.HAWK_HYBER_AUTH_TOKEN, "");
         if (token == null || token.isEmpty()) {
             return chain.proceed(requestBuilder.build());
         } else {
-            requestBuilder.addHeader(Tweakables.X_Hyber_Auth_Token, token);
+            requestBuilder.addHeader(Tweakables.X_HYBER_AUTH_TOKEN, token);
         }
 
         return chain.proceed(requestBuilder.build());

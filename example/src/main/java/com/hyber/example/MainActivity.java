@@ -46,7 +46,8 @@ public class MainActivity extends AppCompatActivity
         setSupportActionBar(toolbar);
 
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
-                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+                this, drawer, toolbar,
+                R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawer.addDrawerListener(toggle);
         toggle.syncState();
 
@@ -80,13 +81,12 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-
         switch (item.getItemId()) {
             case R.id.action_settings:
                 return true;
+            default:
+                return super.onOptionsItemSelected(item);
         }
-
-        return super.onOptionsItemSelected(item);
     }
 
     @SuppressWarnings("StatementWithEmptyBody")
@@ -97,6 +97,8 @@ public class MainActivity extends AppCompatActivity
                 if (mMessagesFragment == null)
                     mMessagesFragment = MessagesFragment.newInstance();
                 replaceMainFragment(mMessagesFragment);
+                break;
+            default:
                 break;
         }
 

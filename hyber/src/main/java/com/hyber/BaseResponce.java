@@ -10,7 +10,7 @@ class BaseResponce {
     private ErrorRespItemModel mError;
 
     @Nullable
-    public ErrorRespItemModel getError() {
+    ErrorRespItemModel getError() {
         return mError;
     }
 

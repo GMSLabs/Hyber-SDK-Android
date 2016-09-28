@@ -14,17 +14,14 @@ import java.util.Locale;
 
 class OsUtils {
 
-    enum DeviceType {
-        FCM, GCM, ADM
-    }
-
     static String getManifestMeta(Context context, String metaName) {
         try {
-            ApplicationInfo ai = context.getPackageManager().getApplicationInfo(context.getPackageName(), PackageManager.GET_META_DATA);
+            ApplicationInfo ai = context.getPackageManager()
+                    .getApplicationInfo(context.getPackageName(), PackageManager.GET_META_DATA);
             Bundle bundle = ai.metaData;
             return bundle.getString(metaName);
         } catch (Throwable t) {
-            Hyber.Log(Hyber.LOG_LEVEL.ERROR, "", t);
+            Hyber.mLog(Hyber.LogLevel.ERROR, "", t);
         }
 
         return null;
@@ -33,50 +30,16 @@ class OsUtils {
     static String getCorrectedLanguage() {
         String lang = Locale.getDefault().getLanguage();
 
-        if (lang.equals("iw"))
-            return "he";
-        if (lang.equals("in"))
-            return "id";
-        if (lang.equals("ji"))
-            return "yi";
-
-        return lang;
-    }
-
-    DeviceType getDeviceType() {
-        try {
-            Class.forName("com.google.firebase.FirebaseApp");
-            return DeviceType.FCM;
-        } catch (ClassNotFoundException e) {
+        switch (lang) {
+            case "iw":
+                return "he";
+            case "in":
+                return "id";
+            case "ji":
+                return "yi";
+            default:
+                return lang;
         }
-
-        try {
-            Class.forName("com.amazon.device.messaging.ADM");
-            return DeviceType.ADM;
-        } catch (ClassNotFoundException e) {
-        }
-
-        return DeviceType.GCM;
-    }
-
-    Integer getNetType() {
-        ConnectivityManager cm = (ConnectivityManager) Hyber.appContext.getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo netInfo = cm.getActiveNetworkInfo();
-
-        if (netInfo != null) {
-            int networkType = netInfo.getType();
-            if (networkType == ConnectivityManager.TYPE_WIFI || networkType == ConnectivityManager.TYPE_ETHERNET)
-                return 0;
-            return 1;
-        }
-
-        return null;
-    }
-
-    String getCarrierName() {
-        TelephonyManager manager = (TelephonyManager) Hyber.appContext.getSystemService(Context.TELEPHONY_SERVICE);
-        String carrierName = manager.getNetworkOperatorName();
-        return "".equals(carrierName) ? null : carrierName;
     }
 
     static String getDeviceOs() {
@@ -103,6 +66,48 @@ class OsUtils {
         return (context.getResources().getConfiguration().screenLayout
                 & Configuration.SCREENLAYOUT_SIZE_MASK)
                 >= Configuration.SCREENLAYOUT_SIZE_LARGE;
+    }
+
+    DeviceType getDeviceType() {
+        try {
+            Class.forName("com.google.firebase.FirebaseApp");
+            return DeviceType.FCM;
+        } catch (ClassNotFoundException ignored) {
+            Hyber.mLog(Hyber.LogLevel.INFO, "Is not Firebase messaging");
+        }
+
+        try {
+            Class.forName("com.amazon.device.messaging.ADM");
+            return DeviceType.ADM;
+        } catch (ClassNotFoundException ignored) {
+            Hyber.mLog(Hyber.LogLevel.INFO, "Is not Amazone messaging");
+        }
+
+        return DeviceType.GCM;
+    }
+
+    Integer getNetType() {
+        ConnectivityManager cm = (ConnectivityManager) Hyber.getAppContext().getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo netInfo = cm.getActiveNetworkInfo();
+
+        if (netInfo != null) {
+            int networkType = netInfo.getType();
+            if (networkType == ConnectivityManager.TYPE_WIFI || networkType == ConnectivityManager.TYPE_ETHERNET)
+                return 0;
+            return 1;
+        }
+
+        return null;
+    }
+
+    String getCarrierName() {
+        TelephonyManager manager = (TelephonyManager) Hyber.getAppContext().getSystemService(Context.TELEPHONY_SERVICE);
+        String carrierName = manager.getNetworkOperatorName();
+        return "".equals(carrierName) ? null : carrierName;
+    }
+
+    enum DeviceType {
+        FCM, GCM, ADM
     }
 
 }

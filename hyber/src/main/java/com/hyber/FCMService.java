@@ -16,7 +16,7 @@ public class FCMService extends FirebaseMessagingService {
     @Override
     public void onMessageReceived(RemoteMessage remoteMessage) {
 
-        NotificationBundleProcessor.ProcessFromFCMIntentService(this, remoteMessage);
+        NotificationBundleProcessor.processFromFCMIntentService(this, remoteMessage);
 
     }
     // [END receive_message]

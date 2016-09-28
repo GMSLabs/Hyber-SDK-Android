@@ -8,13 +8,17 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.util.UUID;
 
-class Installation {
+final class Installation {
 
     private static final String TAG_INSTALLATION = "TAG_INSTALLATION";
 
     private static String sID = null;
 
-    public synchronized static String id(Context context) {
+    private Installation() {
+
+    }
+
+    public static synchronized String id(Context context) {
         if (sID == null) {
             File installation = new File(context.getFilesDir(), TAG_INSTALLATION);
             try {
@@ -42,5 +46,4 @@ class Installation {
         out.write(id.getBytes());
         out.close();
     }
-
 }

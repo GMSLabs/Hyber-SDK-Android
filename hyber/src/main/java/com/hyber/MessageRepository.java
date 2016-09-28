@@ -22,7 +22,7 @@ class MessageRepository implements Closeable {
     }
 
     public Observable<Message> saveReceivedMessage(final Message message) {
-        Hyber.Log(Hyber.LOG_LEVEL.DEBUG, "Start saving message " + message.getId());
+        Hyber.mLog(Hyber.LogLevel.DEBUG, "Start saving message " + message.getId());
         return Observable.create(new Observable.OnSubscribe<Message>() {
             @Override
             public void call(final Subscriber<? super Message> subscriber) {

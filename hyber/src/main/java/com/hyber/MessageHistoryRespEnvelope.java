@@ -6,7 +6,7 @@ import com.google.gson.annotations.SerializedName;
 
 import java.util.List;
 
-public class MessageHistoryRespEnvelope extends BaseResponce {
+class MessageHistoryRespEnvelope extends BaseResponce {
 
     @SerializedName("limitDays")
     private Integer mLimitDays;
@@ -31,7 +31,7 @@ public class MessageHistoryRespEnvelope extends BaseResponce {
     }
 
     @Nullable
-    public Long getTimeLastMessage() {
+    Long getTimeLastMessage() {
         return mTimeLastMessage;
     }
 

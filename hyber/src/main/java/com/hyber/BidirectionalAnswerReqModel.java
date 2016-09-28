@@ -4,7 +4,7 @@ import android.support.annotation.NonNull;
 
 import com.google.gson.annotations.SerializedName;
 
-public class BidirectionalAnswerReqModel {
+class BidirectionalAnswerReqModel {
 
     @SerializedName("messageId")
     private String mMessageId;
@@ -12,11 +12,11 @@ public class BidirectionalAnswerReqModel {
     @SerializedName("text")
     private String mAnswerText;
 
-    public BidirectionalAnswerReqModel() {
+    BidirectionalAnswerReqModel() {
 
     }
 
-    public BidirectionalAnswerReqModel(@NonNull String messageId, @NonNull String answerText) {
+    BidirectionalAnswerReqModel(@NonNull String messageId, @NonNull String answerText) {
         this.mMessageId = messageId;
         this.mAnswerText = answerText;
     }

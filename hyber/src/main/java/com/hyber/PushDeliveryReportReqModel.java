@@ -4,7 +4,7 @@ import android.support.annotation.NonNull;
 
 import com.google.gson.annotations.SerializedName;
 
-public class PushDeliveryReportReqModel {
+class PushDeliveryReportReqModel {
 
     @SerializedName("messageId")
     private String mMessageId;
@@ -16,7 +16,7 @@ public class PushDeliveryReportReqModel {
 
     }
 
-    public PushDeliveryReportReqModel(@NonNull String messageId, @NonNull Long receivedAt) {
+    PushDeliveryReportReqModel(@NonNull String messageId, @NonNull Long receivedAt) {
         this.mMessageId = messageId;
         this.mReceivedAt = receivedAt;
     }

@@ -5,7 +5,6 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 import com.google.firebase.iid.FirebaseInstanceId;
-import com.google.gson.Gson;
 import com.orhanobut.hawk.Hawk;
 
 import java.lang.ref.WeakReference;
@@ -19,10 +18,15 @@ import rx.Observable;
 import rx.functions.Action1;
 import rx.functions.Func1;
 
-class MainApiBusinessModel implements IMainApiBusinessModel {
+final class MainApiBusinessModel implements IMainApiBusinessModel {
 
+    private static final int UNAUTHORIZED_CODE = 401;
     private static MainApiBusinessModel mInstance;
     private WeakReference<Context> mContextWeakReference;
+
+    private MainApiBusinessModel(@NonNull Context context) {
+        this.mContextWeakReference = new WeakReference<>(context);
+    }
 
     static synchronized MainApiBusinessModel getInstance(@NonNull Context context) {
         if (mInstance == null) {
@@ -31,13 +35,9 @@ class MainApiBusinessModel implements IMainApiBusinessModel {
         return mInstance;
     }
 
-    private MainApiBusinessModel(@NonNull Context context) {
-        this.mContextWeakReference = new WeakReference<>(context);
-    }
-
     @Override
     public void authorize(@NonNull final Long phone, @NonNull final AuthorizationListener listener) {
-        Hyber.Log(Hyber.LOG_LEVEL.DEBUG, "Start user registration.");
+        Hyber.mLog(Hyber.LogLevel.DEBUG, "Start user registration.");
 
         RegisterUserReqModel reqModel = new RegisterUserReqModel(phone,
                 OsUtils.getDeviceOs(), OsUtils.getAndroidVersion(),
@@ -49,36 +49,36 @@ class MainApiBusinessModel implements IMainApiBusinessModel {
                     @Override
                     public void call(Response<RegisterUserRespModel> response) {
                         if (response.isSuccessful()) {
-                            Hyber.Log(Hyber.LOG_LEVEL.DEBUG, "Request for user registration is success.");
+                            Hyber.mLog(Hyber.LogLevel.DEBUG, "Request for user registration is success.");
                             Realm realm = Realm.getDefaultInstance();
 
                             clearUserDataIfExists(realm, phone);
 
                             SessionRespItemModel session = response.body().getSession();
                             if (session != null) {
-                                Hyber.Log(Hyber.LOG_LEVEL.DEBUG, "New user session is provided.");
-                                HyberUser user = new HyberUser(String.valueOf(phone), phone);
+                                Hyber.mLog(Hyber.LogLevel.DEBUG, "New user session is provided.");
+                                User user = new User(String.valueOf(phone), phone);
                                 realm.beginTransaction();
                                 realm.copyToRealm(user);
                                 realm.commitTransaction();
-                                Hyber.Log(Hyber.LOG_LEVEL.DEBUG, "New user data saved.");
+                                Hyber.mLog(Hyber.LogLevel.DEBUG, "New user data saved.");
 
                                 updateUserSession(session.getToken(), session.getRefreshToken(), session.getExpirationDate());
-                                Hyber.Log(Hyber.LOG_LEVEL.DEBUG, "User is registered.");
+                                Hyber.mLog(Hyber.LogLevel.DEBUG, "User is registered.");
                                 listener.onAuthorized();
                             } else {
-                                Hyber.Log(Hyber.LOG_LEVEL.ERROR, "User not registered, session data is not provided!");
+                                Hyber.mLog(Hyber.LogLevel.ERROR, "User not registered, session data is not provided!");
                                 listener.onAuthorizationError(AuthErrorStatus.USER_SESSION_DATA_IS_NOT_PROVIDED);
                             }
                         } else {
-                            Hyber.Log(Hyber.LOG_LEVEL.ERROR, "Response for user registration api is unsuccessful!");
+                            Hyber.mLog(Hyber.LogLevel.ERROR, "Response for user registration api is unsuccessful!");
                             listener.onAuthorizationError(AuthErrorStatus.USER_SESSION_DATA_IS_NOT_PROVIDED);
                         }
                     }
                 }, new Action1<Throwable>() {
                     @Override
                     public void call(Throwable throwable) {
-                        Hyber.Log(Hyber.LOG_LEVEL.FATAL, "Error in user registration api request!", throwable);
+                        Hyber.mLog(Hyber.LogLevel.FATAL, "Error in user registration api request!", throwable);
                         listener.onAuthorizationError(AuthErrorStatus.USER_SESSION_DATA_IS_NOT_PROVIDED);
                     }
                 });
@@ -92,24 +92,24 @@ class MainApiBusinessModel implements IMainApiBusinessModel {
                     @Override
                     public void call(Response<RefreshTokenRespModel> response) {
                         if (response.isSuccessful()) {
-                            Hyber.Log(Hyber.LOG_LEVEL.DEBUG, "Request for refresh user auth token is success.");
+                            Hyber.mLog(Hyber.LogLevel.DEBUG, "Request for refresh user auth token is success.");
                             SessionRespItemModel session = response.body().getSession();
                             updateUserSession(session.getToken(), session.getRefreshToken(), session.getExpirationDate());
                         } else {
-                            Hyber.Log(Hyber.LOG_LEVEL.ERROR, "Response for refresh user auth token api is unsuccessful!");
+                            Hyber.mLog(Hyber.LogLevel.ERROR, "Response for refresh user auth token api is unsuccessful!");
                         }
                     }
                 }).doOnError(new Action1<Throwable>() {
                     @Override
                     public void call(Throwable throwable) {
-                        Hyber.Log(Hyber.LOG_LEVEL.FATAL, "Error in refresh user auth token api request!", throwable);
+                        Hyber.mLog(Hyber.LogLevel.FATAL, "Error in refresh user auth token api request!", throwable);
                     }
                 });
     }
 
     @Override
     public void sendDeviceData(@NonNull final SendDeviceDataListener listener) {
-        Hyber.Log(Hyber.LOG_LEVEL.DEBUG, "Start sending user device data.");
+        Hyber.mLog(Hyber.LogLevel.DEBUG, "Start sending user device data.");
 
 
         final UpdateUserReqModel reqModel = new UpdateUserReqModel(
@@ -122,14 +122,19 @@ class MainApiBusinessModel implements IMainApiBusinessModel {
                 .flatMap(new Func1<Response<UpdateUserRespModel>, Observable<Response<UpdateUserRespModel>>>() {
                     @Override
                     public Observable<Response<UpdateUserRespModel>> call(Response<UpdateUserRespModel> response) {
-                        if (response.code() == 401) {
-                            Hyber.Log(Hyber.LOG_LEVEL.DEBUG, "Response for update user device data api request is unsuccessful with code " + response.code() + "!");
+                        if (response.code() == UNAUTHORIZED_CODE) {
+                            Hyber.mLog(Hyber.LogLevel.DEBUG,
+                                    String.format(Locale.getDefault(),
+                                            "Response for update user device data api request is unsuccessful with code %d!",
+                                            response.code()));
                             removeAuthToken();
                             return refreshTokenObservable()
-                                    .flatMap(new Func1<Response<RefreshTokenRespModel>, Observable<Response<UpdateUserRespModel>>>() {
+                                    .flatMap(new Func1<Response<RefreshTokenRespModel>,
+                                            Observable<Response<UpdateUserRespModel>>>() {
                                         @Override
-                                        public Observable<Response<UpdateUserRespModel>> call(Response<RefreshTokenRespModel> response) {
-                                            Hyber.Log(Hyber.LOG_LEVEL.ERROR, "Continue execute updating user data!");
+                                        public Observable<Response<UpdateUserRespModel>> call(
+                                                Response<RefreshTokenRespModel> response) {
+                                            Hyber.mLog(Hyber.LogLevel.ERROR, "Continue execute updating user data!");
                                             return HyberRestClient.updateUserObservable(reqModel);
                                         }
                                     });
@@ -140,23 +145,28 @@ class MainApiBusinessModel implements IMainApiBusinessModel {
             @Override
             public void call(Response<UpdateUserRespModel> response) {
                 if (response.isSuccessful()) {
-                    Hyber.Log(Hyber.LOG_LEVEL.DEBUG, "Request for update user device data is success.");
+                    Hyber.mLog(Hyber.LogLevel.DEBUG, "Request for update user device data is success.");
                     if (response.body().getError() == null) {
                         listener.onSent();
                     } else {
-                        Hyber.Log(Hyber.LOG_LEVEL.ERROR, "Response for update user device data api with error!\n" +
-                                response.body().getError().getDescription());
+                        Hyber.mLog(Hyber.LogLevel.ERROR,
+                                String.format(Locale.getDefault(),
+                                        "Response for update user device data api with error!\n%s",
+                                        response.body().getError().getDescription()));
                         listener.onSendingError(SendDeviceDataErrorStatus.SENDING_UNSUCCESSFUL);
                     }
                 } else {
-                    Hyber.Log(Hyber.LOG_LEVEL.ERROR, "Response for update user device data api request is unsuccessful with code " + response.code() + "!");
+                    Hyber.mLog(Hyber.LogLevel.ERROR,
+                            String.format(Locale.getDefault(),
+                                    "Response for update user device data api request is unsuccessful with code %d!",
+                                    response.code()));
                     listener.onSendingError(SendDeviceDataErrorStatus.SENDING_UNSUCCESSFUL);
                 }
             }
         }, new Action1<Throwable>() {
             @Override
             public void call(Throwable throwable) {
-                Hyber.Log(Hyber.LOG_LEVEL.FATAL, "Error in update user device data api request!", throwable);
+                Hyber.mLog(Hyber.LogLevel.FATAL, "Error in update user device data api request!", throwable);
                 listener.onSendingError(SendDeviceDataErrorStatus.SENDING_UNSUCCESSFUL);
             }
         });
@@ -164,8 +174,9 @@ class MainApiBusinessModel implements IMainApiBusinessModel {
     }
 
     @Override
-    public void sendBidirectionalAnswer(@NonNull final String messageId, @NonNull String answerText, @NonNull final SendBidirectionalAnswerListener listener) {
-        Hyber.Log(Hyber.LOG_LEVEL.DEBUG, "Start sending bidirectional answer.");
+    public void sendBidirectionalAnswer(@NonNull final String messageId, @NonNull String answerText,
+                                        @NonNull final SendBidirectionalAnswerListener listener) {
+        Hyber.mLog(Hyber.LogLevel.DEBUG, "Start sending bidirectional answer.");
 
         final BidirectionalAnswerReqModel reqModel = new BidirectionalAnswerReqModel(
                 messageId,
@@ -176,25 +187,29 @@ class MainApiBusinessModel implements IMainApiBusinessModel {
                     @Override
                     public void call(Response<Void> response) {
                         if (response.isSuccessful()) {
-                            Hyber.Log(Hyber.LOG_LEVEL.DEBUG, "Request for sending bidirectional answer is success.");
+                            Hyber.mLog(Hyber.LogLevel.DEBUG, "Request for sending bidirectional answer is success.");
                             listener.onSent(messageId);
                         } else {
-                            Hyber.Log(Hyber.LOG_LEVEL.ERROR, "Response for sending bidirectional answer api request is unsuccessful with code " + response.code() + "!");
+                            Hyber.mLog(Hyber.LogLevel.ERROR,
+                                    String.format(Locale.getDefault(),
+                                            "Response for sending bidirectional answer api request is unsuccessful with code %d!",
+                                            response.code()));
                             listener.onSendingError();
                         }
                     }
                 }, new Action1<Throwable>() {
                     @Override
                     public void call(Throwable throwable) {
-                        Hyber.Log(Hyber.LOG_LEVEL.FATAL, "Error in sending bidirectional answer api request!", throwable);
+                        Hyber.mLog(Hyber.LogLevel.FATAL, "Error in sending bidirectional answer api request!", throwable);
                         listener.onSendingError();
                     }
                 });
     }
 
     @Override
-    public void sendPushDeliveryReport(@NonNull final String messageId, @NonNull Long receivedAt, @NonNull final SendPushDeliveryReportListener listener) {
-        Hyber.Log(Hyber.LOG_LEVEL.DEBUG, "Start sending push delivery report.");
+    public void sendPushDeliveryReport(@NonNull final String messageId, @NonNull Long receivedAt,
+                                       @NonNull final SendPushDeliveryReportListener listener) {
+        Hyber.mLog(Hyber.LogLevel.DEBUG, "Start sending push delivery report.");
 
         final PushDeliveryReportReqModel reqModel = new PushDeliveryReportReqModel(messageId, receivedAt);
 
@@ -203,17 +218,20 @@ class MainApiBusinessModel implements IMainApiBusinessModel {
                     @Override
                     public void call(Response<Void> response) {
                         if (response.isSuccessful()) {
-                            Hyber.Log(Hyber.LOG_LEVEL.DEBUG, "Request for sending push delivery report is success.");
+                            Hyber.mLog(Hyber.LogLevel.DEBUG, "Request for sending push delivery report is success.");
                             listener.onSuccess(messageId);
                         } else {
-                            Hyber.Log(Hyber.LOG_LEVEL.ERROR, "Response for sending push delivery report api request is unsuccessful with code " + response.code() + "!");
+                            Hyber.mLog(Hyber.LogLevel.ERROR,
+                                    String.format(Locale.getDefault(),
+                                            "Response for sending push delivery report api request is unsuccessful with code %d!",
+                                            response.code()));
                             listener.onFailure();
                         }
                     }
                 }, new Action1<Throwable>() {
                     @Override
                     public void call(Throwable throwable) {
-                        Hyber.Log(Hyber.LOG_LEVEL.FATAL, "Error in sending push delivery report api request!", throwable);
+                        Hyber.mLog(Hyber.LogLevel.FATAL, "Error in sending push delivery report api request!", throwable);
                         listener.onFailure();
                     }
                 });
@@ -221,7 +239,7 @@ class MainApiBusinessModel implements IMainApiBusinessModel {
 
     @Override
     public void getMessageHistory(@NonNull final Long startDate, @NonNull final MessageHistoryListener listener) {
-        Hyber.Log(Hyber.LOG_LEVEL.DEBUG, "Start downloading message history.");
+        Hyber.mLog(Hyber.LogLevel.DEBUG, "Start downloading message history.");
 
         final MessageHistoryReqModel reqModel = new MessageHistoryReqModel(startDate);
 
@@ -230,16 +248,13 @@ class MainApiBusinessModel implements IMainApiBusinessModel {
                     @Override
                     public void call(Response<MessageHistoryRespEnvelope> response) {
                         if (response.isSuccessful()) {
-                            Hyber.Log(Hyber.LOG_LEVEL.DEBUG, "Request for downloading message history is success.");
-                            Hyber.Log(Hyber.LOG_LEVEL.DEBUG, String.format(Locale.getDefault(), "Downloaded %d messages.",
+                            Hyber.mLog(Hyber.LogLevel.DEBUG, "Request for downloading message history is success.");
+                            Hyber.mLog(Hyber.LogLevel.DEBUG, String.format(Locale.getDefault(), "Downloaded %d messages.",
                                     response.body().getMessages().size()));
                             if (response.body().getMessages() != null && response.body().getMessages().size() > 0) {
-                                Hyber.Log(Hyber.LOG_LEVEL.DEBUG, String.format(Locale.getDefault(),
-                                        "LimitDays %d" +
-                                                "\nLimitMessages %d" +
-                                                "\nTimeLastMessage %d" +
-                                                "\nFirst MessageId %s DrTime %d" +
-                                                "\nLast MessageId %s DrTime %d",
+                                Hyber.mLog(Hyber.LogLevel.DEBUG, String.format(Locale.getDefault(),
+                                        "LimitDays %d\nLimitMessages %d\nTimeLastMessage %d"
+                                                + "\nFirst MessageId %s DrTime %d\nLast MessageId %s DrTime %d",
                                         response.body().getLimitDays(),
                                         response.body().getLimitMessages(),
                                         response.body().getTimeLastMessage(),
@@ -250,27 +265,30 @@ class MainApiBusinessModel implements IMainApiBusinessModel {
                             }
                             listener.onSuccess(startDate, response.body());
                         } else {
-                            Hyber.Log(Hyber.LOG_LEVEL.ERROR, "Response for downloading message history api request is unsuccessful with code " + response.code() + "!");
+                            Hyber.mLog(Hyber.LogLevel.ERROR,
+                                    String.format(Locale.getDefault(),
+                                            "Response for downloading message history api request is unsuccessful with code %d!",
+                                            response.code()));
                             listener.onFailure();
                         }
                     }
                 }, new Action1<Throwable>() {
                     @Override
                     public void call(Throwable throwable) {
-                        Hyber.Log(Hyber.LOG_LEVEL.FATAL, "Error in downloading message history api request!", throwable);
+                        Hyber.mLog(Hyber.LogLevel.FATAL, "Error in downloading message history api request!", throwable);
                         listener.onFailure();
                     }
                 });
     }
 
     private void clearUserDataIfExists(@NonNull Realm realm, @NonNull Long phone) {
-        Hyber.Log(Hyber.LOG_LEVEL.DEBUG, "User data cleaning.");
+        Hyber.mLog(Hyber.LogLevel.DEBUG, "User data cleaning.");
         cleanUserSession();
-        RealmResults<HyberUser> users = realm.where(HyberUser.class)
-                .equalTo(HyberUser.PHONE, phone)
+        RealmResults<User> users = realm.where(User.class)
+                .equalTo(User.PHONE, phone)
                 .findAll();
 
-        for (HyberUser user : users) {
+        for (User user : users) {
             RealmResults<Message> messages = realm.where(Message.class)
                     .equalTo(Message.ORDER, user.getId())
                     .findAll();
@@ -279,62 +297,62 @@ class MainApiBusinessModel implements IMainApiBusinessModel {
             user.deleteFromRealm();
             realm.commitTransaction();
         }
-        Hyber.Log(Hyber.LOG_LEVEL.DEBUG, "User data is cleaned.");
+        Hyber.mLog(Hyber.LogLevel.DEBUG, "User data is cleaned.");
     }
 
     private void updateUserSession(@Nullable String token, @Nullable String refreshToken, @Nullable Date expirationDate) {
-        Hyber.Log(Hyber.LOG_LEVEL.DEBUG, "User new session data updating.");
+        Hyber.mLog(Hyber.LogLevel.DEBUG, "User new session data updating.");
         Hawk.Chain chain = Hawk.chain();
         if (token != null) {
-            chain.put(Tweakables.HAWK_HyberAuthToken, token);
+            chain.put(Tweakables.HAWK_HYBER_AUTH_TOKEN, token);
         }
         if (refreshToken != null) {
-            chain.put(Tweakables.HAWK_HyberRefreshToken, refreshToken);
+            chain.put(Tweakables.HAWK_HYBER_REFRESH_TOKEN, refreshToken);
         }
         if (expirationDate != null) {
-            chain.put(Tweakables.HAWK_HyberTokenExpDate, expirationDate);
+            chain.put(Tweakables.HAWK_HYBER_TOKEN_EXP_DATE, expirationDate);
         }
         chain.commit();
-        Hyber.Log(Hyber.LOG_LEVEL.DEBUG, "User session data is updated.");
+        Hyber.mLog(Hyber.LogLevel.DEBUG, "User session data is updated.");
     }
 
     private void updateSentPushToken(@NonNull String pushToken) {
-        Hyber.Log(Hyber.LOG_LEVEL.DEBUG, "Sent push token updating.");
+        Hyber.mLog(Hyber.LogLevel.DEBUG, "Sent push token updating.");
         Hawk.Chain chain = Hawk.chain();
-        chain.put(Tweakables.HAWK_HyberSentPushToken, pushToken);
+        chain.put(Tweakables.HAWK_HYBER_SENT_PUSH_TOKEN, pushToken);
         chain.commit();
-        Hyber.Log(Hyber.LOG_LEVEL.DEBUG, "Sent push token is updated.");
+        Hyber.mLog(Hyber.LogLevel.DEBUG, "Sent push token is updated.");
     }
 
     private void cleanUserSession() {
-        Hyber.Log(Hyber.LOG_LEVEL.DEBUG, "User session data cleaning.");
+        Hyber.mLog(Hyber.LogLevel.DEBUG, "User session data cleaning.");
         Hawk.remove(
-                Tweakables.HAWK_HyberSentPushToken,
-                Tweakables.HAWK_HyberAuthToken,
-                Tweakables.HAWK_HyberRefreshToken,
-                Tweakables.HAWK_HyberTokenExpDate
+                Tweakables.HAWK_HYBER_SENT_PUSH_TOKEN,
+                Tweakables.HAWK_HYBER_AUTH_TOKEN,
+                Tweakables.HAWK_HYBER_REFRESH_TOKEN,
+                Tweakables.HAWK_HYBER_TOKEN_EXP_DATE
         );
-        Hyber.Log(Hyber.LOG_LEVEL.DEBUG, "User session data is cleaned.");
+        Hyber.mLog(Hyber.LogLevel.DEBUG, "User session data is cleaned.");
     }
 
     private void removeAuthToken() {
-        Hyber.Log(Hyber.LOG_LEVEL.DEBUG, "User auth token removing");
+        Hyber.mLog(Hyber.LogLevel.DEBUG, "User auth token removing");
         Hawk.remove(
-                Tweakables.HAWK_HyberAuthToken
+                Tweakables.HAWK_HYBER_AUTH_TOKEN
         );
-        Hyber.Log(Hyber.LOG_LEVEL.DEBUG, "User auth token is removed");
+        Hyber.mLog(Hyber.LogLevel.DEBUG, "User auth token is removed");
     }
 
     private boolean isAuthTokenExists() {
-        return Hawk.contains(Tweakables.HAWK_HyberAuthToken);
+        return Hawk.contains(Tweakables.HAWK_HYBER_AUTH_TOKEN);
     }
 
     private boolean isRefreshTokenExists() {
-        return Hawk.contains(Tweakables.HAWK_HyberRefreshToken);
+        return Hawk.contains(Tweakables.HAWK_HYBER_REFRESH_TOKEN);
     }
 
     private String getRefreshToken() {
-        return Hawk.get(Tweakables.HAWK_HyberRefreshToken);
+        return Hawk.get(Tweakables.HAWK_HYBER_REFRESH_TOKEN);
     }
 
     interface AuthorizationListener {

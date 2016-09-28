@@ -4,7 +4,7 @@ import android.support.annotation.Nullable;
 
 import com.google.gson.annotations.SerializedName;
 
-public class MessageOptionsRespModel {
+class MessageOptionsRespModel {
 
     @SerializedName("img")
     private String mImageUrl;
@@ -17,17 +17,17 @@ public class MessageOptionsRespModel {
 
 
     @Nullable
-    public String getImageUrl() {
+    String getImageUrl() {
         return mImageUrl;
     }
 
     @Nullable
-    public String getAction() {
+    String getAction() {
         return mAction;
     }
 
     @Nullable
-    public String getCaption() {
+    String getCaption() {
         return mCaption;
     }
 

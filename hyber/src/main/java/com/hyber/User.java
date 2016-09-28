@@ -1,15 +1,12 @@
 package com.hyber;
 
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-
-import java.util.Date;
 
 import io.realm.RealmObject;
 import io.realm.annotations.PrimaryKey;
 import io.realm.annotations.Required;
 
-public class HyberUser extends RealmObject {
+public class User extends RealmObject {
 
     public static final String ID = "mId";
     public static final String PHONE = "mPhone";
@@ -21,11 +18,11 @@ public class HyberUser extends RealmObject {
     @Required
     private Long mPhone;
 
-    public HyberUser() {
+    public User() {
 
     }
 
-    public HyberUser(@NonNull String id, @NonNull Long phone) {
+    public User(@NonNull String id, @NonNull Long phone) {
         this.mId = id;
         this.mPhone = phone;
     }

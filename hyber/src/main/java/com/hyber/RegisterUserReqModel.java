@@ -4,7 +4,7 @@ import android.support.annotation.NonNull;
 
 import com.google.gson.annotations.SerializedName;
 
-public class RegisterUserReqModel {
+class RegisterUserReqModel {
 
     @SerializedName("userPhone")
     private Long mUserPhone;
@@ -28,7 +28,10 @@ public class RegisterUserReqModel {
 
     }
 
-    public RegisterUserReqModel(@NonNull Long mUserPhone, @NonNull String mOsType, @NonNull String mAndroidVersion, @NonNull String mDeviceName, @NonNull String mModelName, @NonNull String mDeviceType) {
+    RegisterUserReqModel(@NonNull Long mUserPhone,
+                         @NonNull String mOsType, @NonNull String mAndroidVersion,
+                         @NonNull String mDeviceName, @NonNull String mModelName,
+                         @NonNull String mDeviceType) {
         this.mUserPhone = mUserPhone;
         this.mOsType = mOsType;
         this.mDeviceName = mDeviceName;

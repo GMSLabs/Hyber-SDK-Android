@@ -10,13 +10,17 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Locale;
 
-class Fingerprint {
+final class Fingerprint {
 
     private static final String TAG_FINGERPRINT = "FINGERPRINT";
 
     private static String sFingerprint = null;
 
-    public synchronized static String keyHash(Context context) {
+    private Fingerprint() {
+
+    }
+
+    static synchronized String keyHash(Context context) {
         if (sFingerprint == null) {
             try {
                 String packageName = context.getApplicationContext().getPackageName();
@@ -29,17 +33,16 @@ class Fingerprint {
                             .replace("\n", "");
                 }
             } catch (PackageManager.NameNotFoundException e) {
-                Hyber.Log(Hyber.LOG_LEVEL.ERROR,
+                Hyber.mLog(Hyber.LogLevel.ERROR,
                         String.format(Locale.getDefault(), "Name not found.\n%s", e.toString()));
             } catch (NoSuchAlgorithmException e) {
-                Hyber.Log(Hyber.LOG_LEVEL.ERROR,
+                Hyber.mLog(Hyber.LogLevel.ERROR,
                         String.format(Locale.getDefault(), "No such an algorithm.\n%s", e.toString()));
             } catch (Exception e) {
-                Hyber.Log(Hyber.LOG_LEVEL.ERROR,
+                Hyber.mLog(Hyber.LogLevel.ERROR,
                         String.format(Locale.getDefault(), "Exception.\n%s", e.toString()));
             }
         }
         return sFingerprint;
     }
-
 }

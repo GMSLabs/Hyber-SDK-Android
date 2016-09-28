@@ -4,16 +4,16 @@ import android.support.annotation.NonNull;
 
 import com.google.gson.annotations.SerializedName;
 
-public class MessageHistoryReqModel {
+class MessageHistoryReqModel {
 
     @SerializedName("startDate")
     private Long mStartDate;
 
-    public MessageHistoryReqModel() {
+    MessageHistoryReqModel() {
 
     }
 
-    public MessageHistoryReqModel(@NonNull Long mStartDate) {
+    MessageHistoryReqModel(@NonNull Long mStartDate) {
         this.mStartDate = mStartDate;
     }
 

@@ -13,8 +13,9 @@ import java.util.regex.Pattern;
 import io.realm.Realm;
 import io.realm.RealmConfiguration;
 
-class HyberDataSourceController {
+final class HyberDataSourceController {
 
+    private static final int REALM_PROVIDER_LIMIT = 1000;
     private static HyberDataSourceController singleton = null;
 
     private HyberDataSourceController(Context context) {
@@ -32,7 +33,7 @@ class HyberDataSourceController {
                 .setLogLevel(LogLevel.FULL)
                 .build();
 
-        if (true) {
+        if (BuildConfig.DEBUG) {
             Stetho.initialize(
                     Stetho.newInitializerBuilder(context)
                             .enableDumpapp(Stetho.defaultDumperPluginsProvider(context))
@@ -41,10 +42,10 @@ class HyberDataSourceController {
 
             RealmInspectorModulesProvider.builder(context)
                     .withFolder(context.getCacheDir())
-                    .withEncryptionKey("encrypted.realm", "keyydjghlakfjg;adlshjgdasfjgjdhgdfh;ljga'fgnirhag'lhwrifgioawhnj".getBytes())
+                    .withEncryptionKey("encrypted.realm", Fingerprint.keyHash(context).getBytes())
                     .withMetaTables()
                     .withDescendingOrder()
-                    .withLimit(1000)
+                    .withLimit(REALM_PROVIDER_LIMIT)
                     .databaseNamePattern(Pattern.compile(".+\\.realm"))
                     .build();
         }

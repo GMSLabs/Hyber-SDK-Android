@@ -14,6 +14,8 @@ import android.widget.TextView;
 
 import com.hyber.Hyber;
 
+import java.util.Locale;
+
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import timber.log.Timber;
@@ -61,7 +63,7 @@ public class SplashActivity extends AppCompatActivity {
         Hyber.userRegistration(mPhone, new Hyber.UserRegistrationHandler() {
             @Override
             public void onSuccess() {
-                String s = "HyberUser registration onSuccess\nWith phone " + mPhone;
+                String s = String.format(Locale.getDefault(), "User registration onSuccess\nWith phone %d", mPhone);
                 Timber.d(s);
                 statusTextView.setText(s);
                 deviceDataUpdate();
@@ -69,9 +71,9 @@ public class SplashActivity extends AppCompatActivity {
 
             @Override
             public void onFailure(String message) {
-                String s = "HyberUser registration onFailure\nWith phone " + mPhone;
+                String s = String.format(Locale.getDefault(), "User registration onFailure\nWith phone %d", mPhone);
                 Timber.e("%s\n%s", s, message);
-                statusTextView.setText(s + "\n" + message);
+                statusTextView.setText(String.format(Locale.getDefault(), "%s\n%s", s, message));
             }
         });
     }

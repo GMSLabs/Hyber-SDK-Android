@@ -12,36 +12,45 @@ import rx.Observable;
 import rx.Subscriber;
 import rx.functions.Action1;
 
-class NotificationBundleProcessor {
+final class NotificationBundleProcessor {
 
     private static Subscriber<? super HyberMessageModel> mRemoteMessageSubscriber;
 
-    static Observable<HyberMessageModel> remoteMessageObservable = Observable.create(new Observable.OnSubscribe<HyberMessageModel>() {
-        @Override
-        public void call(Subscriber<? super HyberMessageModel> subscriber) {
-            mRemoteMessageSubscriber = subscriber;
-        }
-    });
+    private static Observable<HyberMessageModel> remoteMessageObservable =
+            Observable.create(new Observable.OnSubscribe<HyberMessageModel>() {
+                @Override
+                public void call(Subscriber<? super HyberMessageModel> subscriber) {
+                    mRemoteMessageSubscriber = subscriber;
+                }
+            });
 
-    static void ProcessFromFCMIntentService(Context context, RemoteMessage remoteMessage) {
+    private NotificationBundleProcessor() {
 
-        Hyber.Log(Hyber.LOG_LEVEL.DEBUG, "From: " + remoteMessage.getFrom());
+    }
+
+    static Observable<HyberMessageModel> getRemoteMessageObservable() {
+        return remoteMessageObservable;
+    }
+
+    static void processFromFCMIntentService(Context context, RemoteMessage remoteMessage) {
+
+        Hyber.mLog(Hyber.LogLevel.DEBUG, "From: " + remoteMessage.getFrom());
 
         // Check if message contains a data payload.
         if (remoteMessage.getData().size() > 0) {
-            Hyber.Log(Hyber.LOG_LEVEL.DEBUG, "Message data payload: " + remoteMessage.getData());
+            Hyber.mLog(Hyber.LogLevel.DEBUG, "Message data payload: " + remoteMessage.getData());
         }
 
         // Check if message contains a notification payload.
         if (remoteMessage.getNotification() != null) {
-            Hyber.Log(Hyber.LOG_LEVEL.DEBUG, "Message Notification Body: " + remoteMessage.getNotification().getBody());
+            Hyber.mLog(Hyber.LogLevel.DEBUG, "Message Notification Body: " + remoteMessage.getNotification().getBody());
         }
 
-        Process(context, remoteMessage.getNotification(), remoteMessage.getData());
+        process(context, remoteMessage.getNotification(), remoteMessage.getData());
     }
 
-    private static void Process(Context context, RemoteMessage.Notification notification, Map<String, String> data) {
-        //TODO Process notification and data payload
+    private static void process(Context context, RemoteMessage.Notification notification, Map<String, String> data) {
+        //TODO process notification and data payload
 
         if (data != null && !data.isEmpty()) {
             String message = data.get("message");
@@ -53,7 +62,12 @@ class NotificationBundleProcessor {
                         mRemoteMessageSubscriber.onNext(messageModel);
 
                     Message receivedMessage =
-                            new Message(messageModel.getId(), "push", new Date(), messageModel.getAlpha(), messageModel.getText(), "");
+                            new Message(messageModel.getId(),
+                                    "push",
+                                    new Date(),
+                                    messageModel.getAlpha(),
+                                    messageModel.getText(),
+                                    "");
                     receivedMessage.setAsNewReceived();
                     if (messageModel.getOptions() != null) {
                         receivedMessage.setOptions(
@@ -66,19 +80,18 @@ class NotificationBundleProcessor {
                             .subscribe(new Action1<Message>() {
                                 @Override
                                 public void call(Message message) {
-                                    Hyber.Log(Hyber.LOG_LEVEL.DEBUG, "message " + message.getId() + " is saved");
+                                    Hyber.mLog(Hyber.LogLevel.DEBUG, "message " + message.getId() + " is saved");
                                 }
                             }, new Action1<Throwable>() {
                                 @Override
                                 public void call(Throwable throwable) {
-                                    Hyber.Log(Hyber.LOG_LEVEL.WARN, throwable.getLocalizedMessage());
+                                    Hyber.mLog(Hyber.LogLevel.WARN, throwable.getLocalizedMessage());
                                 }
                             });
                 } catch (Exception e) {
-                    Hyber.Log(Hyber.LOG_LEVEL.WARN, e.getLocalizedMessage());
+                    Hyber.mLog(Hyber.LogLevel.WARN, e.getLocalizedMessage());
                 }
             }
         }
     }
-
 }

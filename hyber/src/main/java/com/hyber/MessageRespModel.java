@@ -6,7 +6,7 @@ import com.google.gson.annotations.SerializedName;
 
 import java.util.Date;
 
-public class MessageRespModel {
+class MessageRespModel {
 
     @SerializedName("messageId")
     private String mId;
@@ -67,8 +67,8 @@ public class MessageRespModel {
 
     @Nullable
     Message toRealmMessageHistory() {
-        if (mId != null && mPartner != null && mTime != null &&
-                mAlphaName != null && mText != null && mOrder != null) {
+        if (mId != null && mPartner != null && mTime != null
+                && mAlphaName != null && mText != null && mOrder != null) {
             Message mh = new Message(mId, mPartner, new Date(mTime),
                     mAlphaName, mText, mOrder);
 

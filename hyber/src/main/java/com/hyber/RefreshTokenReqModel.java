@@ -4,7 +4,7 @@ import android.support.annotation.NonNull;
 
 import com.google.gson.annotations.SerializedName;
 
-public class RefreshTokenReqModel {
+class RefreshTokenReqModel {
 
     @SerializedName("refreshToken")
     private String mRefreshToken;
@@ -13,7 +13,7 @@ public class RefreshTokenReqModel {
 
     }
 
-    public RefreshTokenReqModel(@NonNull String mRefreshToken) {
+    RefreshTokenReqModel(@NonNull String mRefreshToken) {
         this.mRefreshToken = mRefreshToken;
     }
 

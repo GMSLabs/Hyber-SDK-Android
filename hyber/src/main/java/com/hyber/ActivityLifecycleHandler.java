@@ -5,20 +5,32 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
 
-public class ActivityLifecycleHandler {
+import java.lang.ref.WeakReference;
 
-    static boolean nextResumeIsFirstActivity;
-    static Activity curActivity;
-    static FocusHandlerThread focusHandlerThread = new FocusHandlerThread();
+final class ActivityLifecycleHandler {
+
+    private static final int DELAY_MILLS = 2000;
+    private static boolean nextResumeIsFirstActivity;
+    private static WeakReference<Activity> curActivity;
+    private static FocusHandlerThread focusHandlerThread = new FocusHandlerThread();
     private static ActivityAvailableListener mActivityAvailableListener;
+
+    private ActivityLifecycleHandler() {
+
+    }
+
+    static Activity getCurrActivity() {
+        return curActivity.get();
+    }
 
     // Note: Only supports one callback, create a list when this needs to be used by more than the permissions dialog.
     static void setActivityAvailableListener(ActivityAvailableListener activityAvailableListener) {
-        if (curActivity != null) {
-            activityAvailableListener.available(curActivity);
+        if (curActivity.isEnqueued()) {
+            activityAvailableListener.available(curActivity.get());
             mActivityAvailableListener = activityAvailableListener;
-        } else
+        } else {
             mActivityAvailableListener = activityAvailableListener;
+        }
     }
 
     public static void removeActivityAvailableListener(ActivityAvailableListener activityAvailableListener) {
@@ -26,9 +38,9 @@ public class ActivityLifecycleHandler {
     }
 
     private static void setCurActivity(Activity activity) {
-        curActivity = activity;
+        curActivity = new WeakReference<>(activity);
         if (mActivityAvailableListener != null)
-            mActivityAvailableListener.available(curActivity);
+            mActivityAvailableListener.available(curActivity.get());
     }
 
     static void onActivityCreated(Activity activity) {
@@ -47,8 +59,8 @@ public class ActivityLifecycleHandler {
     }
 
     static void onActivityPaused(Activity activity) {
-        if (activity == curActivity) {
-            curActivity = null;
+        if (activity == curActivity.get()) {
+            curActivity.clear();
             handleLostFocus();
         }
 
@@ -56,10 +68,10 @@ public class ActivityLifecycleHandler {
     }
 
     static void onActivityStopped(Activity activity) {
-        Hyber.Log(Hyber.LOG_LEVEL.DEBUG, "onActivityStopped: " + activity.getClass().getName());
+        Hyber.mLog(Hyber.LogLevel.DEBUG, "onActivityStopped: " + activity.getClass().getName());
 
-        if (activity == curActivity) {
-            curActivity = null;
+        if (activity == curActivity.get()) {
+            curActivity.clear();
             handleLostFocus();
         }
 
@@ -67,31 +79,33 @@ public class ActivityLifecycleHandler {
     }
 
     static void onActivityDestroyed(Activity activity) {
-        Hyber.Log(Hyber.LOG_LEVEL.DEBUG, "onActivityDestroyed: " + activity.getClass().getName());
+        Hyber.mLog(Hyber.LogLevel.DEBUG, "onActivityDestroyed: " + activity.getClass().getName());
 
-        if (activity == curActivity) {
-            curActivity = null;
+        if (activity == curActivity.get()) {
+            curActivity.clear();
             handleLostFocus();
         }
 
         logCurActivity();
     }
 
-    static private void logCurActivity() {
-        Hyber.Log(Hyber.LOG_LEVEL.DEBUG, "curActivity is NOW: " + (curActivity != null ? "" + curActivity.getClass().getName() + ":" + curActivity : "null"));
+    private static void logCurActivity() {
+        Hyber.mLog(Hyber.LogLevel.DEBUG, "curActivity is NOW: "
+                + (curActivity.get() != null ? "" + curActivity.get().getClass().getName() + ":" + curActivity.get() : "null"));
     }
 
-    static private void handleLostFocus() {
+    private static void handleLostFocus() {
         focusHandlerThread.runRunnable(new AppFocusRunnable());
     }
 
-    static private void handleFocus() {
+    private static void handleFocus() {
         if (focusHandlerThread.hasBackgrounded() || nextResumeIsFirstActivity) {
             nextResumeIsFirstActivity = false;
             focusHandlerThread.resetBackgroundState();
             Hyber.onAppFocus();
-        } else
+        } else {
             focusHandlerThread.stopScheduledRunnable();
+        }
     }
 
     interface ActivityAvailableListener {
@@ -99,7 +113,7 @@ public class ActivityLifecycleHandler {
     }
 
     static class FocusHandlerThread extends HandlerThread {
-        Handler mHandler = null;
+        private Handler mHandler = null;
         private AppFocusRunnable appFocusRunnable;
 
         FocusHandlerThread() {
@@ -127,7 +141,7 @@ public class ActivityLifecycleHandler {
 
             appFocusRunnable = runnable;
             mHandler.removeCallbacksAndMessages(null);
-            mHandler.postDelayed(runnable, 2000);
+            mHandler.postDelayed(runnable, DELAY_MILLS);
         }
 
         boolean hasBackgrounded() {
@@ -137,11 +151,11 @@ public class ActivityLifecycleHandler {
         }
     }
 
-    static private class AppFocusRunnable implements Runnable {
+    private static class AppFocusRunnable implements Runnable {
         private boolean backgrounded, completed;
 
         public void run() {
-            if (curActivity != null)
+            if (curActivity.isEnqueued())
                 return;
 
             backgrounded = true;
@@ -149,5 +163,4 @@ public class ActivityLifecycleHandler {
             completed = true;
         }
     }
-
 }

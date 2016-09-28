@@ -2,7 +2,7 @@ package com.hyber;
 
 import com.google.gson.annotations.SerializedName;
 
-public class UpdateUserReqModel {
+class UpdateUserReqModel {
 
     @SerializedName("fcmToken")
     private String mFcmToken;
@@ -41,7 +41,8 @@ public class UpdateUserReqModel {
         this.mDeviceType = mDeviceType;
     }
 
-    public UpdateUserReqModel(String mFcmToken, String mOsType, String mOsVersion, String mDeviceName, String mModelName, String mDeviceType) {
+    public UpdateUserReqModel(String mFcmToken,
+                              String mOsType, String mOsVersion, String mDeviceName, String mModelName, String mDeviceType) {
         this.mFcmToken = mFcmToken;
         this.mOsType = mOsType;
         this.mOsVersion = mOsVersion;
@@ -50,7 +51,8 @@ public class UpdateUserReqModel {
         this.mDeviceType = mDeviceType;
     }
 
-    public UpdateUserReqModel(String mFcmToken, Integer mPriority, String mOsType, String mOsVersion, String mDeviceName, String mModelName, String mDeviceType) {
+    public UpdateUserReqModel(String mFcmToken, Integer mPriority,
+                              String mOsType, String mOsVersion, String mDeviceName, String mModelName, String mDeviceType) {
         this.mFcmToken = mFcmToken;
         this.mPriority = mPriority;
         this.mOsType = mOsType;

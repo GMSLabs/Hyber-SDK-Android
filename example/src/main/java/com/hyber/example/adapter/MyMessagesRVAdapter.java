@@ -6,7 +6,6 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.TextInputEditText;
 import android.support.v7.widget.AppCompatButton;
-import android.support.v7.widget.AppCompatEditText;
 import android.support.v7.widget.AppCompatImageButton;
 import android.support.v7.widget.AppCompatImageView;
 import android.support.v7.widget.AppCompatTextView;
@@ -25,6 +24,8 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
 import io.realm.HyberMessageHistoryBaseRecyclerViewAdapter;
 
 public class MyMessagesRVAdapter extends HyberMessageHistoryBaseRecyclerViewAdapter {
@@ -61,39 +62,28 @@ public class MyMessagesRVAdapter extends HyberMessageHistoryBaseRecyclerViewAdap
         this.onMessageAnswerListener = listener;
     }
 
-    private class MyHolder extends MessageViewHolder {
+    class MyHolder extends MessageViewHolder {
 
         private String mMessageId;
-        private AppCompatTextView messageId;
-        private AppCompatTextView messageAlphaName;
-        private AppCompatTextView messageText;
-        private AppCompatImageView messageImage;
-        private AppCompatButton messageButton;
-        private AppCompatImageButton answerButton;
-        private AppCompatTextView messageDrStatus;
-        private AppCompatTextView messageTime;
+        @BindView(R.id.messageId) AppCompatTextView messageId;
+        @BindView(R.id.messageAlphaName) AppCompatTextView messageAlphaName;
+        @BindView(R.id.messageText) AppCompatTextView messageText;
+        @BindView(R.id.messageImage) AppCompatImageView messageImage;
+        @BindView(R.id.messageButton) AppCompatButton messageButton;
+        @BindView(R.id.answerButton) AppCompatImageButton answerButton;
+        @BindView(R.id.messageDrStatus) AppCompatTextView messageDrStatus;
+        @BindView(R.id.messageTime) AppCompatTextView messageTime;
 
         private boolean isAnswerMode = false;
-        private RelativeLayout messageAnswerLayout;
-        private TextInputEditText messageInputAnswerEditText;
-        private AppCompatImageButton messageSendAnswerAppCompatImageButton;
+        @BindView(R.id.messageAnswerLayout) RelativeLayout messageAnswerLayout;
+        @BindView(R.id.messageInputAnswerEditText) TextInputEditText messageInputAnswerEditText;
+        @BindView(R.id.messageSendAnswerAppCompatImageButton) AppCompatImageButton messageSendAnswerAppCompatImageButton;
 
         private String mAction;
 
         public MyHolder(View itemView) {
             super(itemView);
-            this.messageId = (AppCompatTextView) itemView.findViewById(R.id.messageId);
-            this.messageAlphaName = (AppCompatTextView) itemView.findViewById(R.id.messageAlphaName);
-            this.messageText = (AppCompatTextView) itemView.findViewById(R.id.messageText);
-            this.messageImage = (AppCompatImageView) itemView.findViewById(R.id.messageImage);
-            this.messageButton = (AppCompatButton) itemView.findViewById(R.id.messageButton);
-            this.answerButton = (AppCompatImageButton) itemView.findViewById(R.id.answerButton);
-            this.messageDrStatus = (AppCompatTextView) itemView.findViewById(R.id.messageDrStatus);
-            this.messageTime = (AppCompatTextView) itemView.findViewById(R.id.messageTime);
-
-            this.messageAnswerLayout = (RelativeLayout) itemView.findViewById(R.id.messageAnswerLayout);
-            this.messageInputAnswerEditText = (TextInputEditText) itemView.findViewById(R.id.messageInputAnswerEditText);
-            this.messageSendAnswerAppCompatImageButton = (AppCompatImageButton) itemView.findViewById(R.id.messageSendAnswerAppCompatImageButton);
+            ButterKnife.bind(this, itemView);
         }
 
         @Override
@@ -179,21 +169,21 @@ public class MyMessagesRVAdapter extends HyberMessageHistoryBaseRecyclerViewAdap
                             isAnswerMode = true;
                             messageAnswerLayout.setVisibility(View.VISIBLE);
                             messageInputAnswerEditText.requestFocus();
-                            messageSendAnswerAppCompatImageButton.setOnClickListener(new View.OnClickListener() {
-                                @Override
-                                public void onClick(View view) {
-                                    String answerMessage = messageInputAnswerEditText.getText().toString();
-                                    if (answerMessage.isEmpty()) {
-                                    } else {
-                                        if (onMessageAnswerListener != null) {
-                                            isAnswerMode = false;
-                                            messageAnswerLayout.setVisibility(View.GONE);
-                                            onMessageAnswerListener.onAction(mMessageId, answerMessage);
+                            messageSendAnswerAppCompatImageButton.setOnClickListener(
+                                    new View.OnClickListener() {
+                                        @Override
+                                        public void onClick(View view) {
+                                            String answerMessage = messageInputAnswerEditText.getText().toString();
+                                            if (!answerMessage.isEmpty()) {
+                                                if (onMessageAnswerListener != null) {
+                                                    isAnswerMode = false;
+                                                    messageAnswerLayout.setVisibility(View.GONE);
+                                                    onMessageAnswerListener.onAction(mMessageId, answerMessage);
+                                                }
+                                            }
                                         }
                                     }
-                                }
-                            });
-
+                            );
                         }
                     }
                 });

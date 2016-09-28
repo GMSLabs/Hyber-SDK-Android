@@ -1,6 +1,6 @@
 package com.hyber;
 
-public enum SendPushTokenErrorStatus {
+enum SendPushTokenErrorStatus {
 
     SENDING_UNSUCCESSFUL(3001, "Sending push token unsuccessful!");
 

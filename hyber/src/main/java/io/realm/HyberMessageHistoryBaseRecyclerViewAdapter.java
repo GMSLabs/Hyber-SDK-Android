@@ -20,25 +20,13 @@ import io.realm.internal.TableOrView;
 
 public abstract class HyberMessageHistoryBaseRecyclerViewAdapter extends RecyclerView.Adapter<MessageViewHolder> {
 
-    public interface OnChangeListener {
-        void onItemRangeInserted(int positionStart, int itemCount);
-
-        void onItemRangeRemoved(int positionStart, int itemCount);
-
-        void onItemRangeChanged(int positionStart, int itemCount);
-    }
-
-    private OnChangeListener mChangeListener;
-
     private static final List<Long> EMPTY_LIST = new ArrayList<>(0);
-
+    private List mIds;
+    private OnChangeListener mChangeListener;
     private boolean mAutomaticUpdate = false;
     private boolean mAnimateResults = false;
-
-    protected List mIds;
     private RealmResults<Message> mRealmResults;
     private RealmChangeListener<RealmResults<Message>> mRealmChangeListener;
-
     private long animatePrimaryColumnIndex;
     private RealmFieldType animatePrimaryIdType;
     private long animateIsReportedColumnIndex;
@@ -56,7 +44,8 @@ public abstract class HyberMessageHistoryBaseRecyclerViewAdapter extends Recycle
         updateRealmResults(mRealmResults);
     }
 
-    public HyberMessageHistoryBaseRecyclerViewAdapter(boolean automaticUpdate, boolean animateResults, @NonNull RealmResults<Message> queryResults) {
+    public HyberMessageHistoryBaseRecyclerViewAdapter(boolean automaticUpdate, boolean animateResults,
+                                                      @NonNull RealmResults<Message> queryResults) {
         this.mAutomaticUpdate = automaticUpdate;
         this.mAnimateResults = animateResults;
         this.mRealmResults = queryResults;
@@ -197,10 +186,7 @@ public abstract class HyberMessageHistoryBaseRecyclerViewAdapter extends Recycle
                     Patch patch = DiffUtils.diff(mIds, newIds);
                     List<Delta> deltas = patch.getDeltas();
                     mIds = newIds;
-                    if (deltas.isEmpty()) {
-                        // Nothing has changed - most likely because the notification was for
-                        // a different object/table
-                    } else {
+                    if (!deltas.isEmpty()) {
                         for (Delta delta : deltas) {
                             if (delta.getType() == Delta.TYPE.INSERT) {
                                 notifyItemRangeInserted(
@@ -235,6 +221,14 @@ public abstract class HyberMessageHistoryBaseRecyclerViewAdapter extends Recycle
                 }
             }
         };
+    }
+
+    public interface OnChangeListener {
+        void onItemRangeInserted(int positionStart, int itemCount);
+
+        void onItemRangeRemoved(int positionStart, int itemCount);
+
+        void onItemRangeChanged(int positionStart, int itemCount);
     }
 
 }
