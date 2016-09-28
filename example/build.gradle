@@ -101,6 +101,15 @@ android {
 
             signingConfig signingConfigs.debug
         }
+        prodd {
+            applicationId "com.hyber.example.prodd"
+
+            // TODO: Please update the Google Project number and Hyber client and app Id below to yours.
+            manifestPlaceholders = [manifestApplicationId      : "${applicationId}",
+                                    hyber_client_api_key       : "${hyber_client_api_key}"]
+
+            signingConfig signingConfigs.debug
+        }
     }
 }
 

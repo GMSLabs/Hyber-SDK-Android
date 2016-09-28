@@ -137,6 +137,45 @@
           "status": 2
         }
       }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:936881676680:android:qwerty_44_qwerty",
+        "android_client_info": {
+          "package_name": "com.hyber.example.prodd"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "936881676680-qwertyqwerty1qwertyqwerty1qwerty.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.hyber.example.prodd",
+            "certificate_hash": "822E3A121EF0AAE01C7C9A1381037799C2B85368"
+          }
+        },
+        {
+          "client_id": "936881676680-qwertyqwerty1qwertyqwerty1qwerty.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "DEMODEMO_DEMODEMO_DEMODEMODEMO_DEMODEMO"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
     }
   ],
   "configuration_version": "1"
