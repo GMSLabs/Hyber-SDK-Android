@@ -1,35 +1,35 @@
 {
   "project_info": {
     "project_number": "936881676680",
-    "firebase_url": "https://mock-hyber-example.firebaseio.com",
-    "project_id": "mock-hyber-example",
-    "storage_bucket": "mock-hyber-example.appspot.com"
+    "firebase_url": "https://hyber-example.firebaseio.com",
+    "project_id": "hyber-example",
+    "storage_bucket": "hyber-example.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:936881676680:android:e1g1ac06167be8a7",
+        "mobilesdk_app_id": "1:936881676680:android:qwerty_11_qwerty",
         "android_client_info": {
           "package_name": "com.hyber.example.dev"
         }
       },
       "oauth_client": [
         {
-          "client_id": "936881676680-f1dfb3dn2cgjm2kj73jt82jmeh06qd2o.apps.googleusercontent.com",
+          "client_id": "936881676680-qwertyqwerty1qwertyqwerty1qwerty.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "com.hyber.example.dev",
-            "certificate_hash": "16137ED332A1E684EA29C4F07E2G73C1D2E9B802"
+            "certificate_hash": "DEMODEMO_DEMODEMO_DEMODEMO_DEMO_DEMODEMO"
           }
         },
         {
-          "client_id": "936881676680-f1dfb3dn2cgjm2kj73jt82jmeh06qd2o.apps.googleusercontent.com",
+          "client_id": "936881676680-qwertyqwerty1qwertyqwerty1qwerty.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyAFQaINn46mAzz8iGhQWDVlQFIgnmgVHLo"
+          "current_key": "DEMODEMO_DEMODEMO_DEMODEMODEMO_DEMODEMO"
         }
       ],
       "services": {
@@ -40,7 +40,7 @@
           "status": 2,
           "other_platform_oauth_client": [
             {
-              "client_id": "936881676680-f1dfb3dn2cgjm2kj73jt82jmeh06qd2o.apps.googleusercontent.com",
+              "client_id": "936881676680-qwertyqwerty1qwertyqwerty1qwerty.apps.googleusercontent.com",
               "client_type": 3
             }
           ]
@@ -52,28 +52,28 @@
     },
     {
       "client_info": {
-        "mobilesdk_app_id": "1:936881676680:android:e1g1ac06167be8a7",
+        "mobilesdk_app_id": "1:936881676680:android:qwerty_22_qwerty",
         "android_client_info": {
           "package_name": "com.hyber.example.td"
         }
       },
       "oauth_client": [
         {
-          "client_id": "936881676680-f1dfb3dn2cgjm2kj73jt82jmeh06qd2o.apps.googleusercontent.com",
+          "client_id": "936881676680-qwertyqwerty1qwertyqwerty1qwerty.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "com.hyber.example.td",
-            "certificate_hash": "16137ED332A1E684EA29C4F07E2G73C1D2E9B802"
+            "certificate_hash": "DEMODEMO_DEMODEMO_DEMODEMO_DEMO_DEMODEMO"
           }
         },
         {
-          "client_id": "936881676680-f1dfb3dn2cgjm2kj73jt82jmeh06qd2o.apps.googleusercontent.com",
+          "client_id": "936881676680-qwertyqwerty1qwertyqwerty1qwerty.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyAFQaINn46mAzz8iGhQWDVlQFIgnmgVHLo"
+          "current_key": "DEMODEMO_DEMODEMO_DEMODEMODEMO_DEMODEMO"
         }
       ],
       "services": {
@@ -84,7 +84,7 @@
           "status": 2,
           "other_platform_oauth_client": [
             {
-              "client_id": "936881676680-f1dfb3dn2cgjm2kj73jt82jmeh06qd2o.apps.googleusercontent.com",
+              "client_id": "936881676680-qwertyqwerty1qwertyqwerty1qwerty.apps.googleusercontent.com",
               "client_type": 3
             }
           ]
@@ -96,28 +96,28 @@
     },
     {
       "client_info": {
-        "mobilesdk_app_id": "1:93688176680:android:e1g1ac06167be8a7",
+        "mobilesdk_app_id": "1:936881676680:android:qwerty_33_qwerty",
         "android_client_info": {
           "package_name": "com.hyber.example.prod"
         }
       },
       "oauth_client": [
         {
-          "client_id": "936881676680-f1dfb3dn2cgjm2kj73jt82jmeh06qd2o.apps.googleusercontent.com",
+          "client_id": "936881676680-qwertyqwerty1qwertyqwerty1qwerty.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "com.hyber.example.prod",
-            "certificate_hash": "16137ED332A1E684EA29C4F07E2G73C1D2E9B802"
+            "certificate_hash": "DEMODEMO_DEMODEMO_DEMODEMO_DEMO_DEMODEMO"
           }
         },
         {
-          "client_id": "936881676680-f1dfb3dn2cgjm2kj73jt82jmeh06qd2o.apps.googleusercontent.com",
+          "client_id": "936881676680-qwertyqwerty1qwertyqwerty1qwerty.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyAFQaINn46mAzz8iGhQWDVlQFIgnmgVHLo"
+          "current_key": "DEMODEMO_DEMODEMO_DEMODEMODEMO_DEMODEMO"
         }
       ],
       "services": {
@@ -128,10 +128,49 @@
           "status": 2,
           "other_platform_oauth_client": [
             {
-              "client_id": "936881676680-f1dfb3dn2cgjm2kj73jt82jmeh06qd2o.apps.googleusercontent.com",
+              "client_id": "936881676680-qwertyqwerty1qwertyqwerty1qwerty.apps.googleusercontent.com",
               "client_type": 3
             }
           ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:936881676680:android:qwerty_44_qwerty",
+        "android_client_info": {
+          "package_name": "com.hyber.example.prodd"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "936881676680-qwertyqwerty1qwertyqwerty1qwerty.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.hyber.example.prodd",
+            "certificate_hash": "822E3A121EF0AAE01C7C9A1381037799C2B85368"
+          }
+        },
+        {
+          "client_id": "936881676680-qwertyqwerty1qwertyqwerty1qwerty.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "DEMODEMO_DEMODEMO_DEMODEMODEMO_DEMODEMO"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
         },
         "ads_service": {
           "status": 2

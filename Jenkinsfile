@@ -54,17 +54,17 @@ node {
   }
 
   stage ('Publication Hyber DEV to Fabric') {
-    sh "printenv"
-    sh "./provide_properties.sh properties.zip dev"
-    sh "./provide_keystore.sh keystores.zip dev"
-
     if (env.BRANCH_NAME == 'master-2.0') {
-      env.FABRIC_GROUP='hyber-dev'
-      env.FABRIC_NOTES='DEV BUILD from branch ${env.BRANCH_NAME}'
+      sh "printenv"
+      sh "./provide_properties.sh properties.zip dev"
+      sh "./provide_keystore.sh keystores.zip dev"
+
+      env.FABRIC_GROUP='hyber-developers,hyber-testers'
+      env.FABRIC_NOTES='This is developers build from branch ' + env.BRANCH_NAME
       env.FABRIC_DESCRIPTION='This build powered by Jenkins CI'
 
-      sh "echo FABRIC_GROUP is ${FABRIC_GROUP}"
-      sh "echo FABRIC_NOTES is ${FABRIC_NOTES}"
+      sh "echo FABRIC_GROUP = ${FABRIC_GROUP}"
+      sh "echo FABRIC_NOTES = ${FABRIC_NOTES}"
 
       sh "echo ${env.BRANCH_NAME} is branch for crashlytics upload distribution Dev build"
       sh "./gradlew hyber:clean example:clean example:assembleDevDebug"
@@ -75,17 +75,17 @@ node {
   }
 
   stage ('Publication Hyber TD to Fabric') {
-    sh "printenv"
-    sh "./provide_properties.sh properties.zip td"
-    sh "./provide_keystore.sh keystores.zip td"
-
     if (env.BRANCH_NAME == 'master-2.0') {
-      env.FABRIC_GROUP='hyber-td'
-      env.FABRIC_NOTES='TD BUILD from branch ${env.BRANCH_NAME}'
+      sh "printenv"
+      sh "./provide_properties.sh properties.zip td"
+      sh "./provide_keystore.sh keystores.zip td"
+
+      env.FABRIC_GROUP='hyber-testers'
+      env.FABRIC_NOTES='This is testers build from branch ' + env.BRANCH_NAME
       env.FABRIC_DESCRIPTION='This build powered by Jenkins CI'
 
-      sh "echo FABRIC_GROUP is ${FABRIC_GROUP}"
-      sh "echo FABRIC_NOTES is ${FABRIC_NOTES}"
+      sh "echo FABRIC_GROUP = ${FABRIC_GROUP}"
+      sh "echo FABRIC_NOTES = ${FABRIC_NOTES}"
 
       sh "echo ${env.BRANCH_NAME} is branch for crashlytics upload distribution Td build"
       sh "./gradlew hyber:clean example:clean example:assembleTdDebug"
@@ -96,23 +96,44 @@ node {
   }
 
   stage ('Publication Hyber PROD to Fabric') {
-    sh "printenv"
-    sh "./provide_properties.sh properties.zip prod"
-    sh "./provide_keystore.sh keystores.zip prod"
-
     if (env.BRANCH_NAME == 'master-2.0') {
-      env.FABRIC_GROUP='hyber-prod'
-      env.FABRIC_NOTES='PROD BUILD from branch ${env.BRANCH_NAME}'
+      sh "printenv"
+      sh "./provide_properties.sh properties.zip prod"
+      sh "./provide_keystore.sh keystores.zip prod"
+
+      env.FABRIC_GROUP='hyber-td,hyber-managers'
+      env.FABRIC_NOTES='This is prodaction build from branch ' + env.BRANCH_NAME
       env.FABRIC_DESCRIPTION='This build powered by Jenkins CI'
 
-      sh "echo FABRIC_GROUP is ${FABRIC_GROUP}"
-      sh "echo FABRIC_NOTES is ${FABRIC_NOTES}"
+      sh "echo FABRIC_GROUP = ${FABRIC_GROUP}"
+      sh "echo FABRIC_NOTES = ${FABRIC_NOTES}"
 
       sh "echo ${env.BRANCH_NAME} is branch for crashlytics upload distribution Prod build"
       sh "./gradlew hyber:clean example:clean example:assembleProdDebug"
       sh "./gradlew example:fabricGenerateResourcesProdDebug example:crashlyticsUploadDistributionProdDebug"
     } else {
       sh "echo ${env.BRANCH_NAME} is not branch for crashlytics upload distribution Prod build"
+    }
+  }
+
+  stage ('Publication Hyber PRODD to Fabric') {
+    if (env.BRANCH_NAME == 'master-2.0') {
+      sh "printenv"
+      sh "./provide_properties.sh properties.zip prodd"
+      sh "./provide_keystore.sh keystores.zip prodd"
+
+      env.FABRIC_GROUP='hyber-developers,hyber-testers'
+      env.FABRIC_NOTES='This is prodaction for developers build from branch ' + env.BRANCH_NAME
+      env.FABRIC_DESCRIPTION='This build powered by Jenkins CI'
+
+      sh "echo FABRIC_GROUP = ${FABRIC_GROUP}"
+      sh "echo FABRIC_NOTES = ${FABRIC_NOTES}"
+
+      sh "echo ${env.BRANCH_NAME} is branch for crashlytics upload distribution Prodd build"
+      sh "./gradlew hyber:clean example:clean example:assembleProddDebug"
+      sh "./gradlew example:fabricGenerateResourcesProddDebug example:crashlyticsUploadDistributionProddDebug"
+    } else {
+      sh "echo ${env.BRANCH_NAME} is not branch for crashlytics upload distribution Prodd build"
     }
   }
 
