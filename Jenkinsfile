@@ -45,12 +45,12 @@ node {
     )
   }
 
-  stage ('Test Hyber SDK') {
-    sh "./gradlew hyber:testReleaseUnitTest"
+  stage ('Test hyber') {
+    sh "./gradlew hyber:checkstyle hyber:testReleaseUnitTest"
   }
 
-  stage ('Test example app') {
-    sh "./gradlew example:testDevDebugUnitTest"
+  stage ('Test example') {
+    sh "./gradlew example:checkstyle example:testDevDebugUnitTest"
   }
 
   stage ('Publication Hyber DEV to Fabric') {
@@ -59,7 +59,7 @@ node {
       sh "./provide_properties.sh properties.zip dev"
       sh "./provide_keystore.sh keystores.zip dev"
 
-      env.FABRIC_GROUP='hyber-developers,hyber-testers'
+      env.FABRIC_GROUP='hyber-android,hyber-developers,hyber-testers'
       env.FABRIC_NOTES='This is developers build from branch ' + env.BRANCH_NAME
       env.FABRIC_DESCRIPTION='This build powered by Jenkins CI'
 
@@ -80,7 +80,7 @@ node {
       sh "./provide_properties.sh properties.zip td"
       sh "./provide_keystore.sh keystores.zip td"
 
-      env.FABRIC_GROUP='hyber-testers'
+      env.FABRIC_GROUP='hyber-android,hyber-testers'
       env.FABRIC_NOTES='This is testers build from branch ' + env.BRANCH_NAME
       env.FABRIC_DESCRIPTION='This build powered by Jenkins CI'
 
@@ -101,7 +101,7 @@ node {
       sh "./provide_properties.sh properties.zip prod"
       sh "./provide_keystore.sh keystores.zip prod"
 
-      env.FABRIC_GROUP='hyber-td,hyber-managers'
+      env.FABRIC_GROUP='hyber-android,hyber-td,hyber-managers'
       env.FABRIC_NOTES='This is prodaction build from branch ' + env.BRANCH_NAME
       env.FABRIC_DESCRIPTION='This build powered by Jenkins CI'
 
@@ -122,7 +122,7 @@ node {
       sh "./provide_properties.sh properties.zip prodd"
       sh "./provide_keystore.sh keystores.zip prodd"
 
-      env.FABRIC_GROUP='hyber-developers,hyber-testers'
+      env.FABRIC_GROUP='hyber-android,hyber-developers,hyber-testers'
       env.FABRIC_NOTES='This is prodaction for developers build from branch ' + env.BRANCH_NAME
       env.FABRIC_DESCRIPTION='This build powered by Jenkins CI'
 

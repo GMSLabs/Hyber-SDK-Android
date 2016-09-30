@@ -1,6 +1,6 @@
 package com.hyber;
 
-public enum SendDeviceDataErrorStatus {
+enum SendDeviceDataErrorStatus {
 
     SENDING_UNSUCCESSFUL(3001, "Sending device data unsuccessful!");
 

@@ -12,12 +12,12 @@ class ErrorRespItemModel {
     private Integer mDescription;
 
     @Nullable
-    public Integer getCode() {
+    Integer getCode() {
         return mCode;
     }
 
     @Nullable
-    public Integer getDescription() {
+    Integer getDescription() {
         return mDescription;
     }
 

@@ -4,7 +4,7 @@ import android.support.annotation.Nullable;
 
 import com.google.gson.annotations.SerializedName;
 
-public class RegisterUserRespModel extends BaseResponce {
+class RegisterUserRespModel extends BaseResponce {
 
     @SerializedName("userPhone")
     private String mPhone;

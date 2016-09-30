@@ -1,6 +1,6 @@
 package com.hyber;
 
-public enum AuthErrorStatus {
+enum AuthErrorStatus {
 
     USER_SESSION_DATA_IS_NOT_PROVIDED(2001, "User session data is not provided!"),
     USER_PHONE_INCORRECT(2002, "User phone number incorrect!");
@@ -13,11 +13,11 @@ public enum AuthErrorStatus {
         this.description = description;
     }
 
-    public int getCode() {
+    int getCode() {
         return code;
     }
 
-    public String getDescription() {
+    String getDescription() {
         return description;
     }
 

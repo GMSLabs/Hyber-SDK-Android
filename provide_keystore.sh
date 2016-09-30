@@ -31,7 +31,7 @@ else
     echo "KEYSTORE_FILE_NAME is ${KEYSTORE_FILE_NAME}"
 fi
 
-if [ "$BUILD_TYPE" = "$TYPE_DEV" ] || [ "$BUILD_TYPE" = "$TYPE_TD" ] || [ "$BUILD_TYPE" = "$TYPE_PROD" ] || [ "$BUILD_TYPE" = "$TYPE_PROD" ]
+if [ "$BUILD_TYPE" = "$TYPE_DEV" ] || [ "$BUILD_TYPE" = "$TYPE_TD" ] || [ "$BUILD_TYPE" = "$TYPE_PROD" ] || [ "$BUILD_TYPE" = "$TYPE_PRODD" ]
 then
     echo "BUILD_TYPE is $BUILD_TYPE"
 else

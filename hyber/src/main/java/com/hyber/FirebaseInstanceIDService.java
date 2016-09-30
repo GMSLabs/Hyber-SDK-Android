@@ -17,7 +17,7 @@ public class FirebaseInstanceIDService extends FirebaseInstanceIdService {
     public void onTokenRefresh() {
         // Get updated InstanceID token.
         String refreshedToken = FirebaseInstanceId.getInstance().getToken();
-        Hyber.Log(Hyber.LOG_LEVEL.DEBUG, "Refreshed token: " + refreshedToken);
+        Hyber.mLog(Hyber.LogLevel.DEBUG, "Refreshed token: " + refreshedToken);
 
         // If you want to send messages to this application instance or
         // manage this apps subscriptions on the server side, send the
@@ -28,7 +28,7 @@ public class FirebaseInstanceIDService extends FirebaseInstanceIdService {
 
     /**
      * Persist token to third-party servers.
-     *
+     * <p>
      * Modify this method to associate the user's FCM InstanceID token with any server-side account
      * maintained by your application.
      */
@@ -37,12 +37,12 @@ public class FirebaseInstanceIDService extends FirebaseInstanceIdService {
                 .sendDeviceData(new MainApiBusinessModel.SendDeviceDataListener() {
                     @Override
                     public void onSent() {
-                        Hyber.Log(Hyber.LOG_LEVEL.DEBUG, "Refreshed token is sent.");
+                        Hyber.mLog(Hyber.LogLevel.DEBUG, "Refreshed token is sent.");
                     }
 
                     @Override
                     public void onSendingError(SendDeviceDataErrorStatus status) {
-                        Hyber.Log(Hyber.LOG_LEVEL.WARN, status.getDescription());
+                        Hyber.mLog(Hyber.LogLevel.WARN, status.getDescription());
                     }
                 });
     }

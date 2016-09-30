@@ -75,7 +75,7 @@ task setVersion {
     // The version will be derived from source
     project.version = null
     def sdkVersionFile = file('src/main/java/com/hyber/HyberSdkVersion.java')
-    sdkVersionFile.eachLine{
+    sdkVersionFile.eachLine {
         def matcher = (it =~ /(?:.*BUILD = \")(.*)(?:\".*)/)
         if (matcher.matches()) {
             project.version = matcher[0][1]

@@ -18,6 +18,8 @@ import android.widget.Toast;
 import com.hyber.Hyber;
 import com.hyber.example.adapter.MyMessagesRVAdapter;
 
+import java.util.Locale;
+
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
@@ -50,8 +52,8 @@ public class MessagesFragment extends Fragment {
     @BindView(R.id.sendAnswerAppCompatImageButton)
     AppCompatImageButton mSendAnswer;
 
-    private int MAX_HISTORY_REQUESTS = 5;
-    private Long time_for_next_history_request;
+    private int mMaxHistoryRequests = 2;
+    private Long mTimeForNextHistoryRequest;
 
     public MessagesFragment() {
         // Required empty public constructor
@@ -63,7 +65,6 @@ public class MessagesFragment extends Fragment {
      *
      * @return A new instance of fragment MessagesFragment.
      */
-    // TODO: Rename and change types and number of parameters
     public static MessagesFragment newInstance() {
         MessagesFragment fragment = new MessagesFragment();
         Bundle args = new Bundle();
@@ -74,9 +75,6 @@ public class MessagesFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            //process arguments
-        }
     }
 
     @Override
@@ -92,22 +90,23 @@ public class MessagesFragment extends Fragment {
         mRecyclerView.setLayoutManager(mLayoutManager);
         mAdapter = new MyMessagesRVAdapter(getActivity());
         mRecyclerView.setAdapter(mAdapter);
-        mAdapter.setOnChangeListener(new HyberMessageHistoryBaseRecyclerViewAdapter.OnChangeListener() {
-            @Override
-            public void onItemRangeInserted(int positionStart, int itemCount) {
-                mRecyclerView.smoothScrollToPosition(positionStart);
-            }
+        mAdapter.setOnChangeListener(
+                new HyberMessageHistoryBaseRecyclerViewAdapter.OnChangeListener() {
+                    @Override
+                    public void onItemRangeInserted(int positionStart, int itemCount) {
+                        mRecyclerView.smoothScrollToPosition(positionStart);
+                    }
 
-            @Override
-            public void onItemRangeRemoved(int positionStart, int itemCount) {
+                    @Override
+                    public void onItemRangeRemoved(int positionStart, int itemCount) {
 
-            }
+                    }
 
-            @Override
-            public void onItemRangeChanged(int positionStart, int itemCount) {
+                    @Override
+                    public void onItemRangeChanged(int positionStart, int itemCount) {
 
-            }
-        });
+                    }
+                });
         mAdapter.setOnMessageActionListener(new MyMessagesRVAdapter.OnMessageActionListener() {
             @Override
             public void onAction(@NonNull String action) {
@@ -120,18 +119,31 @@ public class MessagesFragment extends Fragment {
             mAdapter.setOnMessageAnswerListener(new MyMessagesRVAdapter.OnMessageAnswerListener() {
                 @Override
                 public void onAction(@NonNull final String messageId, @NonNull final String answerText) {
-                    Toast.makeText(getActivity(), "messageId: " + messageId + "\n" + "answerText: " + answerText, Toast.LENGTH_SHORT).show();
-                    Hyber.sendBidirectionalAnswer(messageId, answerText, new Hyber.SendBidirectionalAnswerHandler() {
-                        @Override
-                        public void onSuccess() {
-                            Toast.makeText(getActivity(), "Success sended!\nmessageId: " + messageId + "\n" + "answerText: " + answerText, Toast.LENGTH_SHORT).show();
-                        }
+                    Toast.makeText(getActivity(),
+                            String.format(Locale.getDefault(),
+                                    "Message answer action.\nmessageId:%s\nanswerText:%s",
+                                    messageId, answerText),
+                            Toast.LENGTH_SHORT).show();
+                    Hyber.sendBidirectionalAnswer(messageId, answerText,
+                            new Hyber.SendBidirectionalAnswerHandler() {
+                                @Override
+                                public void onSuccess() {
+                                    Toast.makeText(getActivity(),
+                                            String.format(Locale.getDefault(),
+                                                    "Success sent message answer!\nmessageId:%s\nanswerText:%s",
+                                                    messageId, answerText),
+                                            Toast.LENGTH_SHORT).show();
+                                }
 
-                        @Override
-                        public void onFailure(String message) {
-                            Toast.makeText(getActivity(), "Failure sended!\nmessageId: " + messageId + "\n" + "answerText: " + answerText + "\n" + message, Toast.LENGTH_SHORT).show();
-                        }
-                    });
+                                @Override
+                                public void onFailure(String message) {
+                                    Toast.makeText(getActivity(),
+                                            String.format(Locale.getDefault(),
+                                                    "Failure sent message answer!\nmessageId:%s\nanswerText:%s",
+                                                    messageId, answerText),
+                                            Toast.LENGTH_SHORT).show();
+                                }
+                            });
                 }
             });
         } else {
@@ -139,20 +151,20 @@ public class MessagesFragment extends Fragment {
             mAdapter.setOnMessageAnswerListener(null);
         }
 
-        time_for_next_history_request = System.currentTimeMillis();
-        getMessagesFromHistory(time_for_next_history_request);
+        mTimeForNextHistoryRequest = System.currentTimeMillis();
+        getMessagesFromHistory(mTimeForNextHistoryRequest);
 
         return view;
     }
 
-    private void getMessagesFromHistory(long historyFromThisTimeToPast){
-        MAX_HISTORY_REQUESTS -= 1;
+    private void getMessagesFromHistory(long historyFromThisTimeToPast) {
+        mMaxHistoryRequests -= 1;
         Hyber.getMessageHistory(historyFromThisTimeToPast, new Hyber.MessageHistoryHandler() {
             @Override
             public void onSuccess(@NonNull Long recommendedNextTime) {
-                time_for_next_history_request = recommendedNextTime;
-                if (MAX_HISTORY_REQUESTS > 0)
-                    getMessagesFromHistory(time_for_next_history_request);
+                mTimeForNextHistoryRequest = recommendedNextTime;
+                if (mMaxHistoryRequests > 0)
+                    getMessagesFromHistory(mTimeForNextHistoryRequest);
             }
 
             @Override
@@ -164,7 +176,7 @@ public class MessagesFragment extends Fragment {
 
     @OnClick(R.id.sendAnswerAppCompatImageButton)
     public void onClickSendAnswerAppCompatImageButton(View v) {
-        InputMethodManager imm =  (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+        InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
         imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
         final String messageId = mAdapter.getMessageId(mAdapter.getItemCount() - 1);
         final String answerText = mInputAnswer.getText().toString();
@@ -172,14 +184,22 @@ public class MessagesFragment extends Fragment {
             Hyber.sendBidirectionalAnswer(messageId, answerText, new Hyber.SendBidirectionalAnswerHandler() {
                 @Override
                 public void onSuccess() {
-                    Toast.makeText(getActivity(), "Success sended!\nmessageId: " + messageId + "\n" + "answerText: " + answerText, Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getActivity(),
+                            String.format(Locale.getDefault(),
+                                    "Success sent message answer!\nmessageId:%s\nanswerText:%s",
+                                    messageId, answerText),
+                            Toast.LENGTH_SHORT).show();
                     mInputAnswer.setText("");
                     mInputAnswer.clearFocus();
                 }
 
                 @Override
                 public void onFailure(String message) {
-                    Toast.makeText(getActivity(), "Failure sended!\nmessageId: " + messageId + "\n" + "answerText: " + answerText + "\n" + message, Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getActivity(),
+                            String.format(Locale.getDefault(),
+                                    "Failure sent message answer!\nmessageId:%s\nanswerText:%s",
+                                    messageId, answerText),
+                            Toast.LENGTH_SHORT).show();
                 }
             });
         }

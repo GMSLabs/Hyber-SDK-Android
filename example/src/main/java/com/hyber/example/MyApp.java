@@ -8,6 +8,8 @@ import com.hyber.Hyber;
 import com.crashlytics.android.Crashlytics;
 import com.hyber.HyberMessageModel;
 
+import java.util.Locale;
+
 import io.fabric.sdk.android.Fabric;
 
 public class MyApp extends Application {
@@ -18,7 +20,7 @@ public class MyApp extends Application {
         Fabric.with(this, new Crashlytics());
 
         // Logging set to help debug issues, remove before releasing your app.
-        Hyber.setLogLevel(Hyber.LOG_LEVEL.VERBOSE, Hyber.LOG_LEVEL.WARN);
+        Hyber.setLogLevel(Hyber.LogLevel.VERBOSE, Hyber.LogLevel.WARN);
 
         //Initialisation Hyber SDK
         Hyber.startInit(this)
@@ -32,7 +34,9 @@ public class MyApp extends Application {
                         new NotificationCompat.Builder(MyApp.this)
                                 .setSmallIcon(R.mipmap.ic_launcher)
                                 .setContentTitle(hyberMessageModel.getAlpha())
-                                .setContentText(hyberMessageModel.getId() + " ==> " + hyberMessageModel.getText())
+                                .setContentText(String.format(Locale.getDefault(),
+                                        "%s ==> %s",
+                                        hyberMessageModel.getId(), hyberMessageModel.getText()))
                                 .setAutoCancel(true)
                                 .setPriority(NotificationCompat.PRIORITY_MAX)
                                 .setCategory(NotificationCompat.CATEGORY_MESSAGE);

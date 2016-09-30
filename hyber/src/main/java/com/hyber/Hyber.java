@@ -11,12 +11,12 @@ import android.os.Looper;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
 import io.realm.Realm;
 import io.realm.RealmChangeListener;
@@ -26,27 +26,23 @@ import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
 
-public class Hyber {
+public final class Hyber {
 
     /**
      * Tag used on log messages.
      */
-    static final String TAG = "Hyber";
-
-    private static LOG_LEVEL visualLogLevel = LOG_LEVEL.NONE;
-    private static LOG_LEVEL logCatLevel = LOG_LEVEL.WARN;
-
+    private static final String TAG = "Hyber";
+    private static WeakReference<Context> appWeakContext;
+    private static String clientApiKey;
+    private static String installationID;
+    private static String fingerprint;
+    private static boolean isBidirectionalAvailable = false;
+    private static Hyber.Builder mInitBuilder;
+    private static boolean initDone;
+    private static LogLevel visualLogLevel = LogLevel.NONE;
+    private static LogLevel logCatLevel = LogLevel.WARN;
     private static OsUtils.DeviceType deviceType;
     private static OsUtils osUtils;
-
-    static Context appContext;
-    static String clientApiKey;
-    static String installationID, fingerprint;
-
-    static boolean isBidirectionalAvailable = false;
-
-    static Hyber.Builder mInitBuilder;
-    static boolean initDone;
     private static boolean startedRegistration;
 
     private static boolean foreground;
@@ -61,71 +57,24 @@ public class Hyber {
     private static RealmResults<Message> mMessageResults;
     private static HashMap<String, Boolean> drInQueue;
 
-    public interface NotificationListener {
-        void onMessageReceived(HyberMessageModel hyberMessageModel);
+    private Hyber() {
+
     }
 
-    public interface UserRegistrationHandler {
-        void onSuccess();
-
-        void onFailure(String message);
+    static String getClientApiKey() {
+        return clientApiKey;
     }
 
-    public interface PushTokenUpdateHandler {
-        void onSuccess();
-
-        void onFailure(String message);
+    static String getInstallationID() {
+        return installationID;
     }
 
-    public interface DeviceUpdateHandler {
-        void onSuccess();
-
-        void onFailure(String message);
+    static String getFingerprint() {
+        return fingerprint;
     }
 
-    public interface SendBidirectionalAnswerHandler {
-        void onSuccess();
-
-        void onFailure(String message);
-    }
-
-    public interface MessageHistoryHandler {
-        void onSuccess(@NonNull Long recommendedNextTime);
-
-        void onFailure(String message);
-    }
-
-    public interface PushDeliveryReportHandler {
-        void onSuccess(@NonNull String messageId);
-
-        void onFailure(@NonNull String messageId);
-    }
-
-    public static class Builder {
-        Context mContext;
-        boolean mPromptLocation;
-        boolean mDisableGmsMissingPrompt;
-
-        private Builder() {
-        }
-
-        private Builder(Context context) {
-            mContext = context;
-        }
-
-        public Builder setAutoPromptLocation(boolean enable) {
-            mPromptLocation = enable;
-            return this;
-        }
-
-        public Builder disableGmsMissingPrompt(boolean disable) {
-            mDisableGmsMissingPrompt = disable;
-            return this;
-        }
-
-        public void init() {
-            Hyber.init(this);
-        }
+    static Builder getInitBuilder() {
+        return mInitBuilder;
     }
 
     public static Hyber.Builder startInit(Context context) {
@@ -135,11 +84,12 @@ public class Hyber {
     private static void init(Hyber.Builder inBuilder) {
         mInitBuilder = inBuilder;
 
-        Context context = mInitBuilder.mContext;
-        mInitBuilder.mContext = null; // Clear to prevent leaks.
+        Context context = mInitBuilder.getContext();
+        mInitBuilder.removeContext(); // Clear to prevent leaks.
 
         try {
-            ApplicationInfo ai = context.getPackageManager().getApplicationInfo(context.getPackageName(), PackageManager.GET_META_DATA);
+            ApplicationInfo ai = context.getPackageManager()
+                    .getApplicationInfo(context.getPackageName(), PackageManager.GET_META_DATA);
             Bundle bundle = ai.metaData;
             Hyber.init(context, bundle.getString("hyber_client_api_key"));
         } catch (Throwable t) {
@@ -147,7 +97,7 @@ public class Hyber {
         }
     }
 
-    public static void init(Context context, String hyberClientApiKey) {
+    private static void init(Context context, String hyberClientApiKey) {
         HyberDataSourceController.with(context);
 
         if (mInitBuilder == null)
@@ -164,12 +114,23 @@ public class Hyber {
 
         // START: Init validation
         if (hyberClientApiKey == null || hyberClientApiKey.isEmpty()) {
-            Log(LOG_LEVEL.FATAL, "Hyber Client Api Key format is invalid.");
+            mLog(LogLevel.FATAL, "Hyber Client Api Key format is invalid.");
             return;
         }
 
-        if (deviceType == OsUtils.DeviceType.FCM) {
+        switch (deviceType) {
             //TODO Validate integration params
+            case FCM:
+                mLog(LogLevel.INFO, "Firebase messaging on board!");
+                break;
+            case GCM:
+                mLog(LogLevel.INFO, "Google cloud messaging on board!");
+                break;
+            case ADM:
+                mLog(LogLevel.INFO, "Amazone messaging on board!");
+                break;
+            default:
+                mLog(LogLevel.INFO, "NON messaging on board!");
         }
 
         try {
@@ -178,35 +139,51 @@ public class Hyber {
                 Class.forName("android.support.v4.content.WakefulBroadcastReceiver");
                 Class.forName("android.support.v4.app.NotificationManagerCompat");
             } catch (ClassNotFoundException e) {
-                Log(LOG_LEVEL.FATAL, "The included Android Support Library v4 is to old or incomplete. Please update your project's android-support-v4.jar to the latest revision.", e);
+                mLog(LogLevel.FATAL,
+                        "The included Android Support Library v4 is to old or incomplete."
+                                + "\nPlease update your project's android-support-v4.jar to the latest revision.", e);
             }
         } catch (ClassNotFoundException e) {
-            Log(LOG_LEVEL.FATAL, "Could not find the Android Support Library v4. Please make sure android-support-v4.jar has been correctly added to your project.", e);
+            mLog(LogLevel.FATAL,
+                    "Could not find the Android Support Library v4."
+                            + "\nPlease make sure android-support-v4.jar has been correctly added to your project.", e);
         }
 
         if (initDone) {
             if (context != null)
-                appContext = context.getApplicationContext();
+                appWeakContext = new WeakReference<>(context.getApplicationContext());
 
             return;
         }
         // END: Init validation
 
         boolean contextIsActivity = (context instanceof Activity);
-
         foreground = contextIsActivity;
+
         clientApiKey = hyberClientApiKey;
-        appContext = context.getApplicationContext();
+        appWeakContext = new WeakReference<>(context.getApplicationContext());
 
         mMainApiBusinessModel = MainApiBusinessModel.getInstance(context);
         mMessageBusinessModel = MessageBusinessModel.getInstance();
 
         drInQueue = new HashMap<>();
 
-        mMessageChangeListener = new RealmChangeListener<RealmResults<Message>>() {
+        mMessageChangeListener = getMessageChangeListener();
+
+        Realm realm = Realm.getDefaultInstance();
+        mMessageResults = realm.where(Message.class)
+                .equalTo(Message.IS_REPORTED, false)
+                .findAllSorted(Message.RECEIVED_AT, Sort.DESCENDING);
+        realm.close();
+        mMessageResults.addChangeListener(mMessageChangeListener);
+
+        initDone = true;
+    }
+
+    private static RealmChangeListener<RealmResults<Message>> getMessageChangeListener() {
+        return new RealmChangeListener<RealmResults<Message>>() {
             @Override
             public void onChange(RealmResults<Message> elements) {
-
                 for (Message message : elements) {
                     if (!drInQueue.containsKey(message.getId())) {
                         drInQueue.put(message.getId(), false);
@@ -225,7 +202,7 @@ public class Hyber {
                         .subscribe(new Action1<String>() {
                             @Override
                             public void call(String messageId) {
-                                Hyber.Log(LOG_LEVEL.DEBUG, "Message " + messageId + " is changed");
+                                Hyber.mLog(LogLevel.DEBUG, "Message " + messageId + " is changed");
                                 Realm realm = Realm.getDefaultInstance();
                                 Message receivedMessage =
                                         realm.where(Message.class)
@@ -233,39 +210,40 @@ public class Hyber {
                                                 .findFirst();
 
                                 if (receivedMessage != null) {
-                                    Hyber.Log(LOG_LEVEL.DEBUG, "Sending push delivery report with message id " + messageId);
-                                    sendPushDeliveryReport(receivedMessage.getId(), receivedMessage.getReceivedAt().getTime(), new PushDeliveryReportHandler() {
-                                        @Override
-                                        public void onSuccess(@NonNull String messageId) {
-                                            String s = "Push delivery report onSuccess" +
-                                                    "\nWith message id " + messageId;
-                                            Realm realm = Realm.getDefaultInstance();
-                                            Log(LOG_LEVEL.INFO, s);
-                                            realm.beginTransaction();
-                                            Message rm = realm.where(Message.class)
-                                                    .equalTo(Message.ID, messageId)
-                                                    .findFirst();
-                                            if (rm != null) {
-                                                rm.setReportedComplete();
-                                                Log(LOG_LEVEL.INFO, String.format(Locale.getDefault(),
-                                                        "Message %s set delivery report status is %s",
-                                                        rm.getId(), rm.isReported()));
-                                            } else {
-                                                Log(LOG_LEVEL.WARN, String.format(Locale.getDefault(),
-                                                        "Message %s local not found", messageId));
-                                            }
-                                            drInQueue.remove(messageId);
-                                            realm.commitTransaction();
-                                            realm.close();
-                                        }
+                                    Hyber.mLog(LogLevel.DEBUG, "Sending push delivery report with message id " + messageId);
+                                    sendPushDeliveryReport(receivedMessage.getId(), receivedMessage.getReceivedAt().getTime(),
+                                            new PushDeliveryReportHandler() {
+                                                @Override
+                                                public void onSuccess(@NonNull String messageId) {
+                                                    String s = String.format(Locale.getDefault(),
+                                                            "Push delivery report onSuccess\nWith message id %s", messageId);
+                                                    Realm realm = Realm.getDefaultInstance();
+                                                    mLog(LogLevel.INFO, s);
+                                                    realm.beginTransaction();
+                                                    Message rm = realm.where(Message.class)
+                                                            .equalTo(Message.ID, messageId)
+                                                            .findFirst();
+                                                    if (rm != null) {
+                                                        rm.setReportedComplete();
+                                                        mLog(LogLevel.INFO, String.format(Locale.getDefault(),
+                                                                "Message %s set delivery report status is %s",
+                                                                rm.getId(), rm.isReported()));
+                                                    } else {
+                                                        mLog(LogLevel.WARN, String.format(Locale.getDefault(),
+                                                                "Message %s local not found", messageId));
+                                                    }
+                                                    drInQueue.remove(messageId);
+                                                    realm.commitTransaction();
+                                                    realm.close();
+                                                }
 
-                                        @Override
-                                        public void onFailure(@NonNull String messageId) {
-                                            String s = "Push delivery report onFailure";
-                                            Log(LOG_LEVEL.WARN, s);
-                                            drInQueue.remove(messageId);
-                                        }
-                                    });
+                                                @Override
+                                                public void onFailure(@NonNull String messageId) {
+                                                    String s = "Push delivery report onFailure";
+                                                    mLog(LogLevel.WARN, s);
+                                                    drInQueue.remove(messageId);
+                                                }
+                                            });
                                 } else {
                                     drInQueue.put(messageId, false);
                                 }
@@ -277,77 +255,42 @@ public class Hyber {
                         }, new Action1<Throwable>() {
                             @Override
                             public void call(Throwable throwable) {
-                                Log(LOG_LEVEL.ERROR, throwable.getLocalizedMessage());
+                                mLog(LogLevel.ERROR, throwable.getLocalizedMessage());
                                 drInQueue = new HashMap<>();
                             }
                         });
             }
         };
-        Realm realm = Realm.getDefaultInstance();
-        mMessageResults = realm.where(Message.class)
-                .equalTo(Message.IS_REPORTED, false)
-                .findAllSorted(Message.RECEIVED_AT, Sort.DESCENDING);
-        realm.close();
-        mMessageResults.addChangeListener(mMessageChangeListener);
-
-        initDone = true;
     }
 
     public static boolean isBidirectionalAvailable() {
         return isBidirectionalAvailable;
     }
 
-    public static void setLogLevel(LOG_LEVEL inLogCatLevel, LOG_LEVEL inVisualLogLevel) {
+    public static void setLogLevel(LogLevel inLogCatLevel, LogLevel inVisualLogLevel) {
         logCatLevel = inLogCatLevel;
         visualLogLevel = inVisualLogLevel;
     }
 
-    public static void setLogLevel(int inLogCatLevel, int inVisualLogLevel) {
-        setLogLevel(getLogLevel(inLogCatLevel), getLogLevel(inVisualLogLevel));
-    }
-
-    private static Hyber.LOG_LEVEL getLogLevel(int level) {
-        switch (level) {
-            case 0:
-                return Hyber.LOG_LEVEL.NONE;
-            case 1:
-                return Hyber.LOG_LEVEL.FATAL;
-            case 2:
-                return Hyber.LOG_LEVEL.ERROR;
-            case 3:
-                return Hyber.LOG_LEVEL.WARN;
-            case 4:
-                return Hyber.LOG_LEVEL.INFO;
-            case 5:
-                return Hyber.LOG_LEVEL.DEBUG;
-            case 6:
-                return Hyber.LOG_LEVEL.VERBOSE;
-        }
-
-        if (level < 0)
-            return Hyber.LOG_LEVEL.NONE;
-        return Hyber.LOG_LEVEL.VERBOSE;
-    }
-
-    private static boolean atLogLevel(LOG_LEVEL level) {
+    private static boolean atLogLevel(LogLevel level) {
         return level.compareTo(visualLogLevel) < 1 || level.compareTo(logCatLevel) < 1;
     }
 
-    static void Log(LOG_LEVEL level, String message) {
-        Log(level, message, null);
+    static void mLog(LogLevel level, String message) {
+        mLog(level, message, null);
     }
 
-    static void Log(final LOG_LEVEL level, String message, Throwable throwable) {
+    static void mLog(final LogLevel level, String message, Throwable throwable) {
         if (level.compareTo(logCatLevel) < 1) {
-            if (level == LOG_LEVEL.VERBOSE)
+            if (level == LogLevel.VERBOSE)
                 Log.v(TAG, message, throwable);
-            else if (level == LOG_LEVEL.DEBUG)
+            else if (level == LogLevel.DEBUG)
                 Log.d(TAG, message, throwable);
-            else if (level == LOG_LEVEL.INFO)
+            else if (level == LogLevel.INFO)
                 Log.i(TAG, message, throwable);
-            else if (level == LOG_LEVEL.WARN)
+            else if (level == LogLevel.WARN)
                 Log.w(TAG, message, throwable);
-            else if (level == LOG_LEVEL.ERROR || level == LOG_LEVEL.FATAL)
+            else if (level == LogLevel.ERROR || level == LogLevel.FATAL)
                 Log.e(TAG, message, throwable);
         }
     }
@@ -390,18 +333,20 @@ public class Hyber {
         });
     }
 
-    public static void sendBidirectionalAnswer(@NonNull String messageId, @NonNull String answerText, final SendBidirectionalAnswerHandler handler) {
-        mMainApiBusinessModel.sendBidirectionalAnswer(messageId, answerText, new MainApiBusinessModel.SendBidirectionalAnswerListener() {
-            @Override
-            public void onSent(@NonNull String messageId) {
-                handler.onSuccess();
-            }
+    public static void sendBidirectionalAnswer(@NonNull String messageId, @NonNull String answerText,
+                                               final SendBidirectionalAnswerHandler handler) {
+        mMainApiBusinessModel.sendBidirectionalAnswer(messageId, answerText,
+                new MainApiBusinessModel.SendBidirectionalAnswerListener() {
+                    @Override
+                    public void onSent(@NonNull String messageId) {
+                        handler.onSuccess();
+                    }
 
-            @Override
-            public void onSendingError() {
-                handler.onFailure(/*TODO*/ "TODO");
-            }
-        });
+                    @Override
+                    public void onSendingError() {
+                        handler.onFailure(/*TODO*/ "TODO");
+                    }
+                });
     }
 
     public static void getMessageHistory(@NonNull Long startDate, final MessageHistoryHandler handler) {
@@ -436,18 +381,20 @@ public class Hyber {
         });
     }
 
-    private static void sendPushDeliveryReport(@NonNull final String messageId, @NonNull Long receivedAt, final PushDeliveryReportHandler handler) {
-        mMainApiBusinessModel.sendPushDeliveryReport(messageId, receivedAt, new MainApiBusinessModel.SendPushDeliveryReportListener() {
-            @Override
-            public void onSuccess(@NonNull String messageId) {
-                handler.onSuccess(messageId);
-            }
+    private static void sendPushDeliveryReport(@NonNull final String messageId, @NonNull Long receivedAt,
+                                               final PushDeliveryReportHandler handler) {
+        mMainApiBusinessModel.sendPushDeliveryReport(messageId, receivedAt,
+                new MainApiBusinessModel.SendPushDeliveryReportListener() {
+                    @Override
+                    public void onSuccess(@NonNull String messageId) {
+                        handler.onSuccess(messageId);
+                    }
 
-            @Override
-            public void onFailure() {
-                handler.onFailure(messageId);
-            }
-        });
+                    @Override
+                    public void onFailure() {
+                        handler.onFailure(messageId);
+                    }
+                });
     }
 
     private static void startRegistrationOrOnSession() throws Throwable {
@@ -466,7 +413,7 @@ public class Hyber {
                 throw new Throwable("Firebase classes not found");
         }
 
-        pushRegistrator.registerForPush(appContext, new PushRegistrator.RegisteredHandler() {
+        pushRegistrator.registerForPush(appWeakContext.get(), new PushRegistrator.RegisteredHandler() {
             @Override
             public void complete(String id) {
                 lastRegistrationId = id;
@@ -476,8 +423,12 @@ public class Hyber {
         });
     }
 
+    static Context getAppContext() {
+        return appWeakContext.get();
+    }
+
     public static void notificationListener(final NotificationListener listener) {
-        NotificationBundleProcessor.remoteMessageObservable
+        NotificationBundleProcessor.getRemoteMessageObservable()
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Action1<HyberMessageModel>() {
                     @Override
@@ -488,7 +439,7 @@ public class Hyber {
     }
 
     private static void updateDeviceData() {
-        Log(LOG_LEVEL.DEBUG, "updateDeviceData: registerForPushFired:" + registerForPushFired);
+        mLog(LogLevel.DEBUG, "updateDeviceData: registerForPushFired:" + registerForPushFired);
 
         if (!registerForPushFired)
             return;
@@ -512,7 +463,7 @@ public class Hyber {
                 }, new Action1<Throwable>() {
                     @Override
                     public void call(Throwable throwable) {
-                        Log(LOG_LEVEL.WARN, throwable.getLocalizedMessage());
+                        mLog(LogLevel.WARN, throwable.getLocalizedMessage());
                     }
                 });
     }
@@ -522,8 +473,91 @@ public class Hyber {
         handler.post(action);
     }
 
-    public enum LOG_LEVEL {
+    public enum LogLevel {
         NONE, FATAL, ERROR, WARN, INFO, DEBUG, VERBOSE
+    }
+
+    public interface NotificationListener {
+        void onMessageReceived(HyberMessageModel hyberMessageModel);
+    }
+
+    public interface UserRegistrationHandler {
+        void onSuccess();
+
+        void onFailure(String message);
+    }
+
+    public interface PushTokenUpdateHandler {
+        void onSuccess();
+
+        void onFailure(String message);
+    }
+
+    public interface DeviceUpdateHandler {
+        void onSuccess();
+
+        void onFailure(String message);
+    }
+
+    public interface SendBidirectionalAnswerHandler {
+        void onSuccess();
+
+        void onFailure(String message);
+    }
+
+    public interface MessageHistoryHandler {
+        void onSuccess(@NonNull Long recommendedNextTime);
+
+        void onFailure(String message);
+    }
+
+    public interface PushDeliveryReportHandler {
+        void onSuccess(@NonNull String messageId);
+
+        void onFailure(@NonNull String messageId);
+    }
+
+    public static final class Builder {
+        private WeakReference<Context> mWeakContext;
+        private boolean mPromptLocation;
+        private boolean mDisableGmsMissingPrompt;
+
+        private Builder() {
+        }
+
+        private Builder(Context context) {
+            mWeakContext = new WeakReference<>(context);
+        }
+
+        public Builder setAutoPromptLocation(boolean enable) {
+            mPromptLocation = enable;
+            return this;
+        }
+
+        public Builder disableGmsMissingPrompt(boolean disable) {
+            mDisableGmsMissingPrompt = disable;
+            return this;
+        }
+
+        public void init() {
+            Hyber.init(this);
+        }
+
+        Context getContext() {
+            return mWeakContext.get();
+        }
+
+        void removeContext() {
+            mWeakContext.clear();
+        }
+
+        boolean isPromptLocation() {
+            return mPromptLocation;
+        }
+
+        boolean isDisableGmsMissingPrompt() {
+            return mDisableGmsMissingPrompt;
+        }
     }
 
 }
