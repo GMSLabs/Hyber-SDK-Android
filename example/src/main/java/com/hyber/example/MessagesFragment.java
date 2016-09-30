@@ -17,6 +17,8 @@ import android.widget.Toast;
 
 import com.hyber.Hyber;
 import com.hyber.example.adapter.MyMessagesRVAdapter;
+import com.hyber.handler.BidirectionalAnswerHandler;
+import com.hyber.handler.MessageHistoryHandler;
 
 import java.util.Locale;
 
@@ -125,7 +127,7 @@ public class MessagesFragment extends Fragment {
                                     messageId, answerText),
                             Toast.LENGTH_SHORT).show();
                     Hyber.sendBidirectionalAnswer(messageId, answerText,
-                            new Hyber.SendBidirectionalAnswerHandler() {
+                            new BidirectionalAnswerHandler() {
                                 @Override
                                 public void onSuccess() {
                                     Toast.makeText(getActivity(),
@@ -159,7 +161,7 @@ public class MessagesFragment extends Fragment {
 
     private void getMessagesFromHistory(long historyFromThisTimeToPast) {
         mMaxHistoryRequests -= 1;
-        Hyber.getMessageHistory(historyFromThisTimeToPast, new Hyber.MessageHistoryHandler() {
+        Hyber.getMessageHistory(historyFromThisTimeToPast, new MessageHistoryHandler() {
             @Override
             public void onSuccess(@NonNull Long recommendedNextTime) {
                 mTimeForNextHistoryRequest = recommendedNextTime;
@@ -181,7 +183,7 @@ public class MessagesFragment extends Fragment {
         final String messageId = mAdapter.getMessageId(mAdapter.getItemCount() - 1);
         final String answerText = mInputAnswer.getText().toString();
         if (!answerText.isEmpty()) {
-            Hyber.sendBidirectionalAnswer(messageId, answerText, new Hyber.SendBidirectionalAnswerHandler() {
+            Hyber.sendBidirectionalAnswer(messageId, answerText, new BidirectionalAnswerHandler() {
                 @Override
                 public void onSuccess() {
                     Toast.makeText(getActivity(),

@@ -9,7 +9,16 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.util.Log;
+
+import com.hyber.handler.BidirectionalAnswerHandler;
+import com.hyber.handler.DeviceUpdateHandler;
+import com.hyber.handler.MessageHistoryHandler;
+import com.hyber.handler.UserRegistrationHandler;
+import com.hyber.listener.DeliveryReportListener;
+import com.hyber.listener.HyberErrorListener;
+import com.hyber.listener.HyberNotificationListener;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -23,7 +32,6 @@ import io.realm.RealmChangeListener;
 import io.realm.RealmResults;
 import io.realm.Sort;
 import rx.Observable;
-import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
 
 public final class Hyber {
@@ -41,8 +49,6 @@ public final class Hyber {
     private static boolean initDone;
     private static LogLevel visualLogLevel = LogLevel.NONE;
     private static LogLevel logCatLevel = LogLevel.WARN;
-    private static OsUtils.DeviceType deviceType;
-    private static OsUtils osUtils;
     private static boolean startedRegistration;
 
     private static boolean foreground;
@@ -57,8 +63,14 @@ public final class Hyber {
     private static RealmResults<Message> mMessageResults;
     private static HashMap<String, Boolean> drInQueue;
 
+    private static Hyber instance = null;
+
     private Hyber() {
 
+    }
+
+    private static Hyber getInstance() {
+        return instance;
     }
 
     static String getClientApiKey() {
@@ -77,7 +89,7 @@ public final class Hyber {
         return mInitBuilder;
     }
 
-    public static Hyber.Builder startInit(Context context) {
+    public static Hyber.Builder with(Context context) {
         return new Hyber.Builder(context);
     }
 
@@ -92,20 +104,38 @@ public final class Hyber {
                     .getApplicationInfo(context.getPackageName(), PackageManager.GET_META_DATA);
             Bundle bundle = ai.metaData;
             Hyber.init(context, bundle.getString("hyber_client_api_key"));
-        } catch (Throwable t) {
-            t.printStackTrace();
+        } catch (PackageManager.NameNotFoundException e) {
+            HyberErrorProcessor.getInstance().onError(new HyberError(e));
         }
     }
 
     private static void init(Context context, String hyberClientApiKey) {
+        HyberErrorProcessor.getInstance().getHyberErrorObservable()
+                .subscribe(new Action1<HyberError>() {
+                    @Override
+                    public void call(HyberError error) {
+                        if (mInitBuilder.mErrorListener != null)
+                            mInitBuilder.mErrorListener.onError(error);
+
+                        mLog(LogLevel.ERROR, String.format(Locale.getDefault(),
+                                "Hyber error code %d\n%s", error.getCode(), error.getDescription()));
+                    }
+                });
+
         HyberDataSourceController.with(context);
 
-        if (mInitBuilder == null)
-            mInitBuilder = new Hyber.Builder();
+        NotificationBundleProcessor.getRemoteMessageObservable()
+                .subscribe(new Action1<HyberMessageModel>() {
+                    @Override
+                    public void call(HyberMessageModel hyberMessageModel) {
+                        if (mInitBuilder.mNotificationListener != null)
+                            mInitBuilder.mNotificationListener.onMessageReceived(hyberMessageModel);
 
-        osUtils = new OsUtils();
-
-        deviceType = osUtils.getDeviceType();
+                        mLog(LogLevel.INFO, String.format(Locale.getDefault(),
+                                "New Hyber message:\nID: %s\nAlpha name: %s\nMessage: %s",
+                                hyberMessageModel.getId(), hyberMessageModel.getAlpha(), hyberMessageModel.getText()));
+                    }
+                });
 
         installationID = Installation.id(context);
         fingerprint = Fingerprint.keyHash(context);
@@ -115,10 +145,11 @@ public final class Hyber {
         // START: Init validation
         if (hyberClientApiKey == null || hyberClientApiKey.isEmpty()) {
             mLog(LogLevel.FATAL, "Hyber Client Api Key format is invalid.");
+            HyberErrorProcessor.getInstance().onError(new HyberError(HyberErrorStatus.INTERNAL_ChuckNorrisException));
             return;
         }
 
-        switch (deviceType) {
+        switch (OsUtils.getDeviceType()) {
             //TODO Validate integration params
             case FCM:
                 mLog(LogLevel.INFO, "Firebase messaging on board!");
@@ -212,9 +243,9 @@ public final class Hyber {
                                 if (receivedMessage != null) {
                                     Hyber.mLog(LogLevel.DEBUG, "Sending push delivery report with message id " + messageId);
                                     sendPushDeliveryReport(receivedMessage.getId(), receivedMessage.getReceivedAt().getTime(),
-                                            new PushDeliveryReportHandler() {
+                                            new DeliveryReportListener() {
                                                 @Override
-                                                public void onSuccess(@NonNull String messageId) {
+                                                public void onDeliveryReportSent(@NonNull String messageId) {
                                                     String s = String.format(Locale.getDefault(),
                                                             "Push delivery report onSuccess\nWith message id %s", messageId);
                                                     Realm realm = Realm.getDefaultInstance();
@@ -235,13 +266,6 @@ public final class Hyber {
                                                     drInQueue.remove(messageId);
                                                     realm.commitTransaction();
                                                     realm.close();
-                                                }
-
-                                                @Override
-                                                public void onFailure(@NonNull String messageId) {
-                                                    String s = "Push delivery report onFailure";
-                                                    mLog(LogLevel.WARN, s);
-                                                    drInQueue.remove(messageId);
                                                 }
                                             });
                                 } else {
@@ -264,6 +288,7 @@ public final class Hyber {
     }
 
     public static boolean isBidirectionalAvailable() {
+        checkInitialized();
         return isBidirectionalAvailable;
     }
 
@@ -306,6 +331,7 @@ public final class Hyber {
     }
 
     public static void userRegistration(@NonNull Long phone, final UserRegistrationHandler handler) {
+        checkInitialized();
         mMainApiBusinessModel.authorize(phone, new MainApiBusinessModel.AuthorizationListener() {
             @Override
             public void onAuthorized() {
@@ -320,6 +346,7 @@ public final class Hyber {
     }
 
     public static void deviceUpdate(final DeviceUpdateHandler handler) {
+        checkInitialized();
         mMainApiBusinessModel.sendDeviceData(new MainApiBusinessModel.SendDeviceDataListener() {
             @Override
             public void onSent() {
@@ -334,7 +361,8 @@ public final class Hyber {
     }
 
     public static void sendBidirectionalAnswer(@NonNull String messageId, @NonNull String answerText,
-                                               final SendBidirectionalAnswerHandler handler) {
+                                               final BidirectionalAnswerHandler handler) {
+        checkInitialized();
         mMainApiBusinessModel.sendBidirectionalAnswer(messageId, answerText,
                 new MainApiBusinessModel.SendBidirectionalAnswerListener() {
                     @Override
@@ -350,6 +378,7 @@ public final class Hyber {
     }
 
     public static void getMessageHistory(@NonNull Long startDate, final MessageHistoryHandler handler) {
+        checkInitialized();
         mMainApiBusinessModel.getMessageHistory(startDate, new MainApiBusinessModel.MessageHistoryListener() {
             @Override
             public void onSuccess(@NonNull final Long startDate, @NonNull final MessageHistoryRespEnvelope envelope) {
@@ -382,17 +411,17 @@ public final class Hyber {
     }
 
     private static void sendPushDeliveryReport(@NonNull final String messageId, @NonNull Long receivedAt,
-                                               final PushDeliveryReportHandler handler) {
+                                               final DeliveryReportListener handler) {
         mMainApiBusinessModel.sendPushDeliveryReport(messageId, receivedAt,
                 new MainApiBusinessModel.SendPushDeliveryReportListener() {
                     @Override
                     public void onSuccess(@NonNull String messageId) {
-                        handler.onSuccess(messageId);
+                        handler.onDeliveryReportSent(messageId);
                     }
 
                     @Override
                     public void onFailure() {
-                        handler.onFailure(messageId);
+                        HyberErrorProcessor.getInstance().onError(new HyberError());
                     }
                 });
     }
@@ -405,7 +434,7 @@ public final class Hyber {
 
         PushRegistrator pushRegistrator;
 
-        switch (deviceType) {
+        switch (OsUtils.getDeviceType()) {
             case FCM:
                 pushRegistrator = new PushRegistrarFCM();
                 break;
@@ -425,17 +454,6 @@ public final class Hyber {
 
     static Context getAppContext() {
         return appWeakContext.get();
-    }
-
-    public static void notificationListener(final NotificationListener listener) {
-        NotificationBundleProcessor.getRemoteMessageObservable()
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Action1<HyberMessageModel>() {
-                    @Override
-                    public void call(HyberMessageModel hyberMessageModel) {
-                        listener.onMessageReceived(hyberMessageModel);
-                    }
-                });
     }
 
     private static void updateDeviceData() {
@@ -477,65 +495,49 @@ public final class Hyber {
         NONE, FATAL, ERROR, WARN, INFO, DEBUG, VERBOSE
     }
 
-    public interface NotificationListener {
-        void onMessageReceived(HyberMessageModel hyberMessageModel);
-    }
-
-    public interface UserRegistrationHandler {
-        void onSuccess();
-
-        void onFailure(String message);
-    }
-
     public interface PushTokenUpdateHandler {
         void onSuccess();
 
         void onFailure(String message);
     }
 
-    public interface DeviceUpdateHandler {
-        void onSuccess();
-
-        void onFailure(String message);
-    }
-
-    public interface SendBidirectionalAnswerHandler {
-        void onSuccess();
-
-        void onFailure(String message);
-    }
-
-    public interface MessageHistoryHandler {
-        void onSuccess(@NonNull Long recommendedNextTime);
-
-        void onFailure(String message);
-    }
-
-    public interface PushDeliveryReportHandler {
-        void onSuccess(@NonNull String messageId);
-
-        void onFailure(@NonNull String messageId);
-    }
-
     public static final class Builder {
         private WeakReference<Context> mWeakContext;
         private boolean mPromptLocation;
         private boolean mDisableGmsMissingPrompt;
+        private HyberErrorListener mErrorListener;
+        private HyberNotificationListener mNotificationListener;
 
         private Builder() {
+
         }
 
         private Builder(Context context) {
-            mWeakContext = new WeakReference<>(context);
+            this.mWeakContext = new WeakReference<>(context);
+        }
+
+        public Builder setLogLevel(LogLevel level) {
+            logCatLevel = level;
+            return this;
+        }
+
+        public Builder setErrorListener(@NonNull final HyberErrorListener listener) {
+            this.mErrorListener = listener;
+            return this;
+        }
+
+        public Builder setNotificationListener(@NonNull final HyberNotificationListener listener) {
+            this.mNotificationListener = listener;
+            return this;
         }
 
         public Builder setAutoPromptLocation(boolean enable) {
-            mPromptLocation = enable;
+            this.mPromptLocation = enable;
             return this;
         }
 
         public Builder disableGmsMissingPrompt(boolean disable) {
-            mDisableGmsMissingPrompt = disable;
+            this.mDisableGmsMissingPrompt = disable;
             return this;
         }
 
@@ -557,6 +559,24 @@ public final class Hyber {
 
         boolean isDisableGmsMissingPrompt() {
             return mDisableGmsMissingPrompt;
+        }
+
+        @Nullable
+        public HyberErrorListener getErrorListener() {
+            return mErrorListener;
+        }
+
+        @Nullable
+        public HyberNotificationListener getNotificationListener() {
+            return mNotificationListener;
+        }
+
+    }
+
+    private static void checkInitialized() {
+        if (!initDone) {
+            throw new IllegalStateException(
+                    "Hyber must be initialized by calling Hyber.with(Context).init() prior to calling Hyber methods");
         }
     }
 

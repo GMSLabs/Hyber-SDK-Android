@@ -12,7 +12,11 @@ import android.telephony.TelephonyManager;
 
 import java.util.Locale;
 
-class OsUtils {
+final class OsUtils {
+
+    private OsUtils() {
+
+    }
 
     static String getManifestMeta(Context context, String metaName) {
         try {
@@ -68,7 +72,7 @@ class OsUtils {
                 >= Configuration.SCREENLAYOUT_SIZE_LARGE;
     }
 
-    DeviceType getDeviceType() {
+    static DeviceType getDeviceType() {
         try {
             Class.forName("com.google.firebase.FirebaseApp");
             return DeviceType.FCM;
@@ -86,7 +90,7 @@ class OsUtils {
         return DeviceType.GCM;
     }
 
-    Integer getNetType() {
+    static Integer getNetType() {
         ConnectivityManager cm = (ConnectivityManager) Hyber.getAppContext().getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo netInfo = cm.getActiveNetworkInfo();
 
@@ -100,7 +104,7 @@ class OsUtils {
         return null;
     }
 
-    String getCarrierName() {
+    static String getCarrierName() {
         TelephonyManager manager = (TelephonyManager) Hyber.getAppContext().getSystemService(Context.TELEPHONY_SERVICE);
         String carrierName = manager.getNetworkOperatorName();
         return "".equals(carrierName) ? null : carrierName;
