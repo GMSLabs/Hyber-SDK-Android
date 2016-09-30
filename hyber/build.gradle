@@ -11,7 +11,7 @@ dependencies {
     // Hyber Dependencies
     compile 'com.android.support:recyclerview-v7:24.2.1'
 
-    compile 'com.google.android.gms:play-services-base:9.4.0'
+    compile 'com.google.android.gms:play-services-base:9.6.1'
     compile 'com.google.firebase:firebase-messaging:9.4.0'
 
     compile 'io.reactivex:rxandroid:1.2.1'
@@ -41,12 +41,13 @@ dependencies {
 }
 
 android {
-    compileSdkVersion Integer.parseInt(project.ANDROID_BUILD_SDK_VERSION)
-    buildToolsVersion project.ANDROID_BUILD_TOOLS_VERSION
+    compileSdkVersion rootProject.ext.compileSdkVersion
+    buildToolsVersion rootProject.ext.buildToolsVersion
 
     defaultConfig {
-        minSdkVersion Integer.parseInt(project.ANDROID_BUILD_MIN_SDK_VERSION)
-        targetSdkVersion Integer.parseInt(project.ANDROID_BUILD_TARGET_SDK_VERSION)
+        minSdkVersion rootProject.ext.minSdkVersion
+        targetSdkVersion rootProject.ext.targetSdkVersion
+
         consumerProguardFiles 'proguard.pro'
 
         buildConfigField 'String', 'HOST_mobile_abonents', api_host_mobile_abonents
