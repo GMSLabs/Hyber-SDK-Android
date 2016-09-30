@@ -131,6 +131,7 @@ dependencies {
     compile 'com.jakewharton.timber:timber:4.3.0'
 
     // Analytics
+    compile 'com.google.firebase:firebase-crash:9.6.0'
     compile('com.crashlytics.sdk.android:crashlytics:2.6.3@aar') {
         transitive = true;
     }

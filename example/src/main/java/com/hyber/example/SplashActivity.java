@@ -13,6 +13,8 @@ import android.widget.EditText;
 import android.widget.TextView;
 
 import com.hyber.Hyber;
+import com.hyber.handler.DeviceUpdateHandler;
+import com.hyber.handler.UserRegistrationHandler;
 
 import java.util.Locale;
 
@@ -46,7 +48,7 @@ public class SplashActivity extends AppCompatActivity {
     }
 
     private void deviceDataUpdate() {
-        Hyber.deviceUpdate(new Hyber.DeviceUpdateHandler() {
+        Hyber.deviceUpdate(new DeviceUpdateHandler() {
             @Override
             public void onSuccess() {
                 startActivity(new Intent(SplashActivity.this, MainActivity.class));
@@ -60,7 +62,7 @@ public class SplashActivity extends AppCompatActivity {
     }
 
     private void userRegistration() {
-        Hyber.userRegistration(mPhone, new Hyber.UserRegistrationHandler() {
+        Hyber.userRegistration(mPhone, new UserRegistrationHandler() {
             @Override
             public void onSuccess() {
                 String s = String.format(Locale.getDefault(), "User registration onSuccess\nWith phone %d", mPhone);
