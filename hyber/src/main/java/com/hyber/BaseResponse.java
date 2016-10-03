@@ -4,7 +4,7 @@ import android.support.annotation.Nullable;
 
 import com.google.gson.annotations.SerializedName;
 
-class BaseResponce {
+class BaseResponse {
 
     @SerializedName("error")
     private ErrorRespItemModel mError;

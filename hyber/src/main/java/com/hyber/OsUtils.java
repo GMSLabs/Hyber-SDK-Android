@@ -25,7 +25,7 @@ final class OsUtils {
             Bundle bundle = ai.metaData;
             return bundle.getString(metaName);
         } catch (Throwable t) {
-            Hyber.mLog(Hyber.LogLevel.ERROR, "", t);
+            HyberLogger.wtf(t);
         }
 
         return null;
@@ -77,14 +77,14 @@ final class OsUtils {
             Class.forName("com.google.firebase.FirebaseApp");
             return DeviceType.FCM;
         } catch (ClassNotFoundException ignored) {
-            Hyber.mLog(Hyber.LogLevel.INFO, "Is not Firebase messaging");
+            HyberLogger.d("Is not Firebase messaging");
         }
 
         try {
             Class.forName("com.amazon.device.messaging.ADM");
             return DeviceType.ADM;
         } catch (ClassNotFoundException ignored) {
-            Hyber.mLog(Hyber.LogLevel.INFO, "Is not Amazone messaging");
+            HyberLogger.d("Is not Amazone messaging");
         }
 
         return DeviceType.GCM;

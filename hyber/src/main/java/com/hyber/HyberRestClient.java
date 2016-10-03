@@ -8,7 +8,6 @@ import com.google.gson.GsonBuilder;
 import java.util.concurrent.TimeUnit;
 
 import okhttp3.OkHttpClient;
-import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory;
@@ -26,8 +25,8 @@ final class HyberRestClient {
     static {
         OkHttpClient okHttpClient = new OkHttpClient.Builder()
                 //.addInterceptor(new StethoInterceptor())
-                .addInterceptor(new HyberInterceptor())
-                .addInterceptor(new HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY))
+                .addInterceptor(new HyberAuthInterceptor())
+                .addInterceptor(new HyberHttpLoggingInterceptor().setLevel(HyberHttpLoggingInterceptor.Level.FULL))
                 .connectTimeout(Tweakables.STANDARD_API_TIMEOUT_SECONDS, TimeUnit.SECONDS)
                 .readTimeout(Tweakables.STANDARD_API_TIMEOUT_SECONDS, TimeUnit.SECONDS)
                 .writeTimeout(Tweakables.STANDARD_API_TIMEOUT_SECONDS, TimeUnit.SECONDS)

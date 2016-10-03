@@ -14,7 +14,6 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.firebase.iid.FirebaseInstanceId;
 
-import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
 class PushRegistrarFCM implements PushRegistrator {
@@ -34,13 +33,12 @@ class PushRegistrarFCM implements PushRegistrator {
             if (checkPlayServices())
                 registerInBackground();
             else {
-                Hyber.mLog(Hyber.LogLevel.ERROR, "No valid Google Play services APK found.");
+                HyberLogger.e("No valid Google Play services APK found.");
                 registeredHandler.complete(null);
             }
         } catch (Throwable t) {
-            Hyber.mLog(Hyber.LogLevel.ERROR,
-                    "Could not register with GCM due to an error with the AndroidManifest.xml "
-                            + "file or with 'Google Play services'.", t);
+            HyberLogger.e(t, "Could not register with GCM due to an error with the AndroidManifest.xml "
+                                    + "file or with 'Google Play services'.");
             registeredHandler.complete(null);
         }
     }
@@ -62,7 +60,7 @@ class PushRegistrarFCM implements PushRegistrator {
         int resultCode = GooglePlayServicesUtil.isGooglePlayServicesAvailable(appContext);
         if (resultCode != ConnectionResult.SUCCESS) {
             if (GooglePlayServicesUtil.isUserRecoverableError(resultCode) && isGooglePlayStoreInstalled()) {
-                Hyber.mLog(Hyber.LogLevel.INFO, "Google Play services Recoverable Error: " + resultCode);
+                HyberLogger.i("Google Play services Recoverable Error: %d", resultCode);
 
                 final SharedPreferences prefs = Hyber.getHyberPreferences(appContext);
                 if (prefs.getBoolean("GT_DO_NOT_SHOW_MISSING_GPS", false))
@@ -71,10 +69,10 @@ class PushRegistrarFCM implements PushRegistrator {
                 try {
                     showUpdateGPSDialog(resultCode);
                 } catch (Exception e) {
-                    Hyber.mLog(Hyber.LogLevel.WARN, "showUpdateGPSDialog(resultCode)", e);
+                    HyberLogger.wtf(e, "showUpdateGPSDialog(resultCode)");
                 }
             } else {
-                Hyber.mLog(Hyber.LogLevel.WARN, "Google Play services error: This device is not supported. Code:" + resultCode);
+                HyberLogger.w("Google Play services error: This device is not supported. Code: %d", resultCode);
             }
 
             return false;
@@ -95,7 +93,7 @@ class PushRegistrarFCM implements PushRegistrator {
         Hyber.runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                final Activity activity = ActivityLifecycleHandler.getCurrActivity();
+                final Activity activity = HyberActivityLifecycleHandler.getCurrActivity();
                 if (activity == null || Hyber.getInitBuilder().isDisableGmsMissingPrompt())
                     return;
 
@@ -137,23 +135,16 @@ class PushRegistrarFCM implements PushRegistrator {
                 for (int currentRetry = 0; currentRetry < FCM_RETRY_COUNT; currentRetry++) {
                     registrationId = FirebaseInstanceId.getInstance().getToken();
                     if (registrationId != null) {
-                        Hyber.mLog(Hyber.LogLevel.INFO,
-                                String.format(Locale.getDefault(),
-                                        "Device registered, Firebase registration push token = %s",
-                                        registrationId));
+                        HyberLogger.i("Device registered, Firebase registration push token = %s", registrationId);
                         registeredHandler.complete(registrationId);
                         break;
                     } else {
                         if (currentRetry >= (FCM_RETRY_COUNT - 1)) {
-                            Hyber.mLog(Hyber.LogLevel.ERROR,
-                                    String.format(Locale.getDefault(),
-                                            "FCM_RETRY_COUNT of %d exceed! Could not get a Firebase Registration Id",
-                                            FCM_RETRY_COUNT));
+                            HyberLogger.e("FCM_RETRY_COUNT of %d exceed! Could not get a Firebase Registration Id",
+                                    FCM_RETRY_COUNT);
                         } else {
-                            Hyber.mLog(Hyber.LogLevel.INFO,
-                                    String.format(Locale.getDefault(),
-                                            "Google Play services returned SERVICE_NOT_AVAILABLE error. Current retry count: %d",
-                                            currentRetry));
+                            HyberLogger.i("Google Play services returned SERVICE_NOT_AVAILABLE error."
+                                    + " Current retry count: %d", currentRetry);
                             if (currentRetry == 2) {
                                 // Retry 3 times before firing a null response and continuing a few more times.
                                 registeredHandler.complete(null);
@@ -161,7 +152,7 @@ class PushRegistrarFCM implements PushRegistrator {
                             try {
                                 Thread.sleep(TimeUnit.SECONDS.toMillis(FCM_RETRY_INTERVAL_SECONDS));
                             } catch (Throwable e) {
-                                Hyber.mLog(Hyber.LogLevel.WARN, "Thread.sleep error", e);
+                                HyberLogger.wtf(e, "Thread.sleep error");
                             }
                         }
                     }

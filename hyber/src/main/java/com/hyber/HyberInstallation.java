@@ -8,25 +8,26 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.util.UUID;
 
-final class Installation {
+final class HyberInstallation {
 
-    private static final String TAG_INSTALLATION = "TAG_INSTALLATION";
+    private static final String TAG = "HyberInstallation";
 
     private static String sID = null;
 
-    private Installation() {
+    private HyberInstallation() {
 
     }
 
     public static synchronized String id(Context context) {
         if (sID == null) {
-            File installation = new File(context.getFilesDir(), TAG_INSTALLATION);
+            File installation = new File(context.getFilesDir(), TAG);
             try {
                 if (!installation.exists())
                     writeInstallationFile(installation);
                 sID = readInstallationFile(installation);
             } catch (Exception e) {
-                throw new RuntimeException(e);
+                HyberLogger.tag(TAG);
+                HyberLogger.wtf(e);
             }
         }
         return sID;

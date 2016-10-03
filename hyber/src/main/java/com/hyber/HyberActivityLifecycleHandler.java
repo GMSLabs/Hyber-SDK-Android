@@ -7,7 +7,9 @@ import android.os.Looper;
 
 import java.lang.ref.WeakReference;
 
-final class ActivityLifecycleHandler {
+final class HyberActivityLifecycleHandler {
+
+    private static final String TAG = "HyberFingerprint";
 
     private static final int DELAY_MILLS = 2000;
     private static boolean nextResumeIsFirstActivity;
@@ -15,7 +17,7 @@ final class ActivityLifecycleHandler {
     private static FocusHandlerThread focusHandlerThread = new FocusHandlerThread();
     private static ActivityAvailableListener mActivityAvailableListener;
 
-    private ActivityLifecycleHandler() {
+    private HyberActivityLifecycleHandler() {
 
     }
 
@@ -68,7 +70,8 @@ final class ActivityLifecycleHandler {
     }
 
     static void onActivityStopped(Activity activity) {
-        Hyber.mLog(Hyber.LogLevel.DEBUG, "onActivityStopped: " + activity.getClass().getName());
+        HyberLogger.tag(TAG);
+        HyberLogger.d("onActivityStopped: %s", activity.getClass().getName());
 
         if (activity == curActivity.get()) {
             curActivity.clear();
@@ -79,7 +82,8 @@ final class ActivityLifecycleHandler {
     }
 
     static void onActivityDestroyed(Activity activity) {
-        Hyber.mLog(Hyber.LogLevel.DEBUG, "onActivityDestroyed: " + activity.getClass().getName());
+        HyberLogger.tag(TAG);
+        HyberLogger.d("onActivityDestroyed: %s", activity.getClass().getName());
 
         if (activity == curActivity.get()) {
             curActivity.clear();
@@ -90,8 +94,9 @@ final class ActivityLifecycleHandler {
     }
 
     private static void logCurActivity() {
-        Hyber.mLog(Hyber.LogLevel.DEBUG, "curActivity is NOW: "
-                + (curActivity.get() != null ? "" + curActivity.get().getClass().getName() + ":" + curActivity.get() : "null"));
+        HyberLogger.tag(TAG);
+        HyberLogger.d("curActivity is NOW: %s", (curActivity.get() != null
+                ? curActivity.get().getClass().getName() + ":" + curActivity.get() : "null"));
     }
 
     private static void handleLostFocus() {

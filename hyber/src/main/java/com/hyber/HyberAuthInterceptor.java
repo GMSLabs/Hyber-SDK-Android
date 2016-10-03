@@ -8,10 +8,11 @@ import okhttp3.Interceptor;
 import okhttp3.Request;
 import okhttp3.Response;
 
-class HyberInterceptor implements Interceptor {
+class HyberAuthInterceptor implements Interceptor {
 
     @Override
     public Response intercept(Chain chain) throws IOException {
+        Response response;
         Request original = chain.request();
 
         // Request customization: add request headers
@@ -22,13 +23,13 @@ class HyberInterceptor implements Interceptor {
                 .header(Tweakables.X_HYBER_INSTALLATION_ID, Hyber.getInstallationID());
 
         String token = Hawk.get(Tweakables.HAWK_HYBER_AUTH_TOKEN, "");
-        if (token == null || token.isEmpty()) {
-            return chain.proceed(requestBuilder.build());
-        } else {
+        if (token != null && !token.isEmpty()) {
             requestBuilder.addHeader(Tweakables.X_HYBER_AUTH_TOKEN, token);
         }
 
-        return chain.proceed(requestBuilder.build());
+        response = chain.proceed(requestBuilder.build());
+
+        return response;
     }
 
 }

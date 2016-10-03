@@ -6,4 +6,6 @@ public interface DeliveryReportListener {
 
     void onDeliveryReportSent(@NonNull String messageId);
 
+    void onFailure();
+
 }

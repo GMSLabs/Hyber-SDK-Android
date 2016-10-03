@@ -3,9 +3,9 @@ package com.hyber;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 
-public class FCMService extends FirebaseMessagingService {
+public class HyberFCMService extends FirebaseMessagingService {
 
-    private static final String TAG = "FCMService";
+    private static final String TAG = "HyberFCMService";
 
     /**
      * Called when message is received.

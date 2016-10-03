@@ -4,6 +4,6 @@ public interface DeviceUpdateHandler {
 
     void onSuccess();
 
-    void onFailure(String message);
+    void onFailure();
 
 }
