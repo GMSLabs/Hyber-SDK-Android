@@ -34,16 +34,16 @@ final class NotificationBundleProcessor {
 
     static void processFromFCMIntentService(Context context, RemoteMessage remoteMessage) {
 
-        Hyber.mLog(Hyber.LogLevel.DEBUG, "From: " + remoteMessage.getFrom());
+        HyberLogger.i("From: %s", remoteMessage.getFrom());
 
         // Check if message contains a data payload.
         if (remoteMessage.getData().size() > 0) {
-            Hyber.mLog(Hyber.LogLevel.DEBUG, "Message data payload: " + remoteMessage.getData());
+            HyberLogger.i("Message data payload: %s", remoteMessage.getData());
         }
 
         // Check if message contains a notification payload.
         if (remoteMessage.getNotification() != null) {
-            Hyber.mLog(Hyber.LogLevel.DEBUG, "Message Notification Body: " + remoteMessage.getNotification().getBody());
+            HyberLogger.i("Message Notification Body: %s", remoteMessage.getNotification().getBody());
         }
 
         process(context, remoteMessage.getNotification(), remoteMessage.getData());
@@ -80,16 +80,16 @@ final class NotificationBundleProcessor {
                             .subscribe(new Action1<Message>() {
                                 @Override
                                 public void call(Message message) {
-                                    Hyber.mLog(Hyber.LogLevel.DEBUG, "message " + message.getId() + " is saved");
+                                    HyberLogger.i("message %s is saved", message.getId());
                                 }
                             }, new Action1<Throwable>() {
                                 @Override
                                 public void call(Throwable throwable) {
-                                    Hyber.mLog(Hyber.LogLevel.WARN, throwable.getLocalizedMessage());
+                                    HyberLogger.e(throwable);
                                 }
                             });
                 } catch (Exception e) {
-                    Hyber.mLog(Hyber.LogLevel.WARN, e.getLocalizedMessage());
+                    HyberLogger.e(e);
                 }
             }
         }

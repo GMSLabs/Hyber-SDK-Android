@@ -8,15 +8,14 @@ import android.util.Base64;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.Locale;
 
-final class Fingerprint {
+final class HyberFingerprint {
 
-    private static final String TAG_FINGERPRINT = "FINGERPRINT";
+    private static final String TAG = "HyberFingerprint";
 
     private static String sFingerprint = null;
 
-    private Fingerprint() {
+    private HyberFingerprint() {
 
     }
 
@@ -32,15 +31,12 @@ final class Fingerprint {
                     sFingerprint = Base64.encodeToString(md.digest(), Base64.DEFAULT)
                             .replace("\n", "");
                 }
-            } catch (PackageManager.NameNotFoundException e) {
-                Hyber.mLog(Hyber.LogLevel.ERROR,
-                        String.format(Locale.getDefault(), "Name not found.\n%s", e.toString()));
-            } catch (NoSuchAlgorithmException e) {
-                Hyber.mLog(Hyber.LogLevel.ERROR,
-                        String.format(Locale.getDefault(), "No such an algorithm.\n%s", e.toString()));
+            } catch (PackageManager.NameNotFoundException | NoSuchAlgorithmException e) {
+                HyberLogger.tag(TAG);
+                HyberLogger.e(e);
             } catch (Exception e) {
-                Hyber.mLog(Hyber.LogLevel.ERROR,
-                        String.format(Locale.getDefault(), "Exception.\n%s", e.toString()));
+                HyberLogger.tag(TAG);
+                HyberLogger.wtf(e);
             }
         }
         return sFingerprint;

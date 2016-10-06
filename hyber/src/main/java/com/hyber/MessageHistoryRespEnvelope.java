@@ -6,7 +6,7 @@ import com.google.gson.annotations.SerializedName;
 
 import java.util.List;
 
-class MessageHistoryRespEnvelope extends BaseResponce {
+class MessageHistoryRespEnvelope extends BaseResponse {
 
     @SerializedName("limitDays")
     private Integer mLimitDays;

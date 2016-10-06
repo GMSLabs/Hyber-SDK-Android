@@ -55,7 +55,7 @@ public class SplashActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onFailure(String message) {
+            public void onFailure() {
                 showRegisterDialog(SplashActivity.this);
             }
         });

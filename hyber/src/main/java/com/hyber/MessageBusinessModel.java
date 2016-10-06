@@ -27,7 +27,7 @@ final class MessageBusinessModel {
     }
 
     Observable<Message> saveMessage(Message message) {
-        Hyber.mLog(Hyber.LogLevel.DEBUG, "Save new message " + message.getId());
+        HyberLogger.i("Save new message %s", message.getId());
         return repository.saveReceivedMessage(message);
     }
 

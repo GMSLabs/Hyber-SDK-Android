@@ -1,5 +1,5 @@
 package com.hyber;
 
-class UpdateUserRespModel extends BaseResponce {
+class UpdateUserRespModel extends BaseResponse {
 
 }

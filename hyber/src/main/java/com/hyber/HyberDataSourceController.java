@@ -27,7 +27,7 @@ final class HyberDataSourceController {
         Realm.setDefaultConfiguration(realmConfiguration);
 
         Hawk.init(context)
-                .setPassword(Fingerprint.keyHash(context))
+                .setPassword(HyberFingerprint.keyHash(context))
                 .setEncryptionMethod(HawkBuilder.EncryptionMethod.HIGHEST)
                 .setStorage(HawkBuilder.newSharedPrefStorage(context))
                 .setLogLevel(LogLevel.FULL)
@@ -42,7 +42,7 @@ final class HyberDataSourceController {
 
             RealmInspectorModulesProvider.builder(context)
                     .withFolder(context.getCacheDir())
-                    .withEncryptionKey("encrypted.realm", Fingerprint.keyHash(context).getBytes())
+                    .withEncryptionKey("encrypted.realm", HyberFingerprint.keyHash(context).getBytes())
                     .withMetaTables()
                     .withDescendingOrder()
                     .withLimit(REALM_PROVIDER_LIMIT)

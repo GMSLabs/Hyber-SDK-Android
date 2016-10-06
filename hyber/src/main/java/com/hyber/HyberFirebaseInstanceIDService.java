@@ -3,9 +3,9 @@ package com.hyber;
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.iid.FirebaseInstanceIdService;
 
-public class FirebaseInstanceIDService extends FirebaseInstanceIdService {
+public class HyberFirebaseInstanceIDService extends FirebaseInstanceIdService {
 
-    private static final String TAG = "FirebaseIIDService";
+    private static final String TAG = "HyberFirebaseIIDService";
 
     /**
      * Called if InstanceID token is updated. This may occur if the security of
@@ -17,32 +17,24 @@ public class FirebaseInstanceIDService extends FirebaseInstanceIdService {
     public void onTokenRefresh() {
         // Get updated InstanceID token.
         String refreshedToken = FirebaseInstanceId.getInstance().getToken();
-        Hyber.mLog(Hyber.LogLevel.DEBUG, "Refreshed token: " + refreshedToken);
 
-        // If you want to send messages to this application instance or
-        // manage this apps subscriptions on the server side, send the
-        // Instance ID token to your app server.
+        HyberLogger.tag(TAG).i("Refreshed FCM token: %s", refreshedToken);
+
         sendRegistrationToServer();
     }
     // [END refresh_token]
 
-    /**
-     * Persist token to third-party servers.
-     * <p>
-     * Modify this method to associate the user's FCM InstanceID token with any server-side account
-     * maintained by your application.
-     */
     private void sendRegistrationToServer() {
         MainApiBusinessModel.getInstance(this)
                 .sendDeviceData(new MainApiBusinessModel.SendDeviceDataListener() {
                     @Override
-                    public void onSent() {
-                        Hyber.mLog(Hyber.LogLevel.DEBUG, "Refreshed token is sent.");
+                    public void onSuccess() {
+                        HyberLogger.i("Refreshed FCM token sent to Hyber.");
                     }
 
                     @Override
-                    public void onSendingError(SendDeviceDataErrorStatus status) {
-                        Hyber.mLog(Hyber.LogLevel.WARN, status.getDescription());
+                    public void onFailure() {
+                        HyberLogger.w("Refreshed FCM token can not sent to Hyber.");
                     }
                 });
     }

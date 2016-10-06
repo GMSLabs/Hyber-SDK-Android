@@ -4,7 +4,7 @@ import android.support.annotation.Nullable;
 
 import com.google.gson.annotations.SerializedName;
 
-class RefreshTokenRespModel extends BaseResponce {
+class RefreshTokenRespModel extends BaseResponse {
 
     @SerializedName("session")
     private SessionRespItemModel mSession;
