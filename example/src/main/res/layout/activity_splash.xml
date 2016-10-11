@@ -10,32 +10,12 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="com.hyber.example.SplashActivity">
 
-    <ScrollView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
-
-        <android.support.v7.widget.LinearLayoutCompat
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:gravity="center_horizontal">
-
-            <TextView
-                android:id="@+id/statusTextView"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:minHeight="100dp"
-                android:text="Hello World!" />
-
-            <Button
-                android:id="@+id/userRegisterButton"
-                android:layout_width="200dp"
-                android:layout_height="wrap_content"
-                android:text="register new device"
-                android:layout_marginTop="30dp" />
-
-        </android.support.v7.widget.LinearLayoutCompat>
-
-    </ScrollView>
+    <ProgressBar
+        android:id="@+id/progressBar"
+        style="?android:attr/progressBarStyleLarge"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true" />
 
 </RelativeLayout>

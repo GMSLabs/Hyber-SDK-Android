@@ -2,6 +2,9 @@ package com.hyber.example;
 
 import android.app.Application;
 import android.app.NotificationManager;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.Message;
 import android.support.v4.app.NotificationCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.view.ContextThemeWrapper;
@@ -107,7 +110,12 @@ public class MyApp extends Application {
 
             mAlertDialog = mAlertDialogBuilder.create();
             mAlertDialog.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
-            mAlertDialog.show();
+            new Handler(Looper.getMainLooper()) {
+                @Override
+                public void handleMessage(Message msg) {
+                    mAlertDialog.show();
+                }
+            };
         }
     }
 
