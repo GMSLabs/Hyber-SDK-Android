@@ -25,8 +25,8 @@ public class HyberFirebaseInstanceIDService extends FirebaseInstanceIdService {
     // [END refresh_token]
 
     private void sendRegistrationToServer() {
-        MainApiBusinessModel.getInstance(this)
-                .sendDeviceData(new MainApiBusinessModel.SendDeviceDataListener() {
+        HyberApiBusinessModel.getInstance(this)
+                .sendDeviceData(new HyberApiBusinessModel.SendDeviceDataListener() {
                     @Override
                     public void onSuccess() {
                         HyberLogger.i("Refreshed FCM token sent to Hyber.");

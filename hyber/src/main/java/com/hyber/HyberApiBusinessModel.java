@@ -21,21 +21,21 @@ import rx.Observable;
 import rx.functions.Action1;
 import rx.functions.Func1;
 
-final class MainApiBusinessModel implements IMainApiBusinessModel {
+final class HyberApiBusinessModel implements IHyberApiBusinessModel {
 
-    private static final String TAG = "MainApiBusinessModel";
+    private static final String TAG = "HyberApiBusinessModel";
 
     private static final int UNAUTHORIZED_CODE = 401;
-    private static MainApiBusinessModel mInstance;
+    private static HyberApiBusinessModel mInstance;
     private WeakReference<Context> mContextWeakReference;
 
-    private MainApiBusinessModel(@NonNull Context context) {
+    private HyberApiBusinessModel(@NonNull Context context) {
         this.mContextWeakReference = new WeakReference<>(context);
     }
 
-    static synchronized MainApiBusinessModel getInstance(@NonNull Context context) {
+    static synchronized HyberApiBusinessModel getInstance(@NonNull Context context) {
         if (mInstance == null) {
-            mInstance = new MainApiBusinessModel(context);
+            mInstance = new HyberApiBusinessModel(context);
         }
         return mInstance;
     }
@@ -186,6 +186,11 @@ final class MainApiBusinessModel implements IMainApiBusinessModel {
     public void sendDeviceData(@NonNull final SendDeviceDataListener listener) {
         HyberLogger.i("Start sending user device data.");
 
+        if (!Hawk.contains(Tweakables.HAWK_HYBER_AUTH_TOKEN)) {
+            listener.onFailure();
+            return;
+        }
+
         final UpdateUserReqModel reqModel = new UpdateUserReqModel(
                 FirebaseInstanceId.getInstance().getToken(),
                 OsUtils.getDeviceOs(), OsUtils.getAndroidVersion(),
@@ -231,6 +236,11 @@ final class MainApiBusinessModel implements IMainApiBusinessModel {
                                         @NonNull final SendBidirectionalAnswerListener listener) {
         HyberLogger.i("Start sending bidirectional answer.");
 
+        if (!Hawk.contains(Tweakables.HAWK_HYBER_AUTH_TOKEN)) {
+            listener.onFailure();
+            return;
+        }
+
         final BidirectionalAnswerReqModel reqModel = new BidirectionalAnswerReqModel(
                 messageId,
                 answerText);
@@ -268,6 +278,11 @@ final class MainApiBusinessModel implements IMainApiBusinessModel {
                                        @NonNull final SendPushDeliveryReportListener listener) {
         HyberLogger.i("Start sending push delivery report.");
 
+        if (!Hawk.contains(Tweakables.HAWK_HYBER_AUTH_TOKEN)) {
+            listener.onFailure();
+            return;
+        }
+
         final PushDeliveryReportReqModel reqModel = new PushDeliveryReportReqModel(messageId, receivedAt);
 
         HyberRestClient.sendPushDeliveryReportObservable(reqModel)
@@ -301,6 +316,11 @@ final class MainApiBusinessModel implements IMainApiBusinessModel {
     @Override
     public void getMessageHistory(@NonNull final Long startDate, @NonNull final MessageHistoryListener listener) {
         HyberLogger.i("Start downloading message history.");
+
+        if (!Hawk.contains(Tweakables.HAWK_HYBER_AUTH_TOKEN)) {
+            listener.onFailure();
+            return;
+        }
 
         final MessageHistoryReqModel reqModel = new MessageHistoryReqModel(startDate);
 

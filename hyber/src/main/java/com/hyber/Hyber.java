@@ -51,7 +51,7 @@ public final class Hyber {
     private static String lastRegistrationId;
     private static boolean registerForPushFired;
 
-    private static MainApiBusinessModel mMainApiBusinessModel;
+    private static HyberApiBusinessModel mHyberApiBusinessModel;
     private static MessageBusinessModel mMessageBusinessModel;
 
     private static RealmChangeListener<RealmResults<Message>> mMessageChangeListener;
@@ -73,11 +73,21 @@ public final class Hyber {
     }
 
     static String getInstallationID() {
+        if (installationID == null)
+            installationID = HyberInstallation.id(getAppContext());
         return installationID;
     }
 
     static String getFingerprint() {
+        if (fingerprint == null)
+            fingerprint = HyberFingerprint.keyHash(getAppContext());
         return fingerprint;
+    }
+
+    static HyberApiBusinessModel getApiBusinessModel() {
+        if (mHyberApiBusinessModel == null)
+            mHyberApiBusinessModel = HyberApiBusinessModel.getInstance(getAppContext());
+        return mHyberApiBusinessModel;
     }
 
     static Builder getInitBuilder() {
@@ -118,9 +128,6 @@ public final class Hyber {
                                 hyberMessageModel.getId(), hyberMessageModel.getAlpha(), hyberMessageModel.getText());
                     }
                 });
-
-        installationID = HyberInstallation.id(context);
-        fingerprint = HyberFingerprint.keyHash(context);
 
         isBidirectionalAvailable = /*TODO Add Bidirectional support controller*/ true;
 
@@ -173,9 +180,6 @@ public final class Hyber {
         clientApiKey = hyberClientApiKey;
         appWeakContext = new WeakReference<>(context.getApplicationContext());
 
-        mMainApiBusinessModel = MainApiBusinessModel.getInstance(context);
-        mMessageBusinessModel = MessageBusinessModel.getInstance();
-
         drInQueue = new HashMap<>();
 
         mMessageChangeListener = getMessageChangeListener();
@@ -184,8 +188,8 @@ public final class Hyber {
         mMessageResults = realm.where(Message.class)
                 .equalTo(Message.IS_REPORTED, false)
                 .findAllSorted(Message.RECEIVED_AT, Sort.DESCENDING);
-        realm.close();
         mMessageResults.addChangeListener(mMessageChangeListener);
+        realm.close();
 
         initDone = true;
     }
@@ -285,7 +289,7 @@ public final class Hyber {
 
     public static void userRegistration(@NonNull Long phone, final UserRegistrationHandler handler) {
         checkInitialized();
-        mMainApiBusinessModel.authorize(phone, new MainApiBusinessModel.AuthorizationListener() {
+        getApiBusinessModel().authorize(phone, new HyberApiBusinessModel.AuthorizationListener() {
             @Override
             public void onSuccess() {
                 handler.onSuccess();
@@ -300,7 +304,7 @@ public final class Hyber {
 
     public static void deviceUpdate(final DeviceUpdateHandler handler) {
         checkInitialized();
-        mMainApiBusinessModel.sendDeviceData(new MainApiBusinessModel.SendDeviceDataListener() {
+        getApiBusinessModel().sendDeviceData(new HyberApiBusinessModel.SendDeviceDataListener() {
             @Override
             public void onSuccess() {
                 handler.onSuccess();
@@ -316,8 +320,8 @@ public final class Hyber {
     public static void sendBidirectionalAnswer(@NonNull String messageId, @NonNull String answerText,
                                                final BidirectionalAnswerHandler handler) {
         checkInitialized();
-        mMainApiBusinessModel.sendBidirectionalAnswer(messageId, answerText,
-                new MainApiBusinessModel.SendBidirectionalAnswerListener() {
+        getApiBusinessModel().sendBidirectionalAnswer(messageId, answerText,
+                new HyberApiBusinessModel.SendBidirectionalAnswerListener() {
                     @Override
                     public void onSuccess(@NonNull String messageId) {
                         handler.onSuccess();
@@ -332,7 +336,7 @@ public final class Hyber {
 
     public static void getMessageHistory(@NonNull Long startDate, final MessageHistoryHandler handler) {
         checkInitialized();
-        mMainApiBusinessModel.getMessageHistory(startDate, new MainApiBusinessModel.MessageHistoryListener() {
+        getApiBusinessModel().getMessageHistory(startDate, new HyberApiBusinessModel.MessageHistoryListener() {
             @Override
             public void onSuccess(@NonNull final Long startDate, @NonNull final MessageHistoryRespEnvelope envelope) {
                 Realm realm = null;
@@ -365,8 +369,8 @@ public final class Hyber {
 
     private static void sendPushDeliveryReport(@NonNull final String messageId, @NonNull Long receivedAt,
                                                final DeliveryReportListener handler) {
-        mMainApiBusinessModel.sendPushDeliveryReport(messageId, receivedAt,
-                new MainApiBusinessModel.SendPushDeliveryReportListener() {
+        getApiBusinessModel().sendPushDeliveryReport(messageId, receivedAt,
+                new HyberApiBusinessModel.SendPushDeliveryReportListener() {
                     @Override
                     public void onSuccess(@NonNull String messageId) {
                         handler.onDeliveryReportSent(messageId);
@@ -423,6 +427,8 @@ public final class Hyber {
     }
 
     static MessageBusinessModel getMessageBusinessModel() {
+        if (mMessageBusinessModel == null)
+            mMessageBusinessModel = MessageBusinessModel.getInstance();
         return mMessageBusinessModel;
     }
 
