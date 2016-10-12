@@ -83,7 +83,7 @@ public class MyApp extends Application {
             if (mAlertDialog != null && mAlertDialog.isShowing())
                 mAlertDialog.dismiss();
 
-            AlertDialog.Builder mAlertDialogBuilder =
+            final AlertDialog.Builder mAlertDialogBuilder =
                     new AlertDialog.Builder(new ContextThemeWrapper(MyApp.this, R.style.errorDialog));
 
             switch (priority) {
@@ -108,11 +108,11 @@ public class MyApp extends Application {
                 mAlertDialogBuilder.setMessage(message);
             }
 
-            mAlertDialog = mAlertDialogBuilder.create();
-            mAlertDialog.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
             new Handler(Looper.getMainLooper()) {
                 @Override
                 public void handleMessage(Message msg) {
+                    mAlertDialog = mAlertDialogBuilder.create();
+                    mAlertDialog.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
                     mAlertDialog.show();
                 }
             };
