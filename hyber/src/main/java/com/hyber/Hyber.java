@@ -189,7 +189,6 @@ public final class Hyber {
                 .equalTo(Message.IS_REPORTED, false)
                 .findAllSorted(Message.RECEIVED_AT, Sort.DESCENDING);
         mMessageResults.addChangeListener(mMessageChangeListener);
-        realm.close();
 
         initDone = true;
     }
