@@ -27,6 +27,7 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 import butterknife.Unbinder;
 import io.realm.HyberMessageHistoryBaseRecyclerViewAdapter;
+import timber.log.Timber;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -96,7 +97,12 @@ public class MessagesFragment extends Fragment {
                 new HyberMessageHistoryBaseRecyclerViewAdapter.OnChangeListener() {
                     @Override
                     public void onItemRangeInserted(int positionStart, int itemCount) {
-                        mRecyclerView.smoothScrollToPosition(positionStart);
+                        try {
+                            mRecyclerView.smoothScrollToPosition(positionStart + itemCount - 1);
+                        } catch (NullPointerException e) {
+                            Timber.e(e, "mAdapter count %d, position %d",
+                                    mAdapter.getItemCount(), positionStart + itemCount - 1);
+                        }
                     }
 
                     @Override
