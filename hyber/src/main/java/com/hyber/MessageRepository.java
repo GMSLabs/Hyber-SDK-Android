@@ -18,7 +18,7 @@ class MessageRepository implements Closeable {
     private final Realm mRealm;
 
     public MessageRepository() {
-        this.mRealm = Realm.getDefaultInstance();
+        this.mRealm = Hyber.dataSourceController().getRealmInstance();
     }
 
     public Observable<Message> saveReceivedMessage(final Message message) {

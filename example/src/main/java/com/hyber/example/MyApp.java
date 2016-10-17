@@ -3,8 +3,6 @@ package com.hyber.example;
 import android.app.Application;
 import android.app.NotificationManager;
 import android.os.Handler;
-import android.os.Looper;
-import android.os.Message;
 import android.support.v4.app.NotificationCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.view.ContextThemeWrapper;
@@ -27,12 +25,15 @@ import io.fabric.sdk.android.Fabric;
 
 public class MyApp extends Application {
 
+    private Handler mHandler;
     private AlertDialog mAlertDialog;
 
     @Override
     public void onCreate() {
         super.onCreate();
         Fabric.with(this, new Crashlytics());
+
+        mHandler = new Handler();
 
         HyberLogger.plant(new HyberLogger.DebugTree(), new HyberCrashReportingTree(), new HyberUICrashReportingTree());
 
@@ -52,7 +53,7 @@ public class MyApp extends Application {
         @Override
         protected void log(int priority, @Nullable String tag, @Nullable HyberStatus status, @Nullable String message,
                            @Nullable Throwable t) {
-            if (priority <= Log.INFO) {
+            if (priority <= Log.WARN) {
                 return;
             }
             if (t != null) {
@@ -74,48 +75,48 @@ public class MyApp extends Application {
     private class HyberUICrashReportingTree extends HyberLogger.Tree {
 
         @Override
-        protected void log(int priority, @Nullable String tag, @Nullable HyberStatus status, @Nullable String message,
-                           @Nullable Throwable t) {
+        protected void log(final int priority, @Nullable String tag, @Nullable final HyberStatus status,
+                           @Nullable final String message, @Nullable final Throwable t) {
             if (priority < Log.WARN) {
                 return;
             }
 
-            if (mAlertDialog != null && mAlertDialog.isShowing())
-                mAlertDialog.dismiss();
-
-            final AlertDialog.Builder mAlertDialogBuilder =
-                    new AlertDialog.Builder(new ContextThemeWrapper(MyApp.this, R.style.errorDialog));
-
-            switch (priority) {
-                case Log.WARN:
-                    mAlertDialogBuilder.setTitle("WARN");
-                    break;
-                case Log.ERROR:
-                    mAlertDialogBuilder.setTitle("ERROR");
-                    break;
-                case Log.ASSERT:
-                    mAlertDialogBuilder.setTitle("ASSERT");
-                    break;
-                default: mAlertDialogBuilder.setTitle("VERBOSE");
-            }
-
-            if (t != null) {
-                mAlertDialogBuilder.setMessage(t.getLocalizedMessage());
-            } else if (status != null) {
-                mAlertDialogBuilder.setMessage(String.format(Locale.getDefault(), "%d ==> %s",
-                        status.getCode(), status.getDescription()));
-            } else if (message != null) {
-                mAlertDialogBuilder.setMessage(message);
-            }
-
-            new Handler(Looper.getMainLooper()) {
+            mHandler.post(new Runnable() {
                 @Override
-                public void handleMessage(Message msg) {
+                public void run() {
+                    if (mAlertDialog != null && mAlertDialog.isShowing())
+                        mAlertDialog.dismiss();
+
+                    final AlertDialog.Builder mAlertDialogBuilder =
+                            new AlertDialog.Builder(new ContextThemeWrapper(MyApp.this, R.style.errorDialog));
+
+                    switch (priority) {
+                        case Log.WARN:
+                            mAlertDialogBuilder.setTitle("WARN");
+                            break;
+                        case Log.ERROR:
+                            mAlertDialogBuilder.setTitle("ERROR");
+                            break;
+                        case Log.ASSERT:
+                            mAlertDialogBuilder.setTitle("ASSERT");
+                            break;
+                        default: mAlertDialogBuilder.setTitle("VERBOSE");
+                    }
+
+                    if (t != null) {
+                        mAlertDialogBuilder.setMessage(t.getLocalizedMessage());
+                    } else if (status != null) {
+                        mAlertDialogBuilder.setMessage(String.format(Locale.getDefault(), "%d ==> %s",
+                                status.getCode(), status.getDescription()));
+                    } else if (message != null) {
+                        mAlertDialogBuilder.setMessage(message);
+                    }
+
                     mAlertDialog = mAlertDialogBuilder.create();
                     mAlertDialog.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
                     mAlertDialog.show();
                 }
-            };
+            });
         }
     }
 

@@ -2,6 +2,7 @@ package com.hyber;
 
 import android.support.annotation.NonNull;
 
+//import com.facebook.stetho.okhttp3.StethoInterceptor;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
@@ -24,7 +25,7 @@ final class HyberRestClient {
 
     static {
         OkHttpClient okHttpClient = new OkHttpClient.Builder()
-                //.addInterceptor(new StethoInterceptor())
+//                .addInterceptor(new StethoInterceptor())
                 .addInterceptor(new HyberAuthInterceptor())
                 .addInterceptor(new HyberHttpLoggingInterceptor().setLevel(HyberHttpLoggingInterceptor.Level.FULL))
                 .connectTimeout(Tweakables.STANDARD_API_TIMEOUT_SECONDS, TimeUnit.SECONDS)

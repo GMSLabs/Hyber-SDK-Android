@@ -24,8 +24,8 @@ android {
 
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 10
-        versionName "0.2"
+        versionCode 2
+        versionName "2.0.0-SNAPSHOT"
 
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
 
@@ -114,10 +114,10 @@ android {
 }
 
 dependencies {
+    // Required dependencies for the Hyber
+    compile deps.firebaseMessaging
 
     compile project(':hyber')
-    // Required dependencies for the Hyber
-    compile 'com.google.firebase:firebase-messaging:9.6.0'
 
     compile 'com.android.support:support-v4:24.2.1'
     compile 'com.android.support:appcompat-v7:24.2.1'
@@ -137,7 +137,7 @@ dependencies {
     }
 
     // Unit Tests
-    testCompile 'junit:junit:4.12'
+    testCompile deps.junit
 
     // Connected Tests
     androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {

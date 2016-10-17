@@ -56,7 +56,7 @@ final class HyberApiBusinessModel implements IHyberApiBusinessModel {
                         if (response.isSuccessful()) {
                             HyberLogger.i("Request for user registration is success.");
 
-                            Realm realm = Realm.getDefaultInstance();
+                            Realm realm = Hyber.dataSourceController().getRealmInstance();
 
                             clearUserDataIfExists(realm, phone);
 

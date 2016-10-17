@@ -34,7 +34,7 @@ public class HyberFirebaseInstanceIDService extends FirebaseInstanceIdService {
 
                     @Override
                     public void onFailure() {
-                        HyberLogger.w("Refreshed FCM token can not sent to Hyber.");
+                        HyberLogger.d("Refreshed FCM token can not sent to Hyber.");
                     }
                 });
     }
