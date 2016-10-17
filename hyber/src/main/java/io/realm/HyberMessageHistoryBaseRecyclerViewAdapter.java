@@ -35,7 +35,7 @@ public abstract class HyberMessageHistoryBaseRecyclerViewAdapter extends Recycle
     public HyberMessageHistoryBaseRecyclerViewAdapter(boolean automaticUpdate, boolean animateResults) {
         this.mAutomaticUpdate = automaticUpdate;
         this.mAnimateResults = animateResults;
-        this.mRealmResults = Realm.getDefaultInstance()
+        this.mRealmResults = Hyber.dataSourceController().getRealmInstance()
                 .where(Message.class)
                 .findAllSorted(Message.RECEIVED_AT, Sort.ASCENDING);
         this.mRealmChangeListener = (!mAutomaticUpdate) ? null : getRealmChangeListener();

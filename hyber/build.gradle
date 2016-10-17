@@ -10,30 +10,27 @@ project.group = 'com.hyber.android'
 dependencies {
     compile deps.jetbAnnotations
 
-    // Hyber Dependencies
-    compile 'com.android.support:recyclerview-v7:24.2.1'
+    compile deps.supportRecyclerView
+    compile deps.playServicesBase
+    compile deps.firebaseMessaging
 
-    compile 'com.google.android.gms:play-services-base:9.6.0'
-    compile 'com.google.firebase:firebase-messaging:9.6.0'
+    compile deps.retrofit
+    compile deps.retrofitGsonConv
+    compile deps.retrofitRxAdapter
+    compile deps.okhttp
+    compile deps.rxandroid
+    compile deps.rxjava
 
-    compile 'io.reactivex:rxandroid:1.2.1'
-    compile 'io.reactivex:rxjava:1.1.6'
+    compile deps.hawk
+    compile deps.javaDiffUtils
 
-    compile 'com.squareup.retrofit2:retrofit:2.1.0'
-    compile 'com.squareup.retrofit2:converter-gson:2.1.0'
-    compile 'com.squareup.retrofit2:adapter-rxjava:2.1.0'
-
-    compile 'com.squareup.okhttp3:okhttp:3.4.1'
-
-    compile 'com.github.orhanobut:hawk:1.23'
-    compile 'com.googlecode.java-diff-utils:diffutils:1.3.0'
-
-    compile 'com.facebook.stetho:stetho:1.4.1'
-    compile 'com.facebook.stetho:stetho-okhttp3:1.4.1'
-    compile 'com.uphyca:stetho_realm:0.9.0'
+    // Debug dependencies
+//    compile deps.stetho
+//    compile deps.stethoOkHttp
+//    compile deps.stethoRealm
 
     // Unit Tests
-    testCompile 'junit:junit:4.12'
+    testCompile deps.junit
 
     // Connected Tests
     androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {

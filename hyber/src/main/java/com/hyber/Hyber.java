@@ -90,6 +90,10 @@ public final class Hyber {
         return mHyberApiBusinessModel;
     }
 
+    public static HyberDataSourceController dataSourceController() {
+        return HyberDataSourceController.getInstance();
+    }
+
     static Builder getInitBuilder() {
         return mInitBuilder;
     }
@@ -184,7 +188,7 @@ public final class Hyber {
 
         mMessageChangeListener = getMessageChangeListener();
 
-        Realm realm = Realm.getDefaultInstance();
+        Realm realm = dataSourceController().getRealmInstance();
         mMessageResults = realm.where(Message.class)
                 .equalTo(Message.IS_REPORTED, false)
                 .findAllSorted(Message.RECEIVED_AT, Sort.DESCENDING);
@@ -216,7 +220,7 @@ public final class Hyber {
                             @Override
                             public void call(String messageId) {
                                 HyberLogger.d("Message %s is changed", messageId);
-                                Realm realm = Realm.getDefaultInstance();
+                                Realm realm = dataSourceController().getRealmInstance();
                                 Message receivedMessage =
                                         realm.where(Message.class)
                                                 .equalTo(Message.ID, messageId)
@@ -228,7 +232,7 @@ public final class Hyber {
                                             new DeliveryReportListener() {
                                                 @Override
                                                 public void onDeliveryReportSent(@NonNull String messageId) {
-                                                    Realm realm = Realm.getDefaultInstance();
+                                                    Realm realm = dataSourceController().getRealmInstance();
                                                     HyberLogger.i("Push delivery report onSuccess\nWith message id %s",
                                                             messageId);
                                                     realm.beginTransaction();
@@ -340,7 +344,7 @@ public final class Hyber {
             public void onSuccess(@NonNull final Long startDate, @NonNull final MessageHistoryRespEnvelope envelope) {
                 Realm realm = null;
                 if (!envelope.getMessages().isEmpty()) {
-                    realm = Realm.getDefaultInstance();
+                    realm = dataSourceController().getRealmInstance();
                     realm.executeTransaction(new Realm.Transaction() {
                         @Override
                         public void execute(Realm realm) {
