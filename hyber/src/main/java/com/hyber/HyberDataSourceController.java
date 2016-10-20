@@ -20,13 +20,16 @@ public final class HyberDataSourceController {
     private static HyberDataSourceController singleton = null;
 
     private static int hyberRealmSchemaVersion = 1;
-    private static RealmConfiguration hyberRealmConfiguration = null;
+    private static String hyberRealmSchemaName = "Hyber.realm";
+    private static RealmConfiguration hyberRealmConfig = null;
 
     private HyberDataSourceController(Context context) {
-        hyberRealmConfiguration = new RealmConfiguration.Builder(context)
-                .name(Realm.DEFAULT_REALM_NAME)
+        hyberRealmConfig = new RealmConfiguration.Builder()
+                .name(hyberRealmSchemaName)
                 .schemaVersion(hyberRealmSchemaVersion)
                 .deleteRealmIfMigrationNeeded()
+//                .modules(Realm.getDefaultModule(), new HyberSchemaModule())
+//                .migration(new HyberMigration())
                 .build();
 
         Hawk.init(context)
@@ -77,7 +80,7 @@ public final class HyberDataSourceController {
     }
 
     public Realm getRealmInstance() {
-        return Realm.getInstance(hyberRealmConfiguration);
+        return Realm.getInstance(hyberRealmConfig);
     }
 
     private static void checkInitialized() {

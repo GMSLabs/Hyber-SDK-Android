@@ -108,6 +108,8 @@ public final class Hyber {
         Context context = mInitBuilder.getContext();
         mInitBuilder.removeContext(); // Clear to prevent leaks.
 
+        Realm.init(context);
+
         try {
             ApplicationInfo ai = context.getPackageManager()
                     .getApplicationInfo(context.getPackageName(), PackageManager.GET_META_DATA);
