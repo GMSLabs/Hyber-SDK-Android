@@ -2,19 +2,15 @@ package com.hyber;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
-import com.orhanobut.hawk.Hawk;
 
 import java.io.IOException;
 import java.lang.ref.WeakReference;
-import java.util.Date;
+import java.util.Locale;
 
-import io.realm.Realm;
-import io.realm.RealmResults;
 import okhttp3.ResponseBody;
 import retrofit2.Response;
 import rx.Observable;
@@ -25,7 +21,6 @@ final class HyberApiBusinessModel implements IHyberApiBusinessModel {
 
     private static final String TAG = "HyberApiBusinessModel";
 
-    private static final int UNAUTHORIZED_CODE = 401;
     private static HyberApiBusinessModel mInstance;
     private WeakReference<Context> mContextWeakReference;
 
@@ -56,20 +51,20 @@ final class HyberApiBusinessModel implements IHyberApiBusinessModel {
                         if (response.isSuccessful()) {
                             HyberLogger.i("Request for user registration is success.");
 
-                            Realm realm = Hyber.dataSourceController().getRealmInstance();
+                            Repository repo = new Repository();
+                            repo.open();
 
-                            clearUserDataIfExists(realm, phone);
+                            if (repo.getCurrentUser() != null)
+                                repo.clearUserData(repo.getCurrentUser());
 
-                            SessionRespItemModel session = response.body().getSession();
-                            if (session != null) {
-                                HyberLogger.i("User is registered.");
+                            SessionRespItemModel sessionModel = response.body().getSession();
+                            if (sessionModel != null) {
                                 HyberLogger.i("User session is provided.");
-                                User user = new User(String.valueOf(phone), phone);
-                                realm.beginTransaction();
-                                realm.copyToRealm(user);
-                                realm.commitTransaction();
+                                Session session = new Session(sessionModel.getToken(),
+                                        sessionModel.getRefreshToken(), sessionModel.getExpirationDate(), false);
+                                User user = new User(String.valueOf(phone), String.valueOf(phone), session);
+                                repo.saveNewUser(user);
                                 HyberLogger.i("User data saved.");
-                                updateUserSession(session.getToken(), session.getRefreshToken(), session.getExpirationDate());
                                 listener.onSuccess();
                             } else {
                                 if (response.body().getError() != null) {
@@ -78,43 +73,47 @@ final class HyberApiBusinessModel implements IHyberApiBusinessModel {
                                     HyberLogger.tag(TAG);
                                     HyberLogger.wtf("User not registered, session data is not provided!");
                                 }
-                                listener.onFailure(AuthErrorStatus.USER_SESSION_DATA_IS_NOT_PROVIDED);
+                                listener.onFailure();
                             }
+
+                            repo.close();
                         } else {
                             responseIsUnsuccessful(response);
-                            listener.onFailure(AuthErrorStatus.USER_SESSION_DATA_IS_NOT_PROVIDED);
+                            listener.onFailure();
                         }
                     }
                 }, new Action1<Throwable>() {
                     @Override
                     public void call(Throwable throwable) {
                         HyberLogger.e(throwable, "Error in user registration api request!");
-                        listener.onFailure(AuthErrorStatus.USER_SESSION_DATA_IS_NOT_PROVIDED);
+                        listener.onFailure();
                     }
                 });
     }
 
     private void responseIsUnsuccessful(Response response) {
-        if (response.code() == 404) {
-            HyberLogger.e(HyberStatus.SDK_API_404Error, "url: %s\nresponse code: %d - %s",
+        switch (response.code()) {
+            case 404: HyberLogger.e(HyberStatus.SDK_API_404Error, "url: %s\nresponse code: %d - %s",
                     response.raw().request().url().toString(), response.code(), response.message());
-            return;
-        } else {
-            try {
-                BaseResponse errorResp = new Gson().fromJson(response.errorBody().string(), BaseResponse.class);
-                if (errorResp != null && errorResp.getError() != null
-                        && errorResp.getError().getCode() != null) {
-                    HyberLogger.e(HyberStatus.byCode(errorResp.getError().getCode()), "url: %s\nresponse code: %d - %s",
+                break;
+            case 500: HyberLogger.e(HyberStatus.SDK_API_500Error, "url: %s\nresponse code: %d - %s",
+                    response.raw().request().url().toString(), response.code(), response.message());
+                break;
+            default: {
+                try {
+                    BaseResponse errorResp = new Gson().fromJson(response.errorBody().string(), BaseResponse.class);
+                    if (errorResp != null && errorResp.getError() != null
+                            && errorResp.getError().getCode() != null) {
+                        HyberLogger.e(HyberStatus.byCode(errorResp.getError().getCode()), "url: %s\nresponse code: %d - %s",
+                                response.raw().request().url().toString(), response.code(), response.message());
+                    }
+                } catch (IOException | JsonSyntaxException e) {
+                    HyberLogger.e(e);
+                    HyberLogger.e(HyberStatus.SDK_API_ResponseIsUnsuccessful, "url: %s\nresponse code: %d - %s",
                             response.raw().request().url().toString(), response.code(), response.message());
-                    return;
                 }
-            } catch (IOException | JsonSyntaxException e) {
-                e.printStackTrace();
             }
         }
-
-        HyberLogger.e(HyberStatus.SDK_API_ResponseIsUnsuccessful, "url: %s\nresponse code: %d - %s",
-                response.raw().request().url().toString(), response.code(), response.message());
     }
 
     private <T> Observable<Response<T>> tokenActualProcessorObservable(final Observable<Response<T>> currObservable,
@@ -148,9 +147,16 @@ final class HyberApiBusinessModel implements IHyberApiBusinessModel {
         }
 
         HyberLogger.i("User auth token expired.\nStart refreshing auth token.");
-        removeAuthToken();
 
-        RefreshTokenReqModel reqModel = new RefreshTokenReqModel(getRefreshToken());
+        Repository repo = new Repository();
+        repo.open();
+        User user = repo.getCurrentUser();
+        if (user == null) {
+            return Observable.empty();
+        }
+
+        RefreshTokenReqModel reqModel = new RefreshTokenReqModel(user.getSession().getRefreshToken());
+        repo.close();
 
         final String finalErrorBody = errorBody;
         return HyberRestClient.refreshTokenObservable(reqModel)
@@ -159,8 +165,17 @@ final class HyberApiBusinessModel implements IHyberApiBusinessModel {
                     public Observable<Response<T>> call(Response<RefreshTokenRespModel> response) {
                         if (response.isSuccessful()) {
                             HyberLogger.i("Request for refresh user auth token is success.");
-                            SessionRespItemModel session = response.body().getSession();
-                            updateUserSession(session.getToken(), session.getRefreshToken(), session.getExpirationDate());
+                            SessionRespItemModel sessionModel = response.body().getSession();
+                            HyberLogger.i("User new session data updating.");
+                            Repository repo = new Repository();
+                            repo.open();
+                            User user = repo.getCurrentUser();
+                            if (user != null) {
+                                repo.updateUserSession(user, sessionModel.getToken(),
+                                        sessionModel.getRefreshToken(), sessionModel.getExpirationDate());
+                            }
+                            repo.close();
+                            HyberLogger.i("User session data is updated.");
                             HyberLogger.i("Continue execute current observable!");
                             return currObservable;
                         } else {
@@ -186,9 +201,14 @@ final class HyberApiBusinessModel implements IHyberApiBusinessModel {
     public void sendDeviceData(@NonNull final SendDeviceDataListener listener) {
         HyberLogger.i("Start sending user device data.");
 
-        if (!Hawk.contains(Tweakables.HAWK_HYBER_AUTH_TOKEN)) {
+        Repository repo = new Repository();
+        repo.open();
+        if (repo.getCurrentUser() == null) {
+            repo.close();
             listener.onFailure();
             return;
+        } else {
+            repo.close();
         }
 
         final UpdateUserReqModel reqModel = new UpdateUserReqModel(
@@ -236,11 +256,6 @@ final class HyberApiBusinessModel implements IHyberApiBusinessModel {
                                         @NonNull final SendBidirectionalAnswerListener listener) {
         HyberLogger.i("Start sending bidirectional answer.");
 
-        if (!Hawk.contains(Tweakables.HAWK_HYBER_AUTH_TOKEN)) {
-            listener.onFailure();
-            return;
-        }
-
         final BidirectionalAnswerReqModel reqModel = new BidirectionalAnswerReqModel(
                 messageId,
                 answerText);
@@ -278,11 +293,6 @@ final class HyberApiBusinessModel implements IHyberApiBusinessModel {
                                        @NonNull final SendPushDeliveryReportListener listener) {
         HyberLogger.i("Start sending push delivery report.");
 
-        if (!Hawk.contains(Tweakables.HAWK_HYBER_AUTH_TOKEN)) {
-            listener.onFailure();
-            return;
-        }
-
         final PushDeliveryReportReqModel reqModel = new PushDeliveryReportReqModel(messageId, receivedAt);
 
         HyberRestClient.sendPushDeliveryReportObservable(reqModel)
@@ -316,11 +326,6 @@ final class HyberApiBusinessModel implements IHyberApiBusinessModel {
     @Override
     public void getMessageHistory(@NonNull final Long startDate, @NonNull final MessageHistoryListener listener) {
         HyberLogger.i("Start downloading message history.");
-
-        if (!Hawk.contains(Tweakables.HAWK_HYBER_AUTH_TOKEN)) {
-            listener.onFailure();
-            return;
-        }
 
         final MessageHistoryReqModel reqModel = new MessageHistoryReqModel(startDate);
 
@@ -365,84 +370,10 @@ final class HyberApiBusinessModel implements IHyberApiBusinessModel {
                 });
     }
 
-    private void clearUserDataIfExists(@NonNull Realm realm, @NonNull Long phone) {
-        HyberLogger.i("User data cleaning.");
-        cleanUserSession();
-        RealmResults<User> users = realm.where(User.class)
-                .equalTo(User.PHONE, phone)
-                .findAll();
-
-        for (User user : users) {
-            RealmResults<Message> messages = realm.where(Message.class)
-                    .equalTo(Message.ORDER, user.getId())
-                    .findAll();
-            realm.beginTransaction();
-            messages.deleteAllFromRealm();
-            user.deleteFromRealm();
-            realm.commitTransaction();
-        }
-        HyberLogger.i("User data is cleaned.");
-    }
-
-    private void updateUserSession(@Nullable String token, @Nullable String refreshToken, @Nullable Date expirationDate) {
-        HyberLogger.i("User new session data updating.");
-        Hawk.Chain chain = Hawk.chain();
-        if (token != null) {
-            chain.put(Tweakables.HAWK_HYBER_AUTH_TOKEN, token);
-        }
-        if (refreshToken != null) {
-            chain.put(Tweakables.HAWK_HYBER_REFRESH_TOKEN, refreshToken);
-        }
-        if (expirationDate != null) {
-            chain.put(Tweakables.HAWK_HYBER_TOKEN_EXP_DATE, expirationDate);
-        }
-        chain.commit();
-        HyberLogger.i("User session data is updated.");
-    }
-
-    private void updateSentPushToken(@NonNull String pushToken) {
-        HyberLogger.i("Sent push token updating.");
-        Hawk.Chain chain = Hawk.chain();
-        chain.put(Tweakables.HAWK_HYBER_SENT_PUSH_TOKEN, pushToken);
-        chain.commit();
-        HyberLogger.i("Sent push token is updated.");
-    }
-
-    private void cleanUserSession() {
-        HyberLogger.i("User session data cleaning.");
-        Hawk.remove(
-                Tweakables.HAWK_HYBER_SENT_PUSH_TOKEN,
-                Tweakables.HAWK_HYBER_AUTH_TOKEN,
-                Tweakables.HAWK_HYBER_REFRESH_TOKEN,
-                Tweakables.HAWK_HYBER_TOKEN_EXP_DATE
-        );
-        HyberLogger.i("User session data is cleaned.");
-    }
-
-    private void removeAuthToken() {
-        HyberLogger.i("User auth token removing");
-        Hawk.remove(
-                Tweakables.HAWK_HYBER_AUTH_TOKEN
-        );
-        HyberLogger.i("User auth token is removed");
-    }
-
-    private boolean isAuthTokenExists() {
-        return Hawk.contains(Tweakables.HAWK_HYBER_AUTH_TOKEN);
-    }
-
-    private boolean isRefreshTokenExists() {
-        return Hawk.contains(Tweakables.HAWK_HYBER_REFRESH_TOKEN);
-    }
-
-    private String getRefreshToken() {
-        return Hawk.get(Tweakables.HAWK_HYBER_REFRESH_TOKEN);
-    }
-
     interface AuthorizationListener {
         void onSuccess();
 
-        void onFailure(AuthErrorStatus status);
+        void onFailure();
     }
 
     interface SendDeviceDataListener {

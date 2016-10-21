@@ -1,10 +1,9 @@
 package com.hyber;
 
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 import com.google.gson.annotations.SerializedName;
-
-import java.util.Date;
 
 class MessageRespModel {
 
@@ -18,10 +17,10 @@ class MessageRespModel {
     private Long mTime;
 
     @SerializedName("from")
-    private String mAlphaName;
+    private String mTitle;
 
     @SerializedName("text")
-    private String mText;
+    private String mBody;
 
     @SerializedName("to")
     private String mOrder;
@@ -30,32 +29,36 @@ class MessageRespModel {
     private MessageOptionsRespModel mOptions;
 
 
-    @Nullable
+    @NonNull
+    @lombok.NonNull
     public String getId() {
         return mId;
     }
 
-    @Nullable
+    @NonNull
+    @lombok.NonNull
     String getPartner() {
         return mPartner;
     }
 
-    @Nullable
+    @NonNull
+    @lombok.NonNull
     Long getTime() {
         return mTime;
     }
 
     @Nullable
-    String getAlphaName() {
-        return mAlphaName;
+    String getTitle() {
+        return mTitle;
     }
 
     @Nullable
-    String getText() {
-        return mText;
+    String getBody() {
+        return mBody;
     }
 
-    @Nullable
+    @NonNull
+    @lombok.NonNull
     String getOrder() {
         return mOrder;
     }
@@ -63,24 +66,6 @@ class MessageRespModel {
     @Nullable
     MessageOptionsRespModel getOptions() {
         return mOptions;
-    }
-
-    @Nullable
-    Message toRealmMessageHistory() {
-        if (mId != null && mPartner != null && mTime != null
-                && mAlphaName != null && mText != null && mOrder != null) {
-            Message mh = new Message(mId, mPartner, new Date(mTime),
-                    mAlphaName, mText, mOrder);
-
-            if (mOptions != null)
-                mh.setOptions(mOptions.getImageUrl(), mOptions.getAction(),
-                        mOptions.getCaption());
-
-            mh.setAsFromHistory();
-            return mh;
-        } else {
-            return null;
-        }
     }
 
 }

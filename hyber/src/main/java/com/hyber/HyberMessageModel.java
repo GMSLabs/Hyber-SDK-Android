@@ -1,5 +1,6 @@
 package com.hyber;
 
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 import com.google.gson.annotations.SerializedName;
@@ -19,17 +20,20 @@ public class HyberMessageModel {
     private FCMessageOptionsModel mOptions;
 
 
-    @Nullable
+    @NonNull
+    @lombok.NonNull
     public String getId() {
         return mId;
     }
 
-    @Nullable
+    @NonNull
+    @lombok.NonNull
     public String getAlpha() {
         return mAlpha;
     }
 
-    @Nullable
+    @NonNull
+    @lombok.NonNull
     public String getText() {
         return mText;
     }

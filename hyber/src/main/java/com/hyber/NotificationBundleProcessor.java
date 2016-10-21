@@ -1,25 +1,21 @@
 package com.hyber;
 
-import android.content.Context;
-
 import com.google.firebase.messaging.RemoteMessage;
 import com.google.gson.Gson;
 
 import java.util.Date;
-import java.util.Map;
 
 import rx.Observable;
 import rx.Subscriber;
-import rx.functions.Action1;
 
 final class NotificationBundleProcessor {
 
-    private static Subscriber<? super HyberMessageModel> mRemoteMessageSubscriber;
+    private static Subscriber<? super RemoteMessage> mRemoteMessageSubscriber;
 
-    private static Observable<HyberMessageModel> remoteMessageObservable =
-            Observable.create(new Observable.OnSubscribe<HyberMessageModel>() {
+    private static Observable<RemoteMessage> remoteMessageObservable =
+            Observable.create(new Observable.OnSubscribe<RemoteMessage>() {
                 @Override
-                public void call(Subscriber<? super HyberMessageModel> subscriber) {
+                public void call(Subscriber<? super RemoteMessage> subscriber) {
                     mRemoteMessageSubscriber = subscriber;
                 }
             });
@@ -28,11 +24,14 @@ final class NotificationBundleProcessor {
 
     }
 
-    static Observable<HyberMessageModel> getRemoteMessageObservable() {
+    static Observable<RemoteMessage> getRemoteMessageObservable() {
         return remoteMessageObservable;
     }
 
-    static void processFromFCMIntentService(Context context, RemoteMessage remoteMessage) {
+    static void processMessageFromFCM(RemoteMessage remoteMessage) {
+
+        if (mRemoteMessageSubscriber != null)
+            mRemoteMessageSubscriber.onNext(remoteMessage);
 
         HyberLogger.i("From: %s", remoteMessage.getFrom());
 
@@ -46,51 +45,49 @@ final class NotificationBundleProcessor {
             HyberLogger.i("Message Notification Body: %s", remoteMessage.getNotification().getBody());
         }
 
-        process(context, remoteMessage.getNotification(), remoteMessage.getData());
-    }
-
-    private static void process(Context context, RemoteMessage.Notification notification, Map<String, String> data) {
-        //TODO process notification and data payload
-
-        if (data != null && !data.isEmpty()) {
-            String message = data.get("message");
-            if (message != null) {
+        if (remoteMessage.getData() != null && !remoteMessage.getData().isEmpty()) {
+            String messageData = remoteMessage.getData().get("message");
+            if (messageData != null) {
                 try {
-                    HyberMessageModel messageModel = new Gson().fromJson(message, HyberMessageModel.class);
+                    HyberMessageModel messageModel = new Gson().fromJson(messageData, HyberMessageModel.class);
 
-                    if (mRemoteMessageSubscriber != null)
-                        mRemoteMessageSubscriber.onNext(messageModel);
+                    Repository repo = new Repository();
+                    repo.open();
 
-                    Message receivedMessage =
-                            new Message(messageModel.getId(),
-                                    "push",
-                                    new Date(),
-                                    messageModel.getAlpha(),
-                                    messageModel.getText(),
-                                    "");
-                    receivedMessage.setAsNewReceived();
-                    if (messageModel.getOptions() != null) {
-                        receivedMessage.setOptions(
-                                messageModel.getOptions().getImageUrl(),
-                                messageModel.getOptions().getActionUrl(),
-                                messageModel.getOptions().getCaptionText());
+                    User user = repo.getCurrentUser();
+                    if (user == null) {
+                        HyberLogger.w("Hyber user is not created");
+                        return;
                     }
 
-                    MessageBusinessModel.newInstance().saveMessage(receivedMessage)
-                            .subscribe(new Action1<Message>() {
-                                @Override
-                                public void call(Message message) {
-                                    HyberLogger.i("message %s is saved", message.getId());
-                                }
-                            }, new Action1<Throwable>() {
-                                @Override
-                                public void call(Throwable throwable) {
-                                    HyberLogger.e(throwable);
-                                }
-                            });
+                    boolean isRead = false;
+                    boolean isReported = false;
+                    Message message = repo.getMessageById(user, messageModel.getId());
+                    if (message != null) {
+                        isRead = message.isRead();
+                        isReported = message.isReported();
+                    }
+
+                    Message hyberMessage = new Message(
+                            messageModel.getId(),
+                            user,
+                            "push",
+                            messageModel.getAlpha(),
+                            messageModel.getText(),
+                            new Date(),
+                            messageModel.getOptions() == null ? null : messageModel.getOptions().getImageUrl(),
+                            messageModel.getOptions() == null ? null : messageModel.getOptions().getActionUrl(),
+                            messageModel.getOptions() == null ? null : messageModel.getOptions().getCaptionText(),
+                            isRead, isReported);
+
+                    repo.saveMessageOrUpdate(hyberMessage);
+
+                    repo.close();
                 } catch (Exception e) {
                     HyberLogger.e(e);
                 }
+            } else {
+                HyberLogger.w("Message object not exist in RemoteMessage data payload");
             }
         }
     }

@@ -1,9 +1,9 @@
 package com.hyber.listener;
 
-import com.hyber.HyberMessageModel;
+import com.google.firebase.messaging.RemoteMessage;
 
 public interface HyberNotificationListener {
 
-    void onMessageReceived(HyberMessageModel hyberMessageModel);
+    void onMessageReceived(RemoteMessage remoteMessage);
 
 }

@@ -16,7 +16,7 @@ public class HyberFCMService extends FirebaseMessagingService {
     @Override
     public void onMessageReceived(RemoteMessage remoteMessage) {
 
-        NotificationBundleProcessor.processFromFCMIntentService(this, remoteMessage);
+        NotificationBundleProcessor.processMessageFromFCM(remoteMessage);
 
     }
     // [END receive_message]

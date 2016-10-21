@@ -21,13 +21,15 @@ dependencies {
     compile deps.rxandroid
     compile deps.rxjava
 
-    compile deps.hawk
     compile deps.javaDiffUtils
 
+    provided "org.projectlombok:lombok:1.12.6"
+    apt "org.projectlombok:lombok:1.12.6"
+
     // Debug dependencies
-//    compile deps.stetho
-//    compile deps.stethoOkHttp
-//    compile deps.stethoRealm
+    compile deps.stetho
+    compile deps.stethoOkHttp
+    compile deps.stethoRealm
 
     // Unit Tests
     testCompile deps.junit

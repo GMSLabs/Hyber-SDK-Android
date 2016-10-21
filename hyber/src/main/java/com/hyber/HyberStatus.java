@@ -6,8 +6,10 @@ public enum HyberStatus {
 
     SDK_INTEGRATION_ClientApiKeyIsInvalid(1011, "Hyber Client Api Key is invalid"),
 
-    SDK_API_404Error(1021, "Hyber API 404 error"),
-    SDK_API_ResponseIsUnsuccessful(1022, "Hyber API response is unsuccessful"),
+    SDK_API_ResponseIsUnsuccessful(1020, "Hyber API response is unsuccessful"),
+    SDK_API_403Error(1021, "Hyber API 403 error"),
+    SDK_API_404Error(1022, "Hyber API 404 error"),
+    SDK_API_500Error(1023, "Hyber API 500 error"),
 
     SDK_API_notCorrectAuthorizationFormat(1131, "Incorrect auth format"),
     SDK_API_pushSettingsNotFound(1126, "Push not configured"),

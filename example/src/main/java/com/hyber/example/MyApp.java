@@ -2,7 +2,10 @@ package com.hyber.example;
 
 import android.app.Application;
 import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.content.Intent;
 import android.os.Handler;
+import android.support.annotation.NonNull;
 import android.support.v4.app.NotificationCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.view.ContextThemeWrapper;
@@ -11,15 +14,22 @@ import android.view.WindowManager;
 
 import com.crashlytics.android.Crashlytics;
 import com.google.firebase.crash.FirebaseCrash;
+import com.google.firebase.messaging.RemoteMessage;
+import com.google.gson.Gson;
 import com.hyber.Hyber;
 import com.hyber.HyberLogger;
 import com.hyber.HyberMessageModel;
 import com.hyber.HyberStatus;
+import com.hyber.Message;
+import com.hyber.Repository;
+import com.hyber.User;
 import com.hyber.listener.HyberNotificationListener;
 
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Date;
 import java.util.Locale;
+import java.util.Map;
 
 import io.fabric.sdk.android.Fabric;
 
@@ -41,8 +51,12 @@ public class MyApp extends Application {
         Hyber.with(this)
                 .setNotificationListener(new HyberNotificationListener() {
                     @Override
-                    public void onMessageReceived(HyberMessageModel hyberMessageModel) {
-                        onNotification(hyberMessageModel);
+                    public void onMessageReceived(RemoteMessage remoteMessage) {
+                        if (remoteMessage.getNotification() != null) {
+                            onNotification(remoteMessage.getNotification());
+                        } else if (remoteMessage.getData() != null) {
+                            onNotificationFromData(remoteMessage.getData());
+                        }
                     }
                 })
                 .init();
@@ -100,7 +114,8 @@ public class MyApp extends Application {
                         case Log.ASSERT:
                             mAlertDialogBuilder.setTitle("ASSERT");
                             break;
-                        default: mAlertDialogBuilder.setTitle("VERBOSE");
+                        default:
+                            mAlertDialogBuilder.setTitle("VERBOSE");
                     }
 
                     if (t != null) {
@@ -113,32 +128,66 @@ public class MyApp extends Application {
                     }
 
                     mAlertDialog = mAlertDialogBuilder.create();
-                    mAlertDialog.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
-                    mAlertDialog.show();
+                    if (mAlertDialog.getWindow() != null) {
+                        mAlertDialog.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
+                        mAlertDialog.show();
+                    }
                 }
             });
         }
     }
 
-    private void onNotification(HyberMessageModel hyberMessageModel) {
+    private void onNotification(@NonNull @lombok.NonNull RemoteMessage.Notification notification) {
+        Intent i = new Intent(this, SplashActivity.class);
+        i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+
+        PendingIntent pendingIntent = PendingIntent.getActivity(this,0,i, PendingIntent.FLAG_UPDATE_CURRENT);
+
         NotificationCompat.Builder mBuilder =
                 new NotificationCompat.Builder(MyApp.this)
                         .setSmallIcon(R.mipmap.ic_launcher)
-                        .setContentTitle(hyberMessageModel.getAlpha())
-                        .setContentText(String.format(Locale.getDefault(),
-                                "%s ==> %s",
-                                hyberMessageModel.getId(), hyberMessageModel.getText()))
+                        .setContentTitle(notification.getTitle())
+                        .setContentText(notification.getBody())
                         .setAutoCancel(true)
                         .setPriority(NotificationCompat.PRIORITY_MAX)
-                        .setCategory(NotificationCompat.CATEGORY_MESSAGE);
-
-        // Sets an ID for the notification
-        int mNotificationId = Integer.parseInt(hyberMessageModel.getId());
+                        .setContentIntent(pendingIntent);
         // Gets an instance of the NotificationManager service
         NotificationManager mNotifyMgr =
                 (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
         // Builds the notification and issues it.
-        mNotifyMgr.notify(mNotificationId, mBuilder.build());
+        mNotifyMgr.notify(0, mBuilder.build());
+    }
+
+    private void onNotificationFromData(@NonNull @lombok.NonNull Map<String, String> data) {
+        String messageData = data.get("message");
+        if (messageData != null) {
+            try {
+                Intent i = new Intent(this, SplashActivity.class);
+                i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+
+                PendingIntent pendingIntent = PendingIntent.getActivity(this,0,i, PendingIntent.FLAG_UPDATE_CURRENT);
+
+                HyberMessageModel messageModel = new Gson().fromJson(messageData, HyberMessageModel.class);
+
+                NotificationCompat.Builder mBuilder =
+                        new NotificationCompat.Builder(MyApp.this)
+                                .setSmallIcon(R.mipmap.ic_launcher)
+                                .setContentTitle(messageModel.getAlpha())
+                                .setContentText(messageModel.getText())
+                                .setAutoCancel(true)
+                                .setPriority(NotificationCompat.PRIORITY_MAX)
+                                .setContentIntent(pendingIntent);
+                // Gets an instance of the NotificationManager service
+                NotificationManager mNotifyMgr =
+                        (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+                // Builds the notification and issues it.
+                mNotifyMgr.notify(0, mBuilder.build());
+            } catch (Exception e) {
+                HyberLogger.e(e);
+            }
+        } else {
+            HyberLogger.w("Message object not exist in RemoteMessage data payload");
+        }
     }
 
 }

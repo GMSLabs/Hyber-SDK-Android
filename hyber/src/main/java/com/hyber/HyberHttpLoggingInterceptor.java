@@ -198,6 +198,8 @@ public class HyberHttpLoggingInterceptor implements Interceptor {
             response = chain.proceed(request);
         } catch (Exception e) {
             logResponseSB.append(String.format(Locale.getDefault(), "<-- HTTP FAILED: %s", e));
+            HyberLogger.e(logRequestSB.toString());
+            HyberLogger.e(logResponseSB.toString());
             throw e;
         }
 

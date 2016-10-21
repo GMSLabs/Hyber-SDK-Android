@@ -1,5 +1,6 @@
 package com.hyber;
 
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 import com.google.gson.annotations.SerializedName;
@@ -15,17 +16,17 @@ class SessionRespItemModel {
     @SerializedName("expirationDate")
     private Date mExpirationDate;
 
-    @Nullable
+    @NonNull
     public String getToken() {
         return mToken;
     }
 
-    @Nullable
+    @NonNull
     public String getRefreshToken() {
         return mRefreshToken;
     }
 
-    @Nullable
+    @NonNull
     public Date getExpirationDate() {
         return mExpirationDate;
     }

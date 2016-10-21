@@ -6,52 +6,43 @@ import android.support.annotation.Nullable;
 import java.util.Date;
 
 import io.realm.RealmObject;
+import io.realm.annotations.Index;
 import io.realm.annotations.PrimaryKey;
+import io.realm.annotations.RealmClass;
 import io.realm.annotations.Required;
 
+@RealmClass
 public class Message extends RealmObject {
 
     public static final String ID = "mId";
+    public static final String USER = "mUser";
     public static final String PARTNER = "mPartner";
-    public static final String ALPHA_NAME = "mAlphaName";
-    public static final String TIME = "mTime";
-    public static final String ORDER = "mOrder";
-
+    public static final String TITLE = "mTitle";
+    public static final String BODY = "mBody";
+    public static final String DATE = "mDate";
     public static final String IMAGE_URL = "mImageUrl";
-    public static final String ACTION = "mAction";
-    public static final String CAPTION = "mCaption";
-
-    public static final String RECEIVED_AT = "mReceivedAt";
+    public static final String BUTTON_URL = "mButtonUrl";
+    public static final String BUTTON_TEXT = "mButtonText";
+    public static final String IS_READ = "isRead";
     public static final String IS_REPORTED = "isReported";
+    public static final String USER_ID = "mUser.mId";
 
     @PrimaryKey
     @Required
+    @Index
     private String mId;
-
+    private User mUser;
     @Required
     private String mPartner;
-
+    private String mTitle;
+    private String mBody;
     @Required
-    private Date mTime;
-
-    @Required
-    private String mAlphaName;
-
-    @Required
-    private String mText;
-
-    @Required
-    private String mOrder;
-
+    private Date mDate;
     private String mImageUrl;
-
-    private String mAction;
-
-    private String mCaption;
-
+    private String mButtonUrl;
+    private String mButtonText;
     @Required
-    private Date mReceivedAt;
-
+    private Boolean isRead;
     @Required
     private Boolean isReported;
 
@@ -59,14 +50,22 @@ public class Message extends RealmObject {
 
     }
 
-    public Message(@NonNull String id, @NonNull String partner, @NonNull Date time,
-                   @NonNull String alphaName, @NonNull String text, @NonNull String order) {
+    public Message(@NonNull @lombok.NonNull String id, @NonNull @lombok.NonNull User user,
+                   @NonNull @lombok.NonNull String partner, @Nullable String title, @Nullable String body,
+                   @NonNull @lombok.NonNull Date date,
+                   @Nullable String imageUrl, @Nullable String buttonUrl, @Nullable String buttonText,
+                   @NonNull @lombok.NonNull Boolean isRead, @NonNull @lombok.NonNull Boolean isReported) {
         this.mId = id;
+        this.mUser = user;
         this.mPartner = partner;
-        this.mTime = time;
-        this.mAlphaName = alphaName;
-        this.mText = text;
-        this.mOrder = order;
+        this.mTitle = title;
+        this.mBody = body;
+        this.mDate = date;
+        this.mImageUrl = imageUrl;
+        this.mButtonUrl = buttonUrl;
+        this.mButtonText = buttonText;
+        this.isRead = isRead;
+        this.isReported = isReported;
     }
 
     @NonNull
@@ -75,34 +74,28 @@ public class Message extends RealmObject {
     }
 
     @NonNull
+    public User getUser() {
+        return mUser;
+    }
+
+    @NonNull
     public String getPartner() {
         return mPartner;
     }
 
-    @NonNull
-    public Date getTime() {
-        return mTime;
+    @Nullable
+    public String getTitle() {
+        return mTitle;
+    }
+
+    @Nullable
+    public String getBody() {
+        return mBody;
     }
 
     @NonNull
-    public String getAlphaName() {
-        return mAlphaName;
-    }
-
-    @NonNull
-    public String getText() {
-        return mText;
-    }
-
-    @NonNull
-    public String getOrder() {
-        return mOrder;
-    }
-
-    public void setOptions(String imageUrl, String action, String caption) {
-        this.mImageUrl = imageUrl;
-        this.mAction = action;
-        this.mCaption = caption;
+    public Date getDate() {
+        return mDate;
     }
 
     @Nullable
@@ -111,18 +104,18 @@ public class Message extends RealmObject {
     }
 
     @Nullable
-    public String getAction() {
-        return mAction;
+    public String getButtonUrl() {
+        return mButtonUrl;
     }
 
     @Nullable
-    public String getCaption() {
-        return mCaption;
+    public String getButtonText() {
+        return mButtonText;
     }
 
     @NonNull
-    public Date getReceivedAt() {
-        return mReceivedAt;
+    public Boolean isRead() {
+        return isRead;
     }
 
     @NonNull
@@ -130,18 +123,12 @@ public class Message extends RealmObject {
         return isReported;
     }
 
-    void setAsFromHistory() {
-        this.mReceivedAt = this.mTime;
-        this.isReported = true;
+    void setReadStatus(boolean status) {
+        isRead = status;
     }
 
-    void setAsNewReceived() {
-        this.mReceivedAt = new Date();
-        this.isReported = false;
-    }
-
-    void setReportedComplete() {
-        isReported = true;
+    void setReportedStatus(boolean status) {
+        isReported = status;
     }
 
 }

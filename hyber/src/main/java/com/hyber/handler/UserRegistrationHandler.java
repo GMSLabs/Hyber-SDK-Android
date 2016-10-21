@@ -4,6 +4,6 @@ public interface UserRegistrationHandler {
 
     void onSuccess();
 
-    void onFailure(String message);
+    void onFailure();
 
 }
