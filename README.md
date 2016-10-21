@@ -11,7 +11,7 @@ For more information about Hyber and its features, see [the website][gms-worldwi
 To use Hyber SDK, add next repository in Gradle:
 ```groovy
     repositories {
-        maven { url 'https://raw.github.com/GMSLabs/Hyber-SDK-Android/master/Hyber/releases/' }
+        maven { url 'https://raw.github.com/Incuube/Hyber-SDK-Android/master/Hyber/releases/' }
     }
 ```
 
