@@ -59,25 +59,25 @@ public abstract class HyberMessageHistoryBaseRecyclerViewAdapter extends Recycle
         // If automatic updates aren't enabled, then animateResults should be false as well.
         this.mAnimateResults = (mAutomaticUpdate && mAnimateResults);
         if (mAnimateResults) {
-            animatePrimaryColumnIndex = mRealmResults.getTable().getTable()
+            animatePrimaryColumnIndex = mRealmResults.getTableOrView().getTable()
                     .getPrimaryKey();
             if (animatePrimaryColumnIndex == TableOrView.NO_MATCH) {
                 throw new IllegalStateException(
                         "Animating the results requires a primaryKey.");
             }
-            animatePrimaryIdType = mRealmResults.getTable().getColumnType(animatePrimaryColumnIndex);
+            animatePrimaryIdType = mRealmResults.getTableOrView().getColumnType(animatePrimaryColumnIndex);
             if (animatePrimaryIdType != RealmFieldType.STRING) {
                 throw new IllegalStateException(
                         "Animating requires a primary key of type String");
             }
 
-            animateIsReportedColumnIndex = mRealmResults.getTable().getTable()
+            animateIsReportedColumnIndex = mRealmResults.getTableOrView().getTable()
                     .getColumnIndex(Message.IS_REPORTED);
             if (animateIsReportedColumnIndex == TableOrView.NO_MATCH) {
                 throw new IllegalStateException(
                         "Animating the results requires a isReported.");
             }
-            animateIsReportedType = mRealmResults.getTable().getColumnType(animateIsReportedColumnIndex);
+            animateIsReportedType = mRealmResults.getTableOrView().getColumnType(animateIsReportedColumnIndex);
             if (animateIsReportedType != RealmFieldType.BOOLEAN) {
                 throw new IllegalStateException(
                         "Animating requires a isReported of type Boolean");
