@@ -15,9 +15,9 @@ public abstract class MessageViewHolder extends RecyclerView.ViewHolder {
 
     public abstract void setMessageId(@NonNull String id);
 
-    public abstract void setMessageAlphaName(@NonNull String alphaName);
+    public abstract void setMessageAlphaName(@Nullable String alphaName);
 
-    public abstract void setMessageText(@NonNull String text);
+    public abstract void setMessageText(@Nullable String text);
 
     public abstract void setMessageImageUrl(@Nullable String imageUrl);
 
@@ -28,6 +28,8 @@ public abstract class MessageViewHolder extends RecyclerView.ViewHolder {
     public abstract void isMessageBidirectionalAvailable(@NonNull Boolean isBiDirMessage);
 
     public abstract void setMessageDate(@NonNull Date date);
+
+    public abstract void setReadStatus(@NonNull Boolean readStatus);
 
     public abstract void setDeliveryReportStatus(@NonNull Boolean drStatus);
 

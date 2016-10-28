@@ -25,7 +25,7 @@ android {
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 2
-        versionName "2.0.1"
+        versionName "2.1.0"
 
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
 
@@ -115,9 +115,11 @@ android {
 
 dependencies {
     // Required dependencies for the Hyber
-    compile deps.firebaseMessaging
+    compile 'com.google.firebase:firebase-messaging:9.6.1'
 
     compile project(':hyber')
+
+    provided "org.projectlombok:lombok:1.12.6"
 
     compile 'com.android.support:support-v4:24.2.1'
     compile 'com.android.support:appcompat-v7:24.2.1'
@@ -131,7 +133,7 @@ dependencies {
     compile 'com.jakewharton.timber:timber:4.3.0'
 
     // Analytics
-    compile 'com.google.firebase:firebase-crash:9.6.0'
+    compile 'com.google.firebase:firebase-crash:9.6.1'
     compile('com.crashlytics.sdk.android:crashlytics:2.6.3@aar') {
         transitive = true;
     }

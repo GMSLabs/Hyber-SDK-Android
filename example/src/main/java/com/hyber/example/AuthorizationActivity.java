@@ -72,10 +72,10 @@ public class AuthorizationActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onFailure(String message) {
+            public void onFailure() {
                 String s = String.format(Locale.getDefault(), "User registration onFailure\nWith phone %d", mPhone);
-                Timber.e("%s\n%s", s, message);
-                statusTextView.setText(String.format(Locale.getDefault(), "%s\n%s", s, message));
+                Timber.e(s);
+                statusTextView.setText(s);
             }
         });
     }

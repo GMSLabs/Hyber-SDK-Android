@@ -7,6 +7,7 @@ import android.view.ViewGroup;
 import com.hyber.Hyber;
 import com.hyber.Message;
 import com.hyber.MessageViewHolder;
+import com.hyber.Repository;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,13 +32,16 @@ public abstract class HyberMessageHistoryBaseRecyclerViewAdapter extends Recycle
     private RealmFieldType animatePrimaryIdType;
     private long animateIsReportedColumnIndex;
     private RealmFieldType animateIsReportedType;
+    private Repository repo;
 
     public HyberMessageHistoryBaseRecyclerViewAdapter(boolean automaticUpdate, boolean animateResults) {
         this.mAutomaticUpdate = automaticUpdate;
         this.mAnimateResults = animateResults;
-        this.mRealmResults = Hyber.dataSourceController().getRealmInstance()
-                .where(Message.class)
-                .findAllSorted(Message.RECEIVED_AT, Sort.ASCENDING);
+        this.repo = new Repository();
+        this.repo.open();
+        if (repo.getCurrentUser() != null) {
+            this.mRealmResults = repo.getMessages(repo.getCurrentUser());
+        }
         this.mRealmChangeListener = (!mAutomaticUpdate) ? null : getRealmChangeListener();
 
         setAnimatedResults();
@@ -96,16 +100,17 @@ public abstract class HyberMessageHistoryBaseRecyclerViewAdapter extends Recycle
         final Message messageItem = mRealmResults.get(position);
         viewHolder.setMessageId(messageItem.getId());
 
-        viewHolder.setMessageAlphaName(messageItem.getAlphaName());
-        viewHolder.setMessageText(messageItem.getText());
+        viewHolder.setMessageAlphaName(messageItem.getTitle());
+        viewHolder.setMessageText(messageItem.getBody());
 
         viewHolder.setMessageImageUrl(messageItem.getImageUrl());
-        viewHolder.setMessageAction(messageItem.getAction());
-        viewHolder.setMessageCaption(messageItem.getCaption());
+        viewHolder.setMessageAction(messageItem.getButtonUrl());
+        viewHolder.setMessageCaption(messageItem.getButtonText());
 
         viewHolder.isMessageBidirectionalAvailable(Hyber.isBidirectionalAvailable());
 
-        viewHolder.setMessageDate(messageItem.getReceivedAt());
+        viewHolder.setMessageDate(messageItem.getDate());
+        viewHolder.setReadStatus(messageItem.isRead());
         viewHolder.setDeliveryReportStatus(messageItem.isReported());
     }
 

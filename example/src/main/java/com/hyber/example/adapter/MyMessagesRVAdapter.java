@@ -93,12 +93,16 @@ public class MyMessagesRVAdapter extends HyberMessageHistoryBaseRecyclerViewAdap
         }
 
         @Override
-        public void setMessageAlphaName(@NonNull String alphaName) {
+        public void setMessageAlphaName(@Nullable String alphaName) {
+            if (alphaName == null)
+                return;
             this.messageAlphaName.setText(alphaName);
         }
 
         @Override
-        public void setMessageText(@NonNull String text) {
+        public void setMessageText(@Nullable String text) {
+            if (text == null)
+                return;
             this.messageText.setText(text);
         }
 
@@ -197,6 +201,11 @@ public class MyMessagesRVAdapter extends HyberMessageHistoryBaseRecyclerViewAdap
         public void setMessageDate(@NonNull Date date) {
             SimpleDateFormat formatter = new SimpleDateFormat("dd.MM.yyyy hh:mm:ss.SSS", Locale.getDefault());
             this.messageTime.setText(formatter.format(date));
+        }
+
+        @Override
+        public void setReadStatus(@NonNull Boolean readStatus) {
+
         }
 
         @Override

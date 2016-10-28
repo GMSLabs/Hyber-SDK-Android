@@ -1,7 +1,5 @@
 package com.hyber;
 
-import com.orhanobut.hawk.Hawk;
-
 import java.io.IOException;
 
 import okhttp3.Interceptor;
@@ -22,10 +20,14 @@ class HyberAuthInterceptor implements Interceptor {
                 .header(Tweakables.X_HYBER_APP_FINGERPRINT, Hyber.getFingerprint())
                 .header(Tweakables.X_HYBER_INSTALLATION_ID, Hyber.getInstallationID());
 
-        String token = Hawk.get(Tweakables.HAWK_HYBER_AUTH_TOKEN, "");
-        if (token != null && !token.isEmpty()) {
-            requestBuilder.addHeader(Tweakables.X_HYBER_AUTH_TOKEN, token);
+
+        Repository repo = new Repository();
+        repo.open();
+        User user = repo.getCurrentUser();
+        if (user != null) {
+            requestBuilder.addHeader(Tweakables.X_HYBER_AUTH_TOKEN, user.getSession().getToken());
         }
+        repo.close();
 
         response = chain.proceed(requestBuilder.build());
 
