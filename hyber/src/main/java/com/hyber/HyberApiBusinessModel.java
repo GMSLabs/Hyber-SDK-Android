@@ -9,7 +9,6 @@ import com.google.gson.JsonSyntaxException;
 
 import java.io.IOException;
 import java.lang.ref.WeakReference;
-import java.util.Locale;
 
 import okhttp3.ResponseBody;
 import retrofit2.Response;
@@ -99,7 +98,7 @@ final class HyberApiBusinessModel implements IHyberApiBusinessModel {
             case 500: HyberLogger.e(HyberStatus.SDK_API_500Error, "url: %s\nresponse code: %d - %s",
                     response.raw().request().url().toString(), response.code(), response.message());
                 break;
-            default: {
+            default:
                 try {
                     BaseResponse errorResp = new Gson().fromJson(response.errorBody().string(), BaseResponse.class);
                     if (errorResp != null && errorResp.getError() != null
@@ -112,7 +111,6 @@ final class HyberApiBusinessModel implements IHyberApiBusinessModel {
                     HyberLogger.e(HyberStatus.SDK_API_ResponseIsUnsuccessful, "url: %s\nresponse code: %d - %s",
                             response.raw().request().url().toString(), response.code(), response.message());
                 }
-            }
         }
     }
 

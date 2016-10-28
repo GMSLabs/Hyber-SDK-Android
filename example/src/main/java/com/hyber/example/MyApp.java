@@ -20,14 +20,10 @@ import com.hyber.Hyber;
 import com.hyber.HyberLogger;
 import com.hyber.HyberMessageModel;
 import com.hyber.HyberStatus;
-import com.hyber.Message;
-import com.hyber.Repository;
-import com.hyber.User;
 import com.hyber.listener.HyberNotificationListener;
 
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Date;
 import java.util.Locale;
 import java.util.Map;
 
@@ -141,7 +137,7 @@ public class MyApp extends Application {
         Intent i = new Intent(this, SplashActivity.class);
         i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 
-        PendingIntent pendingIntent = PendingIntent.getActivity(this,0,i, PendingIntent.FLAG_UPDATE_CURRENT);
+        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, i, PendingIntent.FLAG_UPDATE_CURRENT);
 
         NotificationCompat.Builder mBuilder =
                 new NotificationCompat.Builder(MyApp.this)
@@ -165,7 +161,7 @@ public class MyApp extends Application {
                 Intent i = new Intent(this, SplashActivity.class);
                 i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 
-                PendingIntent pendingIntent = PendingIntent.getActivity(this,0,i, PendingIntent.FLAG_UPDATE_CURRENT);
+                PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, i, PendingIntent.FLAG_UPDATE_CURRENT);
 
                 HyberMessageModel messageModel = new Gson().fromJson(messageData, HyberMessageModel.class);
 
