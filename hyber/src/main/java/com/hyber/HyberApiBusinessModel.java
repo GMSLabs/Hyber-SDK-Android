@@ -8,7 +8,6 @@ import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 
 import java.io.IOException;
-import java.lang.ref.WeakReference;
 
 import okhttp3.ResponseBody;
 import retrofit2.Response;
@@ -21,10 +20,10 @@ final class HyberApiBusinessModel implements IHyberApiBusinessModel {
     private static final String TAG = "HyberApiBusinessModel";
 
     private static HyberApiBusinessModel mInstance;
-    private WeakReference<Context> mContextWeakReference;
+    private Context mContextReference;
 
     private HyberApiBusinessModel(@NonNull Context context) {
-        this.mContextWeakReference = new WeakReference<>(context);
+        this.mContextReference = context;
     }
 
     static synchronized HyberApiBusinessModel getInstance(@NonNull Context context) {
@@ -41,7 +40,7 @@ final class HyberApiBusinessModel implements IHyberApiBusinessModel {
         RegisterUserReqModel reqModel = new RegisterUserReqModel(phone,
                 OsUtils.getDeviceOs(), OsUtils.getAndroidVersion(),
                 OsUtils.getDeviceName(), OsUtils.getModelName(),
-                OsUtils.getDeviceFormat(mContextWeakReference.get()));
+                OsUtils.getDeviceFormat(mContextReference));
 
         HyberRestClient.registerUserObservable(reqModel)
                 .subscribe(new Action1<Response<RegisterUserRespModel>>() {
@@ -213,7 +212,7 @@ final class HyberApiBusinessModel implements IHyberApiBusinessModel {
                 FirebaseInstanceId.getInstance().getToken(),
                 OsUtils.getDeviceOs(), OsUtils.getAndroidVersion(),
                 OsUtils.getDeviceName(), OsUtils.getModelName(),
-                OsUtils.getDeviceFormat(mContextWeakReference.get()));
+                OsUtils.getDeviceFormat(mContextReference));
 
         HyberRestClient.updateUserObservable(reqModel)
                 .flatMap(new Func1<Response<UpdateUserRespModel>, Observable<Response<UpdateUserRespModel>>>() {

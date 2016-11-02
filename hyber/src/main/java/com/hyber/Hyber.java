@@ -38,7 +38,7 @@ public final class Hyber {
      * Tag used on log messages.
      */
     private static final String TAG = "Hyber";
-    private static WeakReference<Context> appWeakContext;
+    private static Context mContextReference;
     private static String clientApiKey;
     private static String installationID;
     private static String fingerprint;
@@ -171,9 +171,7 @@ public final class Hyber {
         }
 
         if (initDone) {
-            if (context != null)
-                appWeakContext = new WeakReference<>(context.getApplicationContext());
-
+            mContextReference = context.getApplicationContext();
             return;
         }
         // END: Init validation
@@ -182,7 +180,7 @@ public final class Hyber {
         foreground = contextIsActivity;
 
         clientApiKey = hyberClientApiKey;
-        appWeakContext = new WeakReference<>(context.getApplicationContext());
+        mContextReference = context.getApplicationContext();
 
         drInQueue = new HashMap<>();
 
@@ -422,7 +420,7 @@ public final class Hyber {
                 throw new Throwable("Firebase classes not found");
         }
 
-        pushRegistrator.registerForPush(appWeakContext.get(), new PushRegistrator.RegisteredHandler() {
+        pushRegistrator.registerForPush(mContextReference, new PushRegistrator.RegisteredHandler() {
             @Override
             public void complete(String id) {
                 lastRegistrationId = id;
@@ -433,7 +431,7 @@ public final class Hyber {
     }
 
     static Context getAppContext() {
-        return appWeakContext.get();
+        return mContextReference;
     }
 
     private static void updateDeviceData() {
