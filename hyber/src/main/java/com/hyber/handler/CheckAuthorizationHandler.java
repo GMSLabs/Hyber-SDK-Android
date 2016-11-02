@@ -1,6 +1,6 @@
 package com.hyber.handler;
 
-public interface DeviceUpdateHandler {
+public interface CheckAuthorizationHandler {
 
     void onSuccess();
 

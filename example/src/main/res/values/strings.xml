@@ -6,9 +6,24 @@
 
     <string name="action_settings">Settings</string>
     <string name="title_activity_main">MainActivity</string>
+    <string name="title_activity_auth">Authorization</string>
     <string name="title_activity_authorization">AuthorizationActivity</string>
 
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
+
+
+    <string name="AppName">Hyber</string>
+    <string name="StartText">Please confirm your country code and enter your phone number.</string>
+    <string name="ChooseCountry">Choose a country</string>
+    <string name="WrongCountry">Wrong country code</string>
+    <string name="YourPhone">Your phone</string>
+
+    <string name="InvalidPhoneNumber">Invalid phone number</string>
+
+    <string name="OK">OK</string>
+
+    <string name="Loading">Loading…</string>
+    <string name="NoResult">No results</string>
 
 </resources>

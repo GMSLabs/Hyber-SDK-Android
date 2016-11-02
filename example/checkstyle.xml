@@ -69,8 +69,12 @@
         <module name="LineLength">
             <property name="max" value="130" />
         </module>
-        <module name="MethodLength"/>
-        <module name="ParameterNumber" />
+        <module name="MethodLength">
+            <property name="max" value="400" />
+        </module>
+        <module name="ParameterNumber">
+            <property name="max" value="15" />
+        </module>
 
 
         <!-- Checks for whitespace                               -->

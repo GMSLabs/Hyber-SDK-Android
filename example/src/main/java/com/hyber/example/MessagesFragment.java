@@ -16,6 +16,7 @@ import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import com.hyber.Hyber;
+import com.hyber.HyberLogger;
 import com.hyber.example.adapter.MyMessagesRVAdapter;
 import com.hyber.handler.BidirectionalAnswerHandler;
 import com.hyber.handler.MessageHistoryHandler;
@@ -27,7 +28,6 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 import butterknife.Unbinder;
 import io.realm.HyberMessageHistoryBaseRecyclerViewAdapter;
-import timber.log.Timber;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -41,20 +41,16 @@ public class MessagesFragment extends Fragment {
 
     @BindView(R.id.messages_RecyclerView)
     RecyclerView mRecyclerView;
-    private MyMessagesRVAdapter mAdapter;
-    private LinearLayoutManager mLayoutManager;
-
-    private OnMessagesFragmentInteractionListener mListener;
-
-    private Unbinder unbinder;
-
     @BindView(R.id.answerLayout)
     RelativeLayout mAnswerLayout;
     @BindView(R.id.inputAnswerEditTextView)
     AppCompatEditText mInputAnswer;
     @BindView(R.id.sendAnswerAppCompatImageButton)
     AppCompatImageButton mSendAnswer;
-
+    private MyMessagesRVAdapter mAdapter;
+    private LinearLayoutManager mLayoutManager;
+    private OnMessagesFragmentInteractionListener mListener;
+    private Unbinder unbinder;
     private int mMaxHistoryRequests = 2;
     private Long mTimeForNextHistoryRequest;
 
@@ -78,6 +74,7 @@ public class MessagesFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        HyberLogger.i("I'm alive!");
     }
 
     @Override
@@ -100,7 +97,7 @@ public class MessagesFragment extends Fragment {
                         try {
                             mRecyclerView.smoothScrollToPosition(positionStart + itemCount - 1);
                         } catch (NullPointerException e) {
-                            Timber.e(e, "mAdapter count %d, position %d",
+                            HyberLogger.e(e, "mAdapter count %d, position %d",
                                     mAdapter.getItemCount(), positionStart + itemCount - 1);
                         }
                     }

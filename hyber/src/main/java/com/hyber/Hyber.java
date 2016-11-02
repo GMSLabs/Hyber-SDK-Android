@@ -13,7 +13,7 @@ import android.support.annotation.Nullable;
 
 import com.google.firebase.messaging.RemoteMessage;
 import com.hyber.handler.BidirectionalAnswerHandler;
-import com.hyber.handler.DeviceUpdateHandler;
+import com.hyber.handler.CheckAuthorizationHandler;
 import com.hyber.handler.MessageHistoryHandler;
 import com.hyber.handler.UserRegistrationHandler;
 import com.hyber.listener.DeliveryReportListener;
@@ -283,6 +283,17 @@ public final class Hyber {
             @Override
             public void onSuccess() {
                 handler.onSuccess();
+                getApiBusinessModel().sendDeviceData(new HyberApiBusinessModel.SendDeviceDataListener() {
+                    @Override
+                    public void onSuccess() {
+                        HyberLogger.i("Send device data is success");
+                    }
+
+                    @Override
+                    public void onFailure() {
+                        HyberLogger.i("Send device data is failure");
+                    }
+                });
             }
 
             @Override
@@ -292,19 +303,19 @@ public final class Hyber {
         });
     }
 
-    public static void deviceUpdate(final DeviceUpdateHandler handler) {
+    public static void isAuthorized(final CheckAuthorizationHandler handler) {
         checkInitialized();
-        getApiBusinessModel().sendDeviceData(new HyberApiBusinessModel.SendDeviceDataListener() {
-            @Override
-            public void onSuccess() {
-                handler.onSuccess();
-            }
-
-            @Override
-            public void onFailure() {
-                handler.onFailure();
-            }
-        });
+        boolean isAuthorized = false;
+        Repository repo = new Repository();
+        repo.open();
+        if (repo.getCurrentUser() != null)
+            isAuthorized = true;
+        repo.close();
+        if (isAuthorized) {
+            handler.onSuccess();
+        } else {
+            handler.onFailure();
+        }
     }
 
     public static void sendBidirectionalAnswer(@NonNull String messageId, @NonNull String answerText,
