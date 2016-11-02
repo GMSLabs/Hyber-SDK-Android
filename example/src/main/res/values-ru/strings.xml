@@ -1,0 +1,18 @@
+<resources>
+
+    <string name="action_settings">Настройки</string>
+    <string name="title_activity_auth">Авторизация</string>
+
+    <string name="StartText">Пожалуйста, подтвердите ваш код страны и введите ваш номер телефона.</string>
+    <string name="ChooseCountry">Выберите страну</string>
+    <string name="WrongCountry">Не правильный код страны</string>
+    <string name="YourPhone">Номер телефона</string>
+
+    <string name="InvalidPhoneNumber">Не корректный номер телефона</string>
+
+    <string name="OK">OK</string>
+
+    <string name="Loading">Загрузка…</string>
+    <string name="NoResult">Не найдено</string>
+
+</resources>

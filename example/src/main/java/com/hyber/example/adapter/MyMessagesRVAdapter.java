@@ -64,7 +64,6 @@ public class MyMessagesRVAdapter extends HyberMessageHistoryBaseRecyclerViewAdap
 
     class MyHolder extends MessageViewHolder {
 
-        private String mMessageId;
         @BindView(R.id.messageId) AppCompatTextView messageId;
         @BindView(R.id.messageAlphaName) AppCompatTextView messageAlphaName;
         @BindView(R.id.messageText) AppCompatTextView messageText;
@@ -73,12 +72,12 @@ public class MyMessagesRVAdapter extends HyberMessageHistoryBaseRecyclerViewAdap
         @BindView(R.id.answerButton) AppCompatImageButton answerButton;
         @BindView(R.id.messageDrStatus) AppCompatTextView messageDrStatus;
         @BindView(R.id.messageTime) AppCompatTextView messageTime;
-
-        private boolean isAnswerMode = false;
         @BindView(R.id.messageAnswerLayout) RelativeLayout messageAnswerLayout;
         @BindView(R.id.messageInputAnswerEditText) TextInputEditText messageInputAnswerEditText;
         @BindView(R.id.messageSendAnswerAppCompatImageButton) AppCompatImageButton messageSendAnswerAppCompatImageButton;
 
+        private String mMessageId;
+        private boolean isAnswerMode = false;
         private String mAction;
 
         public MyHolder(View itemView) {

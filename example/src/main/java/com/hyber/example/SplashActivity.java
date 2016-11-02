@@ -8,11 +8,12 @@ import android.support.v7.app.AppCompatActivity;
 import android.widget.ProgressBar;
 
 import com.hyber.Hyber;
-import com.hyber.handler.DeviceUpdateHandler;
+import com.hyber.HyberLogger;
+import com.hyber.example.ui.AuthActivity;
+import com.hyber.handler.CheckAuthorizationHandler;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import timber.log.Timber;
 
 public class SplashActivity extends AppCompatActivity {
 
@@ -29,6 +30,9 @@ public class SplashActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_splash);
+        HyberLogger.i("I'm alive!");
+
+        AndroidUtilities.checkDisplaySize(this, getResources().getConfiguration());
 
         ButterKnife.bind(this);
 
@@ -36,7 +40,19 @@ public class SplashActivity extends AppCompatActivity {
 
         new ProgressTask().execute();
 
-        deviceDataUpdate();
+        Hyber.isAuthorized(new CheckAuthorizationHandler() {
+            @Override
+            public void onSuccess() {
+                isFinished = true;
+                startActivity(new Intent(SplashActivity.this, MainActivity.class));
+            }
+
+            @Override
+            public void onFailure() {
+                isFinished = true;
+                startActivity(new Intent(SplashActivity.this, AuthActivity.class));
+            }
+        });
     }
 
     class ProgressTask extends AsyncTask<Integer, Integer, String> {
@@ -51,13 +67,14 @@ public class SplashActivity extends AppCompatActivity {
                     try {
                         Thread.sleep(progressWaitMills);
                     } catch (InterruptedException e) {
-                        Timber.e(e);
+                        HyberLogger.e(e);
                     }
                 }
                 publishProgress(mProgressStatus);
             }
             return "Task Completed.";
         }
+
         @Override
         protected void onProgressUpdate(Integer... values) {
             //txt.setText("Running..."+ values[0]);
@@ -69,22 +86,6 @@ public class SplashActivity extends AppCompatActivity {
                 mProgressStatus -= maxProgressStep;
             }
         }
-    }
-
-    private void deviceDataUpdate() {
-        Hyber.deviceUpdate(new DeviceUpdateHandler() {
-            @Override
-            public void onSuccess() {
-                isFinished = true;
-                startActivity(new Intent(SplashActivity.this, MainActivity.class));
-            }
-
-            @Override
-            public void onFailure() {
-                isFinished = true;
-                startActivity(new Intent(SplashActivity.this, AuthorizationActivity.class));
-            }
-        });
     }
 
 }

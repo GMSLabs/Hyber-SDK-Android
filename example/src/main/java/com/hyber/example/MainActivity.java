@@ -15,9 +15,10 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import com.hyber.HyberLogger;
+
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import timber.log.Timber;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener,
@@ -38,10 +39,11 @@ public class MainActivity extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        ButterKnife.bind(this);
+        HyberLogger.i("I'm alive!");
 
-        Timber.tag("MainActivity");
-        Timber.d("Created");
+        AndroidUtilities.checkDisplaySize(this, getResources().getConfiguration());
+
+        ButterKnife.bind(this);
 
         setSupportActionBar(toolbar);
 

@@ -16,3 +16,5 @@ gradle.properties
 local.properties
 /properties
 /keystores
+keystores.zip
+properties.zip
