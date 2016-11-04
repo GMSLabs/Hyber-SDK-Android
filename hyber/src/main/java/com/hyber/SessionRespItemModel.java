@@ -8,7 +8,7 @@ import java.util.Date;
 
 class SessionRespItemModel {
 
-    @SerializedName("authToken")
+    @SerializedName("token")
     private String mToken;
     @SerializedName("refreshToken")
     private String mRefreshToken;

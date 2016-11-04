@@ -17,6 +17,7 @@ import android.widget.RelativeLayout;
 import com.hyber.Hyber;
 import com.hyber.HyberMessageViewHolder;
 import com.hyber.example.R;
+import com.hyber.model.Message;
 import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 
@@ -27,9 +28,10 @@ import java.util.Locale;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import io.realm.HyberMessagesBaseRecyclerViewAdapter;
+import io.realm.HyberMessageAdapter;
+import io.realm.RealmResults;
 
-public class MessagesRVAdapter extends HyberMessagesBaseRecyclerViewAdapter {
+public class MessagesRVAdapter extends HyberMessageAdapter {
 
     public interface OnMessageActionListener {
         void onAction(@NonNull String action);
@@ -43,8 +45,8 @@ public class MessagesRVAdapter extends HyberMessagesBaseRecyclerViewAdapter {
     private OnMessageActionListener onMessageActionListener;
     private OnMessageAnswerListener onMessageAnswerListener;
 
-    public MessagesRVAdapter(Context context) {
-        super(true, true, Hyber.getAllUserMessages());
+    public MessagesRVAdapter(Context context, RealmResults<Message> results, boolean autoUpdate, boolean animateResults) {
+        super(context, results, autoUpdate, animateResults);
         this.mContextWeakReference = new WeakReference<>(context);
     }
 
@@ -94,19 +96,19 @@ public class MessagesRVAdapter extends HyberMessagesBaseRecyclerViewAdapter {
         }
 
         @Override
-        public void setPartner(@NonNull String partner) {
+        public void setMessagePartner(@NonNull String partner) {
             messagePartner.setText(partner);
         }
 
         @Override
-        public void setMessageAlphaName(@Nullable String alphaName) {
+        public void setMessageTitle(@Nullable String alphaName) {
             if (alphaName == null)
                 return;
             this.messageAlphaName.setText(alphaName);
         }
 
         @Override
-        public void setMessageText(@Nullable String text) {
+        public void setMessageBody(@Nullable String text) {
             if (text == null)
                 return;
             this.messageText.setText(text);
@@ -136,7 +138,7 @@ public class MessagesRVAdapter extends HyberMessagesBaseRecyclerViewAdapter {
         }
 
         @Override
-        public void setMessageAction(@Nullable String action) {
+        public void setMessageButtonUrl(@Nullable String action) {
             if (action == null) {
                 this.messageButton.setVisibility(View.GONE);
                 this.messageButton.setOnClickListener(null);
@@ -155,7 +157,7 @@ public class MessagesRVAdapter extends HyberMessagesBaseRecyclerViewAdapter {
         }
 
         @Override
-        public void setMessageCaption(@Nullable String caption) {
+        public void setMessageButtonText(@Nullable String caption) {
             if (caption == null) {
                 this.messageButton.setVisibility(View.GONE);
             } else {
@@ -165,7 +167,7 @@ public class MessagesRVAdapter extends HyberMessagesBaseRecyclerViewAdapter {
         }
 
         @Override
-        public void isMessageBidirectionalAvailable(@NonNull Boolean isBiDirMessage) {
+        public void serMessageIsBidirectional(@NonNull Boolean isBiDirMessage) {
             messageAnswerLayout.setVisibility(View.GONE);
             if (isBiDirMessage) {
                 this.answerButton.setVisibility(View.VISIBLE);
@@ -210,12 +212,12 @@ public class MessagesRVAdapter extends HyberMessagesBaseRecyclerViewAdapter {
         }
 
         @Override
-        public void setReadStatus(@NonNull Boolean readStatus) {
+        public void setMessageIsRead(@NonNull Boolean readStatus) {
 
         }
 
         @Override
-        public void setDeliveryReportStatus(@NonNull Boolean drStatus) {
+        public void setMessageIsReported(@NonNull Boolean drStatus) {
             if (drStatus) {
                 this.messageDrStatus.setText("reported");
                 this.messageDrStatus.setTextColor(Color.GREEN);

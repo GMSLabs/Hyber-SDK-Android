@@ -26,6 +26,8 @@ dependencies {
     provided "org.projectlombok:lombok:1.12.6"
     apt "org.projectlombok:lombok:1.12.6"
 
+    compile 'io.realm:android-adapters:1.4.0'
+
     // Debug dependencies
     compile deps.stetho
     compile deps.stethoOkHttp

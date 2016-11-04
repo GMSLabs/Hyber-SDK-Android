@@ -21,4 +21,8 @@ class PushDeliveryReportReqModel {
         this.mReceivedAt = receivedAt;
     }
 
+    public PushDeliveryReportReqModel setReceivedAt(Long mReceivedAt) {
+        this.mReceivedAt = mReceivedAt;
+        return this;
+    }
 }

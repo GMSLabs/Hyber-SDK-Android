@@ -6,15 +6,15 @@ import com.google.gson.annotations.SerializedName;
 
 class RegisterUserRespModel extends BaseResponse {
 
-    @SerializedName("userPhone")
-    private String mPhone;
+    @SerializedName("profile")
+    private ProfileRespItemModel mProfile;
 
     @SerializedName("session")
     private SessionRespItemModel mSession;
 
     @Nullable
-    public String getPhone() {
-        return mPhone;
+    public ProfileRespItemModel getProfile() {
+        return mProfile;
     }
 
     @Nullable

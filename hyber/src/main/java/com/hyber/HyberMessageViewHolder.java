@@ -15,24 +15,24 @@ public abstract class HyberMessageViewHolder extends RecyclerView.ViewHolder {
 
     public abstract void setMessageId(@NonNull String id);
 
-    public abstract void setPartner(@NonNull String partner);
+    public abstract void setMessagePartner(@NonNull String partner);
 
-    public abstract void setMessageAlphaName(@Nullable String alphaName);
+    public abstract void setMessageTitle(@Nullable String alphaName);
 
-    public abstract void setMessageText(@Nullable String text);
+    public abstract void setMessageBody(@Nullable String text);
 
     public abstract void setMessageImageUrl(@Nullable String imageUrl);
 
-    public abstract void setMessageAction(@Nullable String action);
+    public abstract void setMessageButtonUrl(@Nullable String action);
 
-    public abstract void setMessageCaption(@Nullable String caption);
+    public abstract void setMessageButtonText(@Nullable String caption);
 
-    public abstract void isMessageBidirectionalAvailable(@NonNull Boolean isBiDirMessage);
+    public abstract void serMessageIsBidirectional(@NonNull Boolean isBiDirMessage);
 
     public abstract void setMessageDate(@NonNull Date date);
 
-    public abstract void setReadStatus(@NonNull Boolean readStatus);
+    public abstract void setMessageIsRead(@NonNull Boolean readStatus);
 
-    public abstract void setDeliveryReportStatus(@NonNull Boolean drStatus);
+    public abstract void setMessageIsReported(@NonNull Boolean drStatus);
 
 }

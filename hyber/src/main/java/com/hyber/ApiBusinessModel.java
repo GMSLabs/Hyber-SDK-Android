@@ -4,15 +4,12 @@ import android.content.Context;
 import android.support.annotation.NonNull;
 
 import com.google.firebase.iid.FirebaseInstanceId;
-import com.google.gson.Gson;
-import com.google.gson.JsonSyntaxException;
 import com.hyber.log.HyberLogger;
 import com.hyber.model.Session;
 import com.hyber.model.User;
 
 import java.io.IOException;
 
-import okhttp3.ResponseBody;
 import retrofit2.Response;
 import rx.Observable;
 import rx.functions.Action1;
@@ -40,44 +37,53 @@ final class ApiBusinessModel implements IApiBusinessModel {
     public void authorize(@NonNull final Long phone, @NonNull final AuthorizationListener listener) {
         HyberLogger.i("Start user registration.");
 
-        RegisterUserReqModel reqModel = new RegisterUserReqModel(phone,
+        RegisterUserReqModel reqModel = new RegisterUserReqModel(String.valueOf(phone),
                 OsUtils.getDeviceOs(), OsUtils.getAndroidVersion(),
-                OsUtils.getDeviceName(), OsUtils.getModelName(),
-                OsUtils.getDeviceFormat(mContextReference));
+                OsUtils.getDeviceFormat(mContextReference),
+                OsUtils.getDeviceName(), SdkVersion.BUILD);
 
         RestClient.registerUserObservable(reqModel)
                 .subscribe(new Action1<Response<RegisterUserRespModel>>() {
                     @Override
                     public void call(Response<RegisterUserRespModel> response) {
                         if (response.isSuccessful()) {
-                            HyberLogger.i("Request for user registration is success.");
+                            if (response.body().getError() == null) {
+                                HyberLogger.i("Request for user registration is success.");
 
-                            Repository repo = new Repository();
-                            repo.open();
+                                Repository repo = new Repository();
+                                repo.open();
 
-                            if (repo.getCurrentUser() != null)
-                                repo.clearUserData(repo.getCurrentUser());
+                                if (repo.getCurrentUser() != null)
+                                    repo.clearUserData(repo.getCurrentUser());
 
-                            SessionRespItemModel sessionModel = response.body().getSession();
-                            if (sessionModel != null) {
-                                HyberLogger.i("User session is provided.");
-                                Session session = new Session(sessionModel.getToken(),
-                                        sessionModel.getRefreshToken(), sessionModel.getExpirationDate(), false);
-                                User user = new User(String.valueOf(phone), String.valueOf(phone), session);
-                                repo.saveNewUser(user);
-                                HyberLogger.i("User data saved.");
-                                listener.onSuccess();
-                            } else {
-                                if (response.body().getError() != null) {
-                                    HyberLogger.w(ErrorStatus.byCode(response.body().getError().getCode()).toString());
+                                if (response.body().getProfile() != null
+                                        && response.body().getSession() != null) {
+                                    HyberLogger.i("User profile with session is provided.");
+                                    Session session = new Session(
+                                            response.body().getSession().getToken(),
+                                            response.body().getSession().getRefreshToken(),
+                                            response.body().getSession().getExpirationDate(),
+                                            false);
+                                    User user = new User(
+                                            response.body().getProfile().getUserId(),
+                                            response.body().getProfile().getUserPhone(),
+                                            session);
+                                    repo.saveNewUser(user);
+                                    HyberLogger.i("User data with session saved.");
+                                    listener.onSuccess();
                                 } else {
-                                    HyberLogger.tag(TAG);
-                                    HyberLogger.wtf("User not registered, session data is not provided!");
+                                    if (response.body().getError() != null) {
+                                        HyberLogger.w(ErrorStatus.byCode(response.body().getError().getCode()).toString());
+                                    } else {
+                                        HyberLogger.tag(TAG);
+                                        HyberLogger.wtf("User not registered, session data is not provided!");
+                                    }
                                 }
+                                repo.close();
+                            } else {
+                                HyberLogger.w(ErrorStatus.byCode(response.body().getError().getCode()).toString());
                                 listener.onFailure();
                             }
-
-                            repo.close();
                         } else {
                             responseIsUnsuccessful(response);
                             listener.onFailure();
@@ -93,109 +99,68 @@ final class ApiBusinessModel implements IApiBusinessModel {
     }
 
     private void responseIsUnsuccessful(Response response) {
-        switch (response.code()) {
-            case 404: HyberLogger.e("url: %s\nresponse code: %d - %s",
-                    response.raw().request().url().toString(), response.code(), response.message());
-                break;
-            case 500: HyberLogger.e("url: %s\nresponse code: %d - %s",
-                    response.raw().request().url().toString(), response.code(), response.message());
-                break;
-            default:
-                try {
-                    BaseResponse errorResp = new Gson().fromJson(response.errorBody().string(), BaseResponse.class);
-                    if (errorResp != null && errorResp.getError() != null
-                            && errorResp.getError().getCode() != null) {
-                        HyberLogger.e(ErrorStatus.byCode(errorResp.getError().getCode()).toString()
-                                + "\nurl: %s\nresponse code: %d - %s",
-                                response.raw().request().url().toString(), response.code(), response.message());
-                    }
-                } catch (IOException | JsonSyntaxException e) {
-                    HyberLogger.e(e);
-                    HyberLogger.e("url: %s\nresponse code: %d - %s",
-                            response.raw().request().url().toString(), response.code(), response.message());
-                }
+        try {
+            HyberLogger.e("HTTP response code: %d\nEndpoint URL:\n%s\n----------------------\n%s",
+                    response.code(), response.raw().request().url().toString(), response.errorBody().string());
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
-    private <T> Observable<Response<T>> tokenActualProcessorObservable(final Observable<Response<T>> currObservable,
+    private <T extends BaseResponse> Observable<Response<T>> tokenActualProcessorObservable(final Observable<Response<T>> currObservable,
                                                                        final Response<T> currResponse) {
-        String errorBody = null;
-        try {
-            if (currResponse.isSuccessful()) {
-                return Observable.just(currResponse);
-            } else {
-                errorBody = currResponse.errorBody().string();
-                BaseResponse errorResp = new Gson().fromJson(errorBody, BaseResponse.class);
-                if (errorResp != null && errorResp.getError() != null
-                        && errorResp.getError().getCode() != null
-                        && errorResp.getError().getDescription() != null
-                        && errorResp.getError().getCode().intValue()
-                        != ErrorStatus.SDK_API_mobileAuthTokenExpired.getCode()
-                        && errorResp.getError().getCode().intValue()
-                        != ErrorStatus.SDK_API_notCorrectAuthorizationDataOrTokenExpired.getCode()) {
-                    return Observable.just((Response<T>) Response.error(ResponseBody.create(null, errorBody),
-                            currResponse.raw()));
+        if (currResponse.isSuccessful()) {
+            if (currResponse.body() != null && currResponse.body().getError() != null
+                    && currResponse.body().getError().getCode().equals(ErrorStatus.mobileExpiredToken.code())) {
+                HyberLogger.i("User auth token expired.\nStart refreshing auth token.");
+
+                Repository repo = new Repository();
+                repo.open();
+                User user = repo.getCurrentUser();
+                if (user == null) {
+                    repo.close();
+                    return Observable.just(currResponse);
                 }
-            }
-        } catch (IOException | JsonSyntaxException e) {
-            e.printStackTrace();
-            if (errorBody == null) {
-                return Observable.just(currResponse);
-            } else {
-                return Observable.just((Response<T>) Response.error(ResponseBody.create(null, errorBody),
-                        currResponse.raw()));
-            }
-        }
 
-        HyberLogger.i("User auth token expired.\nStart refreshing auth token.");
+                RefreshTokenReqModel reqModel = new RefreshTokenReqModel(user.getSession().getRefreshToken());
+                repo.close();
 
-        Repository repo = new Repository();
-        repo.open();
-        User user = repo.getCurrentUser();
-        if (user == null) {
-            return Observable.empty();
-        }
-
-        RefreshTokenReqModel reqModel = new RefreshTokenReqModel(user.getSession().getRefreshToken());
-        repo.close();
-
-        final String finalErrorBody = errorBody;
-        return RestClient.refreshTokenObservable(reqModel)
-                .flatMap(new Func1<Response<RefreshTokenRespModel>, Observable<Response<T>>>() {
-                    @Override
-                    public Observable<Response<T>> call(Response<RefreshTokenRespModel> response) {
-                        if (response.isSuccessful()) {
-                            HyberLogger.i("Request for refresh user auth token is success.");
-                            SessionRespItemModel sessionModel = response.body().getSession();
-                            HyberLogger.i("User new session data updating.");
-                            Repository repo = new Repository();
-                            repo.open();
-                            User user = repo.getCurrentUser();
-                            if (user != null) {
-                                repo.updateUserSession(user, sessionModel.getToken(),
-                                        sessionModel.getRefreshToken(), sessionModel.getExpirationDate());
+                return RestClient.refreshTokenObservable(reqModel)
+                        .flatMap(new Func1<Response<RefreshTokenRespModel>, Observable<Response<T>>>() {
+                            @Override
+                            public Observable<Response<T>> call(Response<RefreshTokenRespModel> response) {
+                                if (response.isSuccessful()) {
+                                    HyberLogger.i("Request for refresh user auth token is success.");
+                                    SessionRespItemModel sessionModel = response.body().getSession();
+                                    HyberLogger.i("User new session data updating.");
+                                    Repository repo = new Repository();
+                                    repo.open();
+                                    User user = repo.getCurrentUser();
+                                    if (user != null) {
+                                        repo.updateUserSession(user, sessionModel.getToken(),
+                                                sessionModel.getRefreshToken(), sessionModel.getExpirationDate());
+                                    }
+                                    repo.close();
+                                    HyberLogger.i("User session data is updated.");
+                                    HyberLogger.i("Continue execute current observable!");
+                                    return currObservable;
+                                } else {
+                                    responseIsUnsuccessful(response);
+                                    return Observable.just(currResponse);
+                                }
                             }
-                            repo.close();
-                            HyberLogger.i("User session data is updated.");
-                            HyberLogger.i("Continue execute current observable!");
-                            return currObservable;
-                        } else {
-                            responseIsUnsuccessful(response);
-                            if (finalErrorBody == null) {
-                                return Observable.just(currResponse);
-                            } else {
-                                return Observable.just((Response<T>) Response.error(ResponseBody.create(null, finalErrorBody),
-                                        currResponse.raw()));
+                        })
+                        .doOnError(new Action1<Throwable>() {
+                            @Override
+                            public void call(Throwable throwable) {
+                                HyberLogger.e("Error in refresh user auth token api request!", throwable);
                             }
-                        }
-                    }
-                })
-                .doOnError(new Action1<Throwable>() {
-                    @Override
-                    public void call(Throwable throwable) {
-                        HyberLogger.e("Error in refresh user auth token api request!", throwable);
-                    }
-                });
+                        });
+            }
+        } else {
+            responseIsUnsuccessful(currResponse);
+        }
+        return Observable.just(currResponse);
     }
 
     @Override
@@ -212,11 +177,11 @@ final class ApiBusinessModel implements IApiBusinessModel {
             repo.close();
         }
 
-        final UpdateUserReqModel reqModel = new UpdateUserReqModel(
+        final UpdateDeviceReqModel reqModel = new UpdateDeviceReqModel(
                 FirebaseInstanceId.getInstance().getToken(),
                 OsUtils.getDeviceOs(), OsUtils.getAndroidVersion(),
-                OsUtils.getDeviceName(), OsUtils.getModelName(),
-                OsUtils.getDeviceFormat(mContextReference));
+                OsUtils.getDeviceFormat(mContextReference),
+                OsUtils.getDeviceName(), SdkVersion.BUILD);
 
         RestClient.updateUserObservable(reqModel)
                 .flatMap(new Func1<Response<UpdateUserRespModel>, Observable<Response<UpdateUserRespModel>>>() {
@@ -262,16 +227,16 @@ final class ApiBusinessModel implements IApiBusinessModel {
                 answerText);
 
         RestClient.sendBidirectionalAnswerObservable(reqModel)
-                .flatMap(new Func1<Response<Void>, Observable<Response<Void>>>() {
+                .flatMap(new Func1<Response<BaseResponse>, Observable<Response<BaseResponse>>>() {
                     @Override
-                    public Observable<Response<Void>> call(Response<Void> response) {
+                    public Observable<Response<BaseResponse>> call(Response<BaseResponse> response) {
                         return tokenActualProcessorObservable(
                                 RestClient.sendBidirectionalAnswerObservable(reqModel), response);
                     }
                 })
-                .subscribe(new Action1<Response<Void>>() {
+                .subscribe(new Action1<Response<BaseResponse>>() {
                     @Override
-                    public void call(Response<Void> response) {
+                    public void call(Response<BaseResponse> response) {
                         if (response.isSuccessful()) {
                             HyberLogger.i("Request for sending bidirectional answer is success.");
                             listener.onSuccess(messageId);
@@ -293,20 +258,20 @@ final class ApiBusinessModel implements IApiBusinessModel {
     public void sendPushDeliveryReport(@NonNull final String messageId, @NonNull Long receivedAt,
                                        @NonNull final SendPushDeliveryReportListener listener) {
         HyberLogger.i("Start sending push delivery report.");
-
-        final PushDeliveryReportReqModel reqModel = new PushDeliveryReportReqModel(messageId, receivedAt);
+        final Long r = System.currentTimeMillis();
+        final PushDeliveryReportReqModel reqModel = new PushDeliveryReportReqModel(messageId, r);
 
         RestClient.sendPushDeliveryReportObservable(reqModel)
-                .flatMap(new Func1<Response<Void>, Observable<Response<Void>>>() {
+                .flatMap(new Func1<Response<BaseResponse>, Observable<Response<BaseResponse>>>() {
                     @Override
-                    public Observable<Response<Void>> call(Response<Void> response) {
+                    public Observable<Response<BaseResponse>> call(Response<BaseResponse> response) {
                         return tokenActualProcessorObservable(
-                                RestClient.sendPushDeliveryReportObservable(reqModel), response);
+                                RestClient.sendPushDeliveryReportObservable(reqModel.setReceivedAt(r)), response);
                     }
                 })
-                .subscribe(new Action1<Response<Void>>() {
+                .subscribe(new Action1<Response<BaseResponse>>() {
                     @Override
-                    public void call(Response<Void> response) {
+                    public void call(Response<BaseResponse> response) {
                         if (response.isSuccessful()) {
                             HyberLogger.i("Request for sending push delivery report is success.");
                             listener.onSuccess(messageId);
@@ -350,7 +315,7 @@ final class ApiBusinessModel implements IApiBusinessModel {
                                                 + "\nFirst MessageId %s DrTime %d\nLast MessageId %s DrTime %d",
                                         response.body().getLimitDays(),
                                         response.body().getLimitMessages(),
-                                        response.body().getTimeLastMessage(),
+                                        response.body().getLastTime(),
                                         response.body().getMessages().get(0).getId(),
                                         response.body().getMessages().get(0).getTime(),
                                         response.body().getMessages().get(response.body().getMessages().size() - 1).getId(),

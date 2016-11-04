@@ -17,7 +17,6 @@ class AuthInterceptor implements Interceptor {
 
         // Request customization: add request headers
         Request.Builder requestBuilder = original.newBuilder()
-                .header(Tweakables.X_HYBER_SDK_VERSION, SdkVersion.BUILD)
                 .header(Tweakables.X_HYBER_CLIENT_API_KEY, Hyber.getClientApiKey())
                 .header(Tweakables.X_HYBER_APP_FINGERPRINT, Hyber.getFingerprint())
                 .header(Tweakables.X_HYBER_INSTALLATION_ID, Hyber.getInstallationID());

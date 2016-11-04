@@ -19,9 +19,9 @@ import com.google.firebase.crash.FirebaseCrash;
 import com.google.firebase.messaging.RemoteMessage;
 import com.google.gson.Gson;
 import com.hyber.Hyber;
-import com.hyber.log.HyberLogger;
 import com.hyber.example.ui.SplashActivity;
 import com.hyber.handler.HyberNotificationListener;
+import com.hyber.log.HyberLogger;
 
 import java.util.Map;
 
@@ -132,6 +132,7 @@ public class ApplicationLoader extends Application {
                 FirebaseCrash.report(t);
             }
         }
+
     }
 
     private class UIErrorTree extends HyberLogger.Tree {
@@ -141,6 +142,7 @@ public class ApplicationLoader extends Application {
             if (priority < Log.WARN) {
                 return;
             }
+
             if (mAlertDialog != null && mAlertDialog.isShowing())
                 return;
 
@@ -172,12 +174,12 @@ public class ApplicationLoader extends Application {
                     if (message != null) {
                         sb.append(message);
                     }
+
                     if (t != null) {
                         sb.append("\n");
                         sb.append(t.getLocalizedMessage());
                     }
                     mAlertDialogBuilder.setMessage(sb.toString());
-
                     mAlertDialog = mAlertDialogBuilder.create();
                     if (mAlertDialog.getWindow() != null) {
                         mAlertDialog.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);

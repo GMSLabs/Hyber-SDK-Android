@@ -122,6 +122,7 @@ dependencies {
     compile project(':hyber')
 
     provided "org.projectlombok:lombok:1.12.6"
+    apt "org.projectlombok:lombok:1.12.6"
 
     compile 'com.android.support:support-v4:24.2.1'
     compile 'com.android.support:appcompat-v7:24.2.1'

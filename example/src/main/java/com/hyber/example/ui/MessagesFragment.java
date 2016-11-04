@@ -1,7 +1,10 @@
 package com.hyber.example.ui;
 
+import android.annotation.TargetApi;
 import android.content.Context;
+import android.os.Build;
 import android.os.Bundle;
+import android.speech.tts.TextToSpeech;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.AppCompatEditText;
@@ -16,19 +19,19 @@ import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import com.hyber.Hyber;
+import com.hyber.RealmRecyclerViewAdapter;
 import com.hyber.log.HyberLogger;
 import com.hyber.example.R;
 import com.hyber.example.ui.Adapters.MessagesRVAdapter;
-import com.hyber.handler.EmptyResult;
 import com.hyber.handler.HyberCallback;
 
 import java.util.Locale;
+import java.util.UUID;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import butterknife.Unbinder;
-import io.realm.HyberMessagesBaseRecyclerViewAdapter;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -55,6 +58,8 @@ public class MessagesFragment extends Fragment {
     private int mMaxHistoryRequests = 2;
     private Long mTimeForNextHistoryRequest;
 
+    private TextToSpeech textToSpeech;
+
     public MessagesFragment() {
         // Required empty public constructor
     }
@@ -76,6 +81,34 @@ public class MessagesFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         HyberLogger.i("I'm alive!");
+
+        textToSpeech = new TextToSpeech(getActivity(), new TextToSpeech.OnInitListener() {
+            @Override
+            public void onInit(int status) {
+                HyberLogger.i("TTS", "TextToSpeech.OnInitListener.onInit...");
+                textToSpeech.setLanguage(Locale.US);
+            }
+        });
+    }
+
+    @Override
+    public void onPause() {
+        if (textToSpeech != null) {
+            textToSpeech.stop();
+            textToSpeech.shutdown();
+        }
+        super.onPause();
+    }
+
+    private void speakOut(String text) {
+        Toast.makeText(getActivity(), text, Toast.LENGTH_SHORT).show();
+        // A random String (Unique ID).
+        String utteranceId = UUID.randomUUID().toString();
+        if (Build.VERSION.SDK_INT < 21) {
+            textToSpeech.speak(text, TextToSpeech.QUEUE_FLUSH, null);
+        } else {
+            textToSpeech.speak(text, TextToSpeech.QUEUE_FLUSH, null, utteranceId);
+        }
     }
 
     @Override
@@ -89,10 +122,10 @@ public class MessagesFragment extends Fragment {
         mLayoutManager.setStackFromEnd(true);
 
         mRecyclerView.setLayoutManager(mLayoutManager);
-        mAdapter = new MessagesRVAdapter(getActivity());
+        mAdapter = new MessagesRVAdapter(getActivity(), Hyber.getAllUserMessages(), true, true);
         mRecyclerView.setAdapter(mAdapter);
         mAdapter.setOnChangeListener(
-                new HyberMessagesBaseRecyclerViewAdapter.OnChangeListener() {
+                new RealmRecyclerViewAdapter.OnChangeListener() {
                     @Override
                     public void onItemRangeInserted(int positionStart, int itemCount) {
                         try {
@@ -101,6 +134,7 @@ public class MessagesFragment extends Fragment {
                             HyberLogger.e(e, "mAdapter count %d, position %d",
                                     mAdapter.getItemCount(), positionStart + itemCount - 1);
                         }
+                        speakOut(mAdapter.getItem(positionStart).getBody());
                     }
 
                     @Override
@@ -120,7 +154,7 @@ public class MessagesFragment extends Fragment {
             }
         });
 
-        if (Hyber.isBidirectionalAvailable()) {
+        if (Hyber.isBidirectional()) {
             mAnswerLayout.setVisibility(View.VISIBLE);
             mAdapter.setOnMessageAnswerListener(new MessagesRVAdapter.OnMessageAnswerListener() {
                 @Override
@@ -131,7 +165,7 @@ public class MessagesFragment extends Fragment {
                                     messageId, answerText),
                             Toast.LENGTH_SHORT).show();
                     Hyber.sendBidirectionalAnswer(messageId, answerText,
-                            new HyberCallback<String, EmptyResult>() {
+                            new HyberCallback<String, String>() {
                                 @Override
                                 public void onSuccess(String result) {
                                     Toast.makeText(getActivity(),
@@ -142,7 +176,7 @@ public class MessagesFragment extends Fragment {
                                 }
 
                                 @Override
-                                public void onFailure(EmptyResult error) {
+                                public void onFailure(String error) {
                                     Toast.makeText(getActivity(),
                                             String.format(Locale.getDefault(),
                                                     "Failure sent message answer!\nmessageId:%s\nanswerText:%s\nError:%s",
@@ -184,10 +218,10 @@ public class MessagesFragment extends Fragment {
     public void onClickSendAnswerAppCompatImageButton(View v) {
         InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
         imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
-        final String messageId = mAdapter.getMessageId(mAdapter.getItemCount() - 1);
+        final String messageId = mAdapter.getItem((mAdapter.getItemCount() - 1)).getId();
         final String answerText = mInputAnswer.getText().toString();
         if (!answerText.isEmpty()) {
-            Hyber.sendBidirectionalAnswer(messageId, answerText, new HyberCallback<String, EmptyResult>() {
+            Hyber.sendBidirectionalAnswer(messageId, answerText, new HyberCallback<String, String>() {
                 @Override
                 public void onSuccess(String result) {
                     Toast.makeText(getActivity(),
@@ -200,7 +234,7 @@ public class MessagesFragment extends Fragment {
                 }
 
                 @Override
-                public void onFailure(EmptyResult error) {
+                public void onFailure(String error) {
                     Toast.makeText(getActivity(),
                             String.format(Locale.getDefault(),
                                     "Failure sent message answer!\nmessageId:%s\nanswerText:%s\nError:%s",

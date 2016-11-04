@@ -27,6 +27,7 @@ import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.hyber.Hyber;
 import com.hyber.log.HyberLogger;
@@ -584,7 +585,7 @@ public class AuthActivity extends AppCompatActivity {
                 Hyber.userRegistration(Utilities.parseLong(phone), new HyberCallback<EmptyResult, EmptyResult>() {
                     @Override
                     public void onSuccess(EmptyResult result) {
-                        String s = String.format(Locale.getDefault(), "User registration onSuccess\nWith phone %s", phone);
+                        String s = String.format(Locale.getDefault(), "User registration is success\nWith phone %s", phone);
                         HyberLogger.i(s);
                         needHideProgress();
                         startActivity(new Intent(AuthActivity.this, MainActivity.class));
@@ -592,7 +593,7 @@ public class AuthActivity extends AppCompatActivity {
 
                     @Override
                     public void onFailure(EmptyResult error) {
-                        String s = String.format(Locale.getDefault(), "User registration onFailure\nWith phone %s", phone);
+                        String s = String.format(Locale.getDefault(), "User registration is failure\nWith phone %s", phone);
                         HyberLogger.i(s);
                         needHideProgress();
                     }

@@ -5,6 +5,8 @@ import android.support.annotation.Nullable;
 
 import com.google.gson.annotations.SerializedName;
 
+import org.json.JSONObject;
+
 class MessageRespModel {
 
     @SerializedName("messageId")
@@ -13,20 +15,23 @@ class MessageRespModel {
     @SerializedName("partner")
     private String mPartner;
 
-    @SerializedName("drTime")
+    @SerializedName("time")
     private Long mTime;
 
-    @SerializedName("from")
+    @SerializedName("title")
     private String mTitle;
 
-    @SerializedName("text")
+    @SerializedName("body")
     private String mBody;
 
-    @SerializedName("to")
+    @SerializedName("ownerPhone")
     private String mOrder;
 
-    @SerializedName("options")
-    private MessageOptionsRespModel mOptions;
+    @SerializedName("image")
+    private MessageImageRespModel mImage;
+
+    @SerializedName("button")
+    private MessageButtonRespModel mButton;
 
 
     @NonNull
@@ -64,8 +69,13 @@ class MessageRespModel {
     }
 
     @Nullable
-    MessageOptionsRespModel getOptions() {
-        return mOptions;
+    public MessageImageRespModel getImage() {
+        return mImage;
+    }
+
+    @Nullable
+    public MessageButtonRespModel getButton() {
+        return mButton;
     }
 
 }

@@ -1,7 +1,6 @@
 package com.hyber;
 
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 
 import com.google.gson.annotations.SerializedName;
 
@@ -9,26 +8,18 @@ class ErrorRespItemModel {
 
     @SerializedName("code")
     private Integer mCode;
-    @SerializedName("description")
-    private String mDescription;
+    @SerializedName("message")
+    private String mMessage;
 
-    public ErrorRespItemModel() {
 
-    }
-
-    public ErrorRespItemModel(@NonNull Integer code, @NonNull String description) {
-        this.mCode = code;
-        this.mDescription = description;
-    }
-
-    @Nullable
+    @NonNull
     Integer getCode() {
         return mCode;
     }
 
-    @Nullable
-    String getDescription() {
-        return mDescription;
+    @NonNull
+    String getMessage() {
+        return mMessage;
     }
 
 }

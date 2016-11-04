@@ -4,59 +4,50 @@ import java.util.Locale;
 
 enum ErrorStatus {
 
-    SDK_ChuckNorrisError(1001, "SDK API Chuck Norris error"),
+    hyberChuckNorrisException(1000, "Hyber Chuck Norris exception"),
 
-    SDK_INTEGRATION_ClientApiKeyIsInvalid(1011, "Hyber Client Api Key is invalid"),
+    hyberApiError(1001, "Hyber API error"),
 
-    SDK_API_ResponseIsUnsuccessful(1020, "Hyber API response is unsuccessful"),
-    SDK_API_403Error(1021, "Hyber API 403 error"),
-    SDK_API_404Error(1022, "Hyber API 404 error"),
-    SDK_API_500Error(1023, "Hyber API 500 error"),
-
-    SDK_API_notCorrectAuthorizationFormat(1131, "Incorrect auth format"),
-    SDK_API_pushSettingsNotFound(1126, "Push not configured"),
-    SDK_API_pushAndroidFingerprintIsIncorrect(1152, "Push Android fingerprint is incorrect"),
-    //TODO code duplicate SDK_API_phoneNumberNotExist(1104, "Phone number missing"),
-    SDK_API_internalException(1127, "Internal server error"),
-    SDK_API_bindingFailed(1128, "Malformed request"),
-
-    SDK_API_mobileOsTypeNotFound(1101, "os type not found"),
-    SDK_API_mobileOsVersionNotFound(1102, "os version not found"),
-    SDK_API_mobileDeviceTypeNotFound(1103, "device type not found"),
-    SDK_API_notCorrectAuthorizationDataOrTokenExpired(1104, "not correct authorization data or token has expired"),
-    SDK_API_refreshTokenNotExist(1105, "refreshToken not exist or not correct"),
-    SDK_API_mobileStartDateGetMessagesNotExist(1106, "startDate not exist"),
-    SDK_API_mobileNotAllowedGetMessagesHistory(1107, "not allowed get messages history"),
-    SDK_API_pushIncorrectAuthenticationData(1108, "incorrect authorization data"),
-    SDK_API_pushTokenExpired(1109, "token is expired"),
-    SDK_API_incorrectMessageId(1110, "incorrect message ID"),
-    SDK_API_mobileNotCorrectAuthToken(1111, "not correctAuthToken"),
-    SDK_API_mobileAuthTokenExpired(1112, "authToken has expired"),
-    SDK_API_mobileAbonentWithInstallationIdNotFound(1113, "abonent with authToken not found");
+    hyberIncorrectHeadersFormat(2100, "Headers format in api request is wrong"),
+    mobileIncorrectJsonFormat(2101, "Json format in api request is wrong"),
+    mobileIncorrectClientApiKey(2110, "The client api key used in the request is incorrect"),
+    mobileIncorrectAndroidFingerprint(2111, "The Android fingerprint used in the request is incorrect"),
+    mobileIncorrectIosBundleId(2112, "The iOS Bundle Id used in the request is incorrect"),
+    mobileIncorrectInstallationId(2113, "The Installation Id used in the request is incorrect"),
+    mobileUndefinedErrorInClientSettings(2120, "Unspecified error when checking client settings"),
+    mobileApplicationSettingsNotConfigured(2121, "Not configured settings for the client application"),
+    mobileMessageHistoryNotConfigured(2122, "History of messages is disabled for the client"),
+    mobileBidirectionalSettingsNotConfigured(2123, "Bidirectional answer for messages is disabled for the client"),
+    mobileIncorrectUserCredentials(2132, "The user credentials used in the request is incorrect"),
+    mobileInvalidToken(2133, "The access token used in the request is incorrect"),
+    mobileExpiredToken(2134, "The access token used in the request is expired"),
+    mobileInvalidRefreshToken(2135, "The refresh token used in the request is incorrect or not exists"),
+    mobileDeviceNotFound(2141, "Device not found"),
+    mobileIncorrectMessageId(2142, "Not correct message id");
 
     private int code;
     private String state;
 
-    ErrorStatus(int code, String description) {
+    ErrorStatus(int code, String state) {
         this.code = code;
-        this.state = description;
+        this.state = state;
+    }
+
+    public Integer code() {
+        return code;
+    }
+
+    public String state() {
+        return state;
     }
 
     public static ErrorStatus byCode(int code) {
         for (ErrorStatus status : ErrorStatus.values()) {
-            if (status.getCode() == code) {
+            if (status.code() == code) {
                 return status;
             }
         }
-        return ErrorStatus.SDK_ChuckNorrisError;
-    }
-
-    public Integer getCode() {
-        return code;
-    }
-
-    public String getDescription() {
-        return state;
+        return ErrorStatus.hyberChuckNorrisException;
     }
 
     @Override

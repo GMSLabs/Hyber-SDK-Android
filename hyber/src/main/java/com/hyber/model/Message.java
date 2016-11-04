@@ -10,7 +10,9 @@ import io.realm.annotations.Index;
 import io.realm.annotations.PrimaryKey;
 import io.realm.annotations.RealmClass;
 import io.realm.annotations.Required;
+import lombok.experimental.Builder;
 
+@Builder
 @RealmClass
 public class Message extends RealmObject {
 

@@ -14,8 +14,8 @@ class MessageHistoryRespEnvelope extends BaseResponse {
     @SerializedName("limitMessages")
     private Integer mLimitMessages;
 
-    @SerializedName("timeLastMessage")
-    private Long mTimeLastMessage;
+    @SerializedName("lastTime")
+    private Long mLastTime;
 
     @SerializedName("messages")
     private List<MessageRespModel> mMessages;
@@ -34,8 +34,8 @@ class MessageHistoryRespEnvelope extends BaseResponse {
 
     @NonNull
     @lombok.NonNull
-    Long getTimeLastMessage() {
-        return mTimeLastMessage;
+    Long getLastTime() {
+        return mLastTime;
     }
 
     @NonNull

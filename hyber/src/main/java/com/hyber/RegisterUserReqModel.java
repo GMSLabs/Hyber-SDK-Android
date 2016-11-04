@@ -1,43 +1,19 @@
 package com.hyber;
 
-import android.support.annotation.NonNull;
-
 import com.google.gson.annotations.SerializedName;
 
-class RegisterUserReqModel {
+import lombok.NoArgsConstructor;
 
+@NoArgsConstructor
+class RegisterUserReqModel extends BaseDeviceReqModel {
+
+    @lombok.NonNull
     @SerializedName("userPhone")
-    private Long mUserPhone;
+    private String userPhone;
 
-    @SerializedName("osType")
-    private String mOsType;
-
-    @SerializedName("deviceName")
-    private String mDeviceName;
-
-    @SerializedName("modelName")
-    private String mModelName;
-
-    @SerializedName("osVersion")
-    private String mAndroidVersion;
-
-    @SerializedName("deviceType")
-    private String mDeviceType;
-
-    public RegisterUserReqModel() {
-
-    }
-
-    RegisterUserReqModel(@NonNull Long mUserPhone,
-                         @NonNull String mOsType, @NonNull String mAndroidVersion,
-                         @NonNull String mDeviceName, @NonNull String mModelName,
-                         @NonNull String mDeviceType) {
-        this.mUserPhone = mUserPhone;
-        this.mOsType = mOsType;
-        this.mDeviceName = mDeviceName;
-        this.mModelName = mModelName;
-        this.mAndroidVersion = mAndroidVersion;
-        this.mDeviceType = mDeviceType;
+    RegisterUserReqModel(String userPhone, String osType, String osVersion, String deviceType, String deviceName, String sdkVersion) {
+        super(osType, osVersion, deviceType, deviceName, sdkVersion);
+        this.userPhone = userPhone;
     }
 
 }
