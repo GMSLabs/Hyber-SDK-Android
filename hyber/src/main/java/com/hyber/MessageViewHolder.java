@@ -15,6 +15,8 @@ public abstract class MessageViewHolder extends RecyclerView.ViewHolder {
 
     public abstract void setMessageId(@NonNull String id);
 
+    public abstract void setPartner(@NonNull String partner);
+
     public abstract void setMessageAlphaName(@Nullable String alphaName);
 
     public abstract void setMessageText(@Nullable String text);
