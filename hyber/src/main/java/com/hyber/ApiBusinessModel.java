@@ -6,6 +6,9 @@ import android.support.annotation.NonNull;
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
+import com.hyber.log.HyberLogger;
+import com.hyber.model.Session;
+import com.hyber.model.User;
 
 import java.io.IOException;
 
@@ -15,20 +18,20 @@ import rx.Observable;
 import rx.functions.Action1;
 import rx.functions.Func1;
 
-final class HyberApiBusinessModel implements IHyberApiBusinessModel {
+final class ApiBusinessModel implements IApiBusinessModel {
 
-    private static final String TAG = "HyberApiBusinessModel";
+    private static final String TAG = "ApiBusinessModel";
 
-    private static HyberApiBusinessModel mInstance;
+    private static ApiBusinessModel mInstance;
     private Context mContextReference;
 
-    private HyberApiBusinessModel(@NonNull Context context) {
+    private ApiBusinessModel(@NonNull Context context) {
         this.mContextReference = context;
     }
 
-    static synchronized HyberApiBusinessModel getInstance(@NonNull Context context) {
+    static synchronized ApiBusinessModel getInstance(@NonNull Context context) {
         if (mInstance == null) {
-            mInstance = new HyberApiBusinessModel(context);
+            mInstance = new ApiBusinessModel(context);
         }
         return mInstance;
     }
@@ -42,7 +45,7 @@ final class HyberApiBusinessModel implements IHyberApiBusinessModel {
                 OsUtils.getDeviceName(), OsUtils.getModelName(),
                 OsUtils.getDeviceFormat(mContextReference));
 
-        HyberRestClient.registerUserObservable(reqModel)
+        RestClient.registerUserObservable(reqModel)
                 .subscribe(new Action1<Response<RegisterUserRespModel>>() {
                     @Override
                     public void call(Response<RegisterUserRespModel> response) {
@@ -66,7 +69,7 @@ final class HyberApiBusinessModel implements IHyberApiBusinessModel {
                                 listener.onSuccess();
                             } else {
                                 if (response.body().getError() != null) {
-                                    HyberLogger.w(HyberStatus.byCode(response.body().getError().getCode()));
+                                    HyberLogger.w(ErrorStatus.byCode(response.body().getError().getCode()).toString());
                                 } else {
                                     HyberLogger.tag(TAG);
                                     HyberLogger.wtf("User not registered, session data is not provided!");
@@ -91,10 +94,10 @@ final class HyberApiBusinessModel implements IHyberApiBusinessModel {
 
     private void responseIsUnsuccessful(Response response) {
         switch (response.code()) {
-            case 404: HyberLogger.e(HyberStatus.SDK_API_404Error, "url: %s\nresponse code: %d - %s",
+            case 404: HyberLogger.e("url: %s\nresponse code: %d - %s",
                     response.raw().request().url().toString(), response.code(), response.message());
                 break;
-            case 500: HyberLogger.e(HyberStatus.SDK_API_500Error, "url: %s\nresponse code: %d - %s",
+            case 500: HyberLogger.e("url: %s\nresponse code: %d - %s",
                     response.raw().request().url().toString(), response.code(), response.message());
                 break;
             default:
@@ -102,12 +105,13 @@ final class HyberApiBusinessModel implements IHyberApiBusinessModel {
                     BaseResponse errorResp = new Gson().fromJson(response.errorBody().string(), BaseResponse.class);
                     if (errorResp != null && errorResp.getError() != null
                             && errorResp.getError().getCode() != null) {
-                        HyberLogger.e(HyberStatus.byCode(errorResp.getError().getCode()), "url: %s\nresponse code: %d - %s",
+                        HyberLogger.e(ErrorStatus.byCode(errorResp.getError().getCode()).toString()
+                                + "\nurl: %s\nresponse code: %d - %s",
                                 response.raw().request().url().toString(), response.code(), response.message());
                     }
                 } catch (IOException | JsonSyntaxException e) {
                     HyberLogger.e(e);
-                    HyberLogger.e(HyberStatus.SDK_API_ResponseIsUnsuccessful, "url: %s\nresponse code: %d - %s",
+                    HyberLogger.e("url: %s\nresponse code: %d - %s",
                             response.raw().request().url().toString(), response.code(), response.message());
                 }
         }
@@ -126,9 +130,9 @@ final class HyberApiBusinessModel implements IHyberApiBusinessModel {
                         && errorResp.getError().getCode() != null
                         && errorResp.getError().getDescription() != null
                         && errorResp.getError().getCode().intValue()
-                        != HyberStatus.SDK_API_mobileAuthTokenExpired.getCode()
+                        != ErrorStatus.SDK_API_mobileAuthTokenExpired.getCode()
                         && errorResp.getError().getCode().intValue()
-                        != HyberStatus.SDK_API_notCorrectAuthorizationDataOrTokenExpired.getCode()) {
+                        != ErrorStatus.SDK_API_notCorrectAuthorizationDataOrTokenExpired.getCode()) {
                     return Observable.just((Response<T>) Response.error(ResponseBody.create(null, errorBody),
                             currResponse.raw()));
                 }
@@ -156,7 +160,7 @@ final class HyberApiBusinessModel implements IHyberApiBusinessModel {
         repo.close();
 
         final String finalErrorBody = errorBody;
-        return HyberRestClient.refreshTokenObservable(reqModel)
+        return RestClient.refreshTokenObservable(reqModel)
                 .flatMap(new Func1<Response<RefreshTokenRespModel>, Observable<Response<T>>>() {
                     @Override
                     public Observable<Response<T>> call(Response<RefreshTokenRespModel> response) {
@@ -214,12 +218,12 @@ final class HyberApiBusinessModel implements IHyberApiBusinessModel {
                 OsUtils.getDeviceName(), OsUtils.getModelName(),
                 OsUtils.getDeviceFormat(mContextReference));
 
-        HyberRestClient.updateUserObservable(reqModel)
+        RestClient.updateUserObservable(reqModel)
                 .flatMap(new Func1<Response<UpdateUserRespModel>, Observable<Response<UpdateUserRespModel>>>() {
                     @Override
                     public Observable<Response<UpdateUserRespModel>> call(Response<UpdateUserRespModel> response) {
                         return tokenActualProcessorObservable(
-                                HyberRestClient.updateUserObservable(reqModel), response);
+                                RestClient.updateUserObservable(reqModel), response);
                     }
                 })
                 .subscribe(new Action1<Response<UpdateUserRespModel>>() {
@@ -230,8 +234,8 @@ final class HyberApiBusinessModel implements IHyberApiBusinessModel {
                             if (response.body().getError() == null) {
                                 listener.onSuccess();
                             } else {
-                                HyberLogger.i(HyberStatus.byCode(response.body().getError().getCode()),
-                                        "Response for update user device data api with error!");
+                                HyberLogger.i(ErrorStatus.byCode(response.body().getError().getCode()).toString()
+                                        + "\nResponse for update user device data api with error!");
                                 listener.onFailure();
                             }
                         } else {
@@ -257,12 +261,12 @@ final class HyberApiBusinessModel implements IHyberApiBusinessModel {
                 messageId,
                 answerText);
 
-        HyberRestClient.sendBidirectionalAnswerObservable(reqModel)
+        RestClient.sendBidirectionalAnswerObservable(reqModel)
                 .flatMap(new Func1<Response<Void>, Observable<Response<Void>>>() {
                     @Override
                     public Observable<Response<Void>> call(Response<Void> response) {
                         return tokenActualProcessorObservable(
-                                HyberRestClient.sendBidirectionalAnswerObservable(reqModel), response);
+                                RestClient.sendBidirectionalAnswerObservable(reqModel), response);
                     }
                 })
                 .subscribe(new Action1<Response<Void>>() {
@@ -292,12 +296,12 @@ final class HyberApiBusinessModel implements IHyberApiBusinessModel {
 
         final PushDeliveryReportReqModel reqModel = new PushDeliveryReportReqModel(messageId, receivedAt);
 
-        HyberRestClient.sendPushDeliveryReportObservable(reqModel)
+        RestClient.sendPushDeliveryReportObservable(reqModel)
                 .flatMap(new Func1<Response<Void>, Observable<Response<Void>>>() {
                     @Override
                     public Observable<Response<Void>> call(Response<Void> response) {
                         return tokenActualProcessorObservable(
-                                HyberRestClient.sendPushDeliveryReportObservable(reqModel), response);
+                                RestClient.sendPushDeliveryReportObservable(reqModel), response);
                     }
                 })
                 .subscribe(new Action1<Response<Void>>() {
@@ -326,12 +330,12 @@ final class HyberApiBusinessModel implements IHyberApiBusinessModel {
 
         final MessageHistoryReqModel reqModel = new MessageHistoryReqModel(startDate);
 
-        HyberRestClient.getMessageHistoryObservable(reqModel)
+        RestClient.getMessageHistoryObservable(reqModel)
                 .flatMap(new Func1<Response<MessageHistoryRespEnvelope>, Observable<Response<MessageHistoryRespEnvelope>>>() {
                     @Override
                     public Observable<Response<MessageHistoryRespEnvelope>> call(Response<MessageHistoryRespEnvelope> response) {
                         return tokenActualProcessorObservable(
-                                HyberRestClient.getMessageHistoryObservable(reqModel), response);
+                                RestClient.getMessageHistoryObservable(reqModel), response);
                     }
                 })
                 .subscribe(new Action1<Response<MessageHistoryRespEnvelope>>() {

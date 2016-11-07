@@ -3,7 +3,7 @@ package com.hyber.example;
 import android.os.Handler;
 import android.os.Looper;
 
-import com.hyber.HyberLogger;
+import com.hyber.log.HyberLogger;
 
 import java.util.concurrent.CountDownLatch;
 

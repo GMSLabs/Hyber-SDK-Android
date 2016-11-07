@@ -5,8 +5,8 @@ import android.support.v7.widget.RecyclerView;
 import android.view.ViewGroup;
 
 import com.hyber.Hyber;
-import com.hyber.Message;
-import com.hyber.MessageViewHolder;
+import com.hyber.model.Message;
+import com.hyber.HyberMessageViewHolder;
 import com.hyber.Repository;
 
 import java.util.ArrayList;
@@ -19,7 +19,7 @@ import io.realm.internal.RealmObjectProxy;
 import io.realm.internal.Row;
 import io.realm.internal.TableOrView;
 
-public abstract class HyberMessageHistoryBaseRecyclerViewAdapter extends RecyclerView.Adapter<MessageViewHolder> {
+public abstract class HyberMessagesBaseRecyclerViewAdapter extends RecyclerView.Adapter<HyberMessageViewHolder> {
 
     private static final List<Long> EMPTY_LIST = new ArrayList<>(0);
     private List mIds;
@@ -34,7 +34,7 @@ public abstract class HyberMessageHistoryBaseRecyclerViewAdapter extends Recycle
     private RealmFieldType animateIsReportedType;
     private Repository repo;
 
-    public HyberMessageHistoryBaseRecyclerViewAdapter(boolean automaticUpdate, boolean animateResults) {
+    public HyberMessagesBaseRecyclerViewAdapter(boolean automaticUpdate, boolean animateResults) {
         this.mAutomaticUpdate = automaticUpdate;
         this.mAnimateResults = animateResults;
         this.repo = new Repository();
@@ -48,8 +48,8 @@ public abstract class HyberMessageHistoryBaseRecyclerViewAdapter extends Recycle
         updateRealmResults(mRealmResults);
     }
 
-    public HyberMessageHistoryBaseRecyclerViewAdapter(boolean automaticUpdate, boolean animateResults,
-                                                      @NonNull RealmResults<Message> queryResults) {
+    public HyberMessagesBaseRecyclerViewAdapter(boolean automaticUpdate, boolean animateResults,
+                                                @NonNull RealmResults<Message> queryResults) {
         this.mAutomaticUpdate = automaticUpdate;
         this.mAnimateResults = animateResults;
         this.mRealmResults = queryResults;
@@ -93,10 +93,10 @@ public abstract class HyberMessageHistoryBaseRecyclerViewAdapter extends Recycle
         this.mChangeListener = listener;
     }
 
-    public abstract MessageViewHolder onCreateViewHolder(ViewGroup parent, int viewType);
+    public abstract HyberMessageViewHolder onCreateViewHolder(ViewGroup parent, int viewType);
 
     @Override
-    public void onBindViewHolder(MessageViewHolder viewHolder, int position) {
+    public void onBindViewHolder(HyberMessageViewHolder viewHolder, int position) {
         final Message messageItem = mRealmResults.get(position);
         viewHolder.setMessageId(messageItem.getId());
         viewHolder.setPartner(messageItem.getPartner());

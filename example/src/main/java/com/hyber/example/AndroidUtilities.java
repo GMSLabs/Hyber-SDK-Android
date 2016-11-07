@@ -17,7 +17,7 @@ import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import com.hyber.HyberLogger;
+import com.hyber.log.HyberLogger;
 
 import java.lang.reflect.Field;
 import java.util.Hashtable;

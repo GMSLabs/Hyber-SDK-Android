@@ -4,7 +4,7 @@ import android.content.Context;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.hyber.HyberLogger;
+import com.hyber.log.HyberLogger;
 import com.hyber.example.AndroidUtilities;
 import com.hyber.example.ApplicationLoader;
 import com.hyber.example.ui.Cells.DividerCell;

@@ -1,6 +1,8 @@
 package com.hyber;
 
-public enum HyberStatus {
+import java.util.Locale;
+
+enum ErrorStatus {
 
     SDK_ChuckNorrisError(1001, "SDK API Chuck Norris error"),
 
@@ -32,29 +34,34 @@ public enum HyberStatus {
     SDK_API_mobileAuthTokenExpired(1112, "authToken has expired"),
     SDK_API_mobileAbonentWithInstallationIdNotFound(1113, "abonent with authToken not found");
 
-    private int mCode;
-    private String mDescription;
+    private int code;
+    private String state;
 
-    HyberStatus(int code, String description) {
-        this.mCode = code;
-        this.mDescription = description;
+    ErrorStatus(int code, String description) {
+        this.code = code;
+        this.state = description;
     }
 
-    public static HyberStatus byCode(int code) {
-        for (HyberStatus status : HyberStatus.values()) {
+    public static ErrorStatus byCode(int code) {
+        for (ErrorStatus status : ErrorStatus.values()) {
             if (status.getCode() == code) {
                 return status;
             }
         }
-        return HyberStatus.SDK_ChuckNorrisError;
+        return ErrorStatus.SDK_ChuckNorrisError;
     }
 
     public Integer getCode() {
-        return mCode;
+        return code;
     }
 
     public String getDescription() {
-        return mDescription;
+        return state;
+    }
+
+    @Override
+    public String toString() {
+        return String.format(Locale.getDefault(), "%d ==> %s", code, state);
     }
 
 }

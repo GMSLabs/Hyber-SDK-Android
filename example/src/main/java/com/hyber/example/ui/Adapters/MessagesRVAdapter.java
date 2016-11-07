@@ -1,4 +1,4 @@
-package com.hyber.example.adapter;
+package com.hyber.example.ui.Adapters;
 
 import android.content.Context;
 import android.graphics.Color;
@@ -14,7 +14,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.RelativeLayout;
 
-import com.hyber.MessageViewHolder;
+import com.hyber.HyberMessageViewHolder;
 import com.hyber.example.R;
 import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
@@ -26,9 +26,9 @@ import java.util.Locale;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import io.realm.HyberMessageHistoryBaseRecyclerViewAdapter;
+import io.realm.HyberMessagesBaseRecyclerViewAdapter;
 
-public class MyMessagesRVAdapter extends HyberMessageHistoryBaseRecyclerViewAdapter {
+public class MessagesRVAdapter extends HyberMessagesBaseRecyclerViewAdapter {
 
     public interface OnMessageActionListener {
         void onAction(@NonNull String action);
@@ -42,13 +42,13 @@ public class MyMessagesRVAdapter extends HyberMessageHistoryBaseRecyclerViewAdap
     private OnMessageActionListener onMessageActionListener;
     private OnMessageAnswerListener onMessageAnswerListener;
 
-    public MyMessagesRVAdapter(Context context) {
+    public MessagesRVAdapter(Context context) {
         super(true, true);
         this.mContextWeakReference = new WeakReference<>(context);
     }
 
     @Override
-    public MessageViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public HyberMessageViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View itemView = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.item_message, parent, false);
         return new MyHolder(itemView);
@@ -62,7 +62,7 @@ public class MyMessagesRVAdapter extends HyberMessageHistoryBaseRecyclerViewAdap
         this.onMessageAnswerListener = listener;
     }
 
-    class MyHolder extends MessageViewHolder {
+    class MyHolder extends HyberMessageViewHolder {
 
         @BindView(R.id.messageId) AppCompatTextView messageId;
         @BindView(R.id.messagePartner) AppCompatTextView messagePartner;

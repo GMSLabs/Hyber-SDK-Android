@@ -7,9 +7,9 @@ import android.view.View;
 
 import java.util.Date;
 
-public abstract class MessageViewHolder extends RecyclerView.ViewHolder {
+public abstract class HyberMessageViewHolder extends RecyclerView.ViewHolder {
 
-    public MessageViewHolder(View itemView) {
+    public HyberMessageViewHolder(View itemView) {
         super(itemView);
     }
 

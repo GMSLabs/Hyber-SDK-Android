@@ -3,6 +3,11 @@ package com.hyber;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
+import com.hyber.log.HyberLogger;
+import com.hyber.model.HyberSchemaModule;
+import com.hyber.model.Message;
+import com.hyber.model.User;
+
 import java.util.Date;
 
 import io.realm.Realm;
@@ -34,12 +39,14 @@ public class Repository {
 
     @Nullable
     public User getCurrentUser() {
+        checkOpen();
         return realm.where(User.class)
                 .equalTo(User.INDEX_NUMBER, 0)
                 .findFirst();
     }
 
     public RealmResults<Message> getMessages(@NonNull User user) {
+        checkOpen();
         checkUser(user);
         return realm.where(Message.class)
                 .equalTo(Message.USER_ID, user.getId())
@@ -49,6 +56,7 @@ public class Repository {
     @Nullable
     Message getMessageById(@NonNull User user,
                            @NonNull @lombok.NonNull String messageId) {
+        checkOpen();
         checkUser(user);
         return realm.where(Message.class)
                 .equalTo(Message.USER_ID, user.getId())
@@ -57,12 +65,14 @@ public class Repository {
     }
 
     RealmResults<Message> getAllUnreportedMessages() {
+        checkOpen();
         return realm.where(Message.class)
                 .equalTo(Message.IS_REPORTED, false)
                 .findAllSorted(Message.DATE, Sort.DESCENDING);
     }
 
     void saveNewUser(@NonNull @lombok.NonNull final User user) {
+        checkOpen();
         realm.executeTransaction(new Realm.Transaction() {
             @Override
             public void execute(Realm realm) {
@@ -76,6 +86,7 @@ public class Repository {
                            @NonNull @lombok.NonNull final String token,
                            @NonNull @lombok.NonNull final String refreshToken,
                            @NonNull @lombok.NonNull final Date expirationDate) {
+        checkOpen();
         checkUser(user);
         realm.executeTransaction(new Realm.Transaction() {
             @Override
@@ -90,6 +101,7 @@ public class Repository {
     }
 
     void saveMessageOrUpdate(@NonNull @lombok.NonNull final Message message) {
+        checkOpen();
         checkUser(message.getUser());
         realm.executeTransaction(new Realm.Transaction() {
             @Override
@@ -102,6 +114,7 @@ public class Repository {
 
     void saveMessagesOrUpdate(@NonNull @lombok.NonNull final User user,
                               @NonNull @lombok.NonNull final Iterable<Message> messages) {
+        checkOpen();
         checkUser(user);
         realm.executeTransaction(new Realm.Transaction() {
             @Override
@@ -115,6 +128,7 @@ public class Repository {
     }
 
     void clearUserData(@NonNull User user) {
+        checkOpen();
         checkUser(user);
         getMessages(user).deleteAllFromRealm();
         user.getSession().deleteFromRealm();
@@ -122,13 +136,22 @@ public class Repository {
     }
 
     void clearAllData() {
+        checkOpen();
         if (!realm.isClosed())
             realm.close();
         Realm.deleteRealm(realmConfig);
     }
 
     public void close() {
+        checkOpen();
         realm.close();
+    }
+
+    private void checkOpen() {
+        if (realm == null) {
+            throw new IllegalStateException(
+                    "You must call Repository.open() before calling any Repository method");
+        }
     }
 
     private void checkUser(@Nullable User user) {

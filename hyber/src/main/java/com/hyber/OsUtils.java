@@ -10,6 +10,8 @@ import android.os.Build;
 import android.os.Bundle;
 import android.telephony.TelephonyManager;
 
+import com.hyber.log.HyberLogger;
+
 import java.util.Locale;
 
 final class OsUtils {

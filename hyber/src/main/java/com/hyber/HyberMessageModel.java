@@ -17,7 +17,7 @@ public class HyberMessageModel {
     private String mText;
 
     @SerializedName("options")
-    private FCMessageOptionsModel mOptions;
+    private HyberMessageOptionsModel mOptions;
 
 
     @NonNull
@@ -39,7 +39,7 @@ public class HyberMessageModel {
     }
 
     @Nullable
-    public FCMessageOptionsModel getOptions() {
+    public HyberMessageOptionsModel getOptions() {
         return mOptions;
     }
 

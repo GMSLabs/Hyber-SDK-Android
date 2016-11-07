@@ -9,7 +9,7 @@ import android.widget.AbsListView;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 
-import com.hyber.HyberLogger;
+import com.hyber.log.HyberLogger;
 import com.hyber.example.AndroidUtilities;
 import com.hyber.example.ui.Adapters.BaseSectionsAdapter;
 

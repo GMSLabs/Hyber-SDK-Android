@@ -2,19 +2,21 @@ package com.hyber;
 
 import android.content.Context;
 
+import com.hyber.log.HyberLogger;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.util.UUID;
 
-final class HyberInstallation {
+final class InstallationId {
 
-    private static final String TAG = "HyberInstallation";
+    private static final String TAG = "InstallationId";
 
     private static String sID = null;
 
-    private HyberInstallation() {
+    private InstallationId() {
 
     }
 

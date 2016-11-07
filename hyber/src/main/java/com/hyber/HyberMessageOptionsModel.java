@@ -4,7 +4,7 @@ import android.support.annotation.Nullable;
 
 import com.google.gson.annotations.SerializedName;
 
-public class FCMessageOptionsModel {
+public class HyberMessageOptionsModel {
 
     @SerializedName("caption")
     private String mCaptionText;

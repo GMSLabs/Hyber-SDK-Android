@@ -13,6 +13,7 @@ import android.content.res.Resources;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.firebase.iid.FirebaseInstanceId;
+import com.hyber.log.HyberLogger;
 
 import java.util.concurrent.TimeUnit;
 
@@ -93,7 +94,7 @@ class PushRegistrarFCM implements PushRegistrator {
         Hyber.runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                final Activity activity = HyberActivityLifecycleHandler.getCurrActivity();
+                final Activity activity = ActivityLifecycleHandler.getCurrActivity();
                 if (activity == null || Hyber.getInitBuilder().isDisableGmsMissingPrompt())
                     return;
 

@@ -1,4 +1,4 @@
-package com.hyber;
+package com.hyber.model;
 
 import android.support.annotation.NonNull;
 
