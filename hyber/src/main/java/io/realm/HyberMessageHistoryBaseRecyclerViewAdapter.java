@@ -99,6 +99,7 @@ public abstract class HyberMessageHistoryBaseRecyclerViewAdapter extends Recycle
     public void onBindViewHolder(MessageViewHolder viewHolder, int position) {
         final Message messageItem = mRealmResults.get(position);
         viewHolder.setMessageId(messageItem.getId());
+        viewHolder.setPartner(messageItem.getPartner());
 
         viewHolder.setMessageAlphaName(messageItem.getTitle());
         viewHolder.setMessageText(messageItem.getBody());

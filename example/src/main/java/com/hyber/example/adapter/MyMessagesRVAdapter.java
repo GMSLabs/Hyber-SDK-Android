@@ -65,6 +65,7 @@ public class MyMessagesRVAdapter extends HyberMessageHistoryBaseRecyclerViewAdap
     class MyHolder extends MessageViewHolder {
 
         @BindView(R.id.messageId) AppCompatTextView messageId;
+        @BindView(R.id.messagePartner) AppCompatTextView messagePartner;
         @BindView(R.id.messageAlphaName) AppCompatTextView messageAlphaName;
         @BindView(R.id.messageText) AppCompatTextView messageText;
         @BindView(R.id.messageImage) AppCompatImageView messageImage;
@@ -89,6 +90,11 @@ public class MyMessagesRVAdapter extends HyberMessageHistoryBaseRecyclerViewAdap
         public void setMessageId(@NonNull String id) {
             this.mMessageId = id;
             this.messageId.setText(mMessageId);
+        }
+
+        @Override
+        public void setPartner(@NonNull String partner) {
+            messagePartner.setText(partner);
         }
 
         @Override
