@@ -20,7 +20,6 @@ import com.google.firebase.messaging.RemoteMessage;
 import com.google.gson.Gson;
 import com.hyber.Hyber;
 import com.hyber.log.HyberLogger;
-import com.hyber.HyberMessageModel;
 import com.hyber.example.ui.SplashActivity;
 import com.hyber.handler.HyberNotificationListener;
 
@@ -101,7 +100,7 @@ public class ApplicationLoader extends Application {
 
                 PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, i, PendingIntent.FLAG_UPDATE_CURRENT);
 
-                HyberMessageModel messageModel = new Gson().fromJson(messageData, HyberMessageModel.class);
+                MessageModel messageModel = new Gson().fromJson(messageData, MessageModel.class);
 
                 NotificationCompat.Builder mBuilder =
                         new NotificationCompat.Builder(ApplicationLoader.this)

@@ -5,7 +5,7 @@ import android.support.annotation.Nullable;
 
 import com.google.gson.annotations.SerializedName;
 
-public class HyberMessageModel {
+class MessageModel {
 
     @SerializedName("mess_id")
     private String mId;
@@ -17,7 +17,7 @@ public class HyberMessageModel {
     private String mText;
 
     @SerializedName("options")
-    private HyberMessageOptionsModel mOptions;
+    private MessageOptionsModel mOptions;
 
 
     @NonNull
@@ -39,7 +39,7 @@ public class HyberMessageModel {
     }
 
     @Nullable
-    public HyberMessageOptionsModel getOptions() {
+    public MessageOptionsModel getOptions() {
         return mOptions;
     }
 

@@ -52,7 +52,7 @@ final class NotificationBundleProcessor {
             String messageData = remoteMessage.getData().get("message");
             if (messageData != null) {
                 try {
-                    HyberMessageModel messageModel = new Gson().fromJson(messageData, HyberMessageModel.class);
+                    MessageModel messageModel = new Gson().fromJson(messageData, MessageModel.class);
 
                     Repository repo = new Repository();
                     repo.open();
