@@ -5,7 +5,7 @@ repositories {
     mavenCentral()
 }
 
-project.group = 'com.hyber.android'
+project.group = 'com.hyber'
 
 dependencies {
     compile deps.jetbAnnotations
@@ -75,7 +75,7 @@ def ossrhPassword = hasProperty('NEXUS_PASSWORD') ? NEXUS_PASSWORD : System.gete
 task setVersion {
     // The version will be derived from source
     project.version = null
-    def sdkVersionFile = file('src/main/java/com/hyber/HyberSdkVersion.java')
+    def sdkVersionFile = file('src/main/java/com/hyber/SdkVersion.java')
     sdkVersionFile.eachLine {
         def matcher = (it =~ /(?:.*BUILD = \")(.*)(?:\".*)/)
         if (matcher.matches()) {
@@ -102,7 +102,7 @@ uploadArchives {
 
         pom.project {
             name 'Hyber-Android-SDK'
-            artifactId = 'hyber-android-sdk'
+            artifactId = 'hyber-messaging'
             packaging 'aar'
             description 'A library that gives you access to the powerful Hyber messaging cloud platform from your Android app.'
             url 'https://github.com/Incuube/Hyber-SDK-Android'

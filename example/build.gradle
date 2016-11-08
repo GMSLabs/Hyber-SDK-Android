@@ -13,6 +13,7 @@ apply plugin: 'android-apt'
 
 repositories {
     maven { url 'https://maven.fabric.io/public' }
+//    maven { url 'https://raw.github.com/Incuube/Hyber-SDK-Android/artifactory/hyber/releases' }
 }
 
 android {
@@ -117,6 +118,7 @@ dependencies {
     // Required dependencies for the Hyber
     compile 'com.google.firebase:firebase-messaging:9.6.1'
 
+//    compile 'com.hyber:hyber-messaging:2.1.1'
     compile project(':hyber')
 
     provided "org.projectlombok:lombok:1.12.6"

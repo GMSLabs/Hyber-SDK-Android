@@ -5,7 +5,7 @@ import retrofit2.http.Body;
 import retrofit2.http.POST;
 import rx.Observable;
 
-interface HyberApiService {
+interface ApiService {
 
     @POST("mobile-abonents/register/device")
     Observable<Response<RegisterUserRespModel>> registerUserObservable(@Body RegisterUserReqModel body);

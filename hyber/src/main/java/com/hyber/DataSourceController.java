@@ -9,12 +9,12 @@ import java.util.regex.Pattern;
 
 import io.realm.Realm;
 
-public final class HyberDataSourceController {
+final class DataSourceController {
 
     private static final int REALM_PROVIDER_LIMIT = 1000;
-    private static HyberDataSourceController singleton = null;
+    private static DataSourceController singleton = null;
 
-    private HyberDataSourceController(Context context) {
+    private DataSourceController(Context context) {
         Realm.init(context);
 
         RealmInspectorModulesProvider rimProvider = RealmInspectorModulesProvider.builder(context)
@@ -34,24 +34,24 @@ public final class HyberDataSourceController {
     }
 
     /**
-     * The global default {@link HyberDataSourceController} instance.
+     * The global default {@link DataSourceController} instance.
      * <p>
      * This instance is automatically initialized with defaults that are suitable to most
      * implementations.
      * <p>
      */
-    static HyberDataSourceController with(Context context) {
+    static DataSourceController with(Context context) {
         if (singleton == null) {
-            synchronized (HyberDataSourceController.class) {
+            synchronized (DataSourceController.class) {
                 if (singleton == null) {
-                    singleton = new HyberDataSourceController(context);
+                    singleton = new DataSourceController(context);
                 }
             }
         }
         return singleton;
     }
 
-    static HyberDataSourceController getInstance() {
+    static DataSourceController getInstance() {
         checkInitialized();
         return singleton;
     }
@@ -59,8 +59,8 @@ public final class HyberDataSourceController {
     private static void checkInitialized() {
         if (singleton == null) {
             throw new IllegalStateException(
-                    "HyberDataSourceController must be initialized by calling HyberDataSourceController.with(Context)"
-                            + " prior to calling HyberDataSourceController methods");
+                    "DataSourceController must be initialized by calling DataSourceController.with(Context)"
+                            + " prior to calling DataSourceController methods");
         }
     }
 

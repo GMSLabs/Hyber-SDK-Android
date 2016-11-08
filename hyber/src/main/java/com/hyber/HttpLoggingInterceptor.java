@@ -1,5 +1,7 @@
 package com.hyber;
 
+import com.hyber.log.HyberLogger;
+
 import java.io.EOFException;
 import java.io.IOException;
 import java.nio.charset.Charset;
@@ -30,7 +32,7 @@ import static okhttp3.internal.platform.Platform.INFO;
  * OkHttpClient#networkInterceptors() network interceptor}.
  */
 
-public class HyberHttpLoggingInterceptor implements Interceptor {
+class HttpLoggingInterceptor implements Interceptor {
     private static final Charset UTF8 = Charset.forName("UTF-8");
 
     public enum Level {
@@ -100,11 +102,11 @@ public class HyberHttpLoggingInterceptor implements Interceptor {
         };
     }
 
-    HyberHttpLoggingInterceptor() {
+    HttpLoggingInterceptor() {
         this(Logger.DEFAULT);
     }
 
-    private HyberHttpLoggingInterceptor(Logger logger) {
+    private HttpLoggingInterceptor(Logger logger) {
         this.logger = logger;
     }
 
@@ -113,7 +115,7 @@ public class HyberHttpLoggingInterceptor implements Interceptor {
     private volatile Level level = Level.NONE;
 
     /** Change the level at which this interceptor logs. */
-    HyberHttpLoggingInterceptor setLevel(Level level) {
+    HttpLoggingInterceptor setLevel(Level level) {
         if (level == null) throw new NullPointerException("level == null. Use Level.NONE instead.");
         this.level = level;
         return this;

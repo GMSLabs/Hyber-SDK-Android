@@ -1,4 +1,4 @@
-package com.hyber.example;
+package com.hyber.example.ui;
 
 import android.content.Intent;
 import android.net.Uri;
@@ -15,7 +15,9 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 
-import com.hyber.HyberLogger;
+import com.hyber.log.HyberLogger;
+import com.hyber.example.AndroidUtilities;
+import com.hyber.example.R;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;

@@ -1,6 +1,6 @@
 package com.hyber.example;
 
-import com.hyber.HyberLogger;
+import com.hyber.log.HyberLogger;
 
 import java.io.File;
 import java.io.FileInputStream;

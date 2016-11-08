@@ -29,18 +29,18 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.hyber.Hyber;
-import com.hyber.HyberLogger;
+import com.hyber.log.HyberLogger;
 import com.hyber.example.AndroidUtilities;
 import com.hyber.example.ApplicationLoader;
 import com.hyber.example.LocaleController;
-import com.hyber.example.MainActivity;
 import com.hyber.example.PhoneFormat.PhoneFormat;
 import com.hyber.example.R;
 import com.hyber.example.Utilities;
 import com.hyber.example.ui.Components.HintEditText;
 import com.hyber.example.ui.Components.LayoutHelper;
 import com.hyber.example.ui.Components.SlideView;
-import com.hyber.handler.UserRegistrationHandler;
+import com.hyber.handler.EmptyResult;
+import com.hyber.handler.HyberCallback;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -581,9 +581,9 @@ public class AuthActivity extends AppCompatActivity {
 
             needShowProgress();
             try {
-                Hyber.userRegistration(Utilities.parseLong(phone), new UserRegistrationHandler() {
+                Hyber.userRegistration(Utilities.parseLong(phone), new HyberCallback<EmptyResult, EmptyResult>() {
                     @Override
-                    public void onSuccess() {
+                    public void onSuccess(EmptyResult result) {
                         String s = String.format(Locale.getDefault(), "User registration onSuccess\nWith phone %s", phone);
                         HyberLogger.i(s);
                         needHideProgress();
@@ -591,7 +591,7 @@ public class AuthActivity extends AppCompatActivity {
                     }
 
                     @Override
-                    public void onFailure() {
+                    public void onFailure(EmptyResult error) {
                         String s = String.format(Locale.getDefault(), "User registration onFailure\nWith phone %s", phone);
                         HyberLogger.i(s);
                         needHideProgress();

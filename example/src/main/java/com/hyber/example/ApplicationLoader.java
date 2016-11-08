@@ -19,14 +19,11 @@ import com.google.firebase.crash.FirebaseCrash;
 import com.google.firebase.messaging.RemoteMessage;
 import com.google.gson.Gson;
 import com.hyber.Hyber;
-import com.hyber.HyberLogger;
+import com.hyber.log.HyberLogger;
 import com.hyber.HyberMessageModel;
-import com.hyber.HyberStatus;
-import com.hyber.listener.HyberNotificationListener;
+import com.hyber.example.ui.SplashActivity;
+import com.hyber.handler.HyberNotificationListener;
 
-import org.jetbrains.annotations.Nullable;
-
-import java.util.Locale;
 import java.util.Map;
 
 import io.fabric.sdk.android.Fabric;
@@ -130,23 +127,10 @@ public class ApplicationLoader extends Application {
     private class CrashReportingTree extends HyberLogger.Tree {
 
         @Override
-        protected void log(int priority, @Nullable String tag, @Nullable HyberStatus status, @Nullable String message,
-                           @Nullable Throwable t) {
-            if (priority <= Log.WARN) {
-                return;
-            }
-
+        protected void log(int priority, String tag, String message, Throwable t) {
             if (t != null) {
                 Crashlytics.logException(t);
                 FirebaseCrash.report(t);
-            }
-
-            if (status != null) {
-                Crashlytics.log(priority, tag == null ? "MyHyber" : tag,
-                        String.format(Locale.getDefault(), "%d ==> %s",
-                                status.getCode(), status.getDescription()));
-                FirebaseCrash.logcat(priority, tag == null ? "MyHyber" : tag,
-                        String.format(Locale.getDefault(), "%d ==> %s", status.getCode(), status.getDescription()));
             }
         }
     }
@@ -154,8 +138,7 @@ public class ApplicationLoader extends Application {
     private class UIErrorTree extends HyberLogger.Tree {
 
         @Override
-        protected void log(final int priority, @Nullable String tag, @Nullable final HyberStatus status,
-                           @Nullable final String message, @Nullable final Throwable t) {
+        protected void log(final int priority, String tag, final String message, final Throwable t) {
             if (priority < Log.WARN) {
                 return;
             }
@@ -187,17 +170,12 @@ public class ApplicationLoader extends Application {
 
                     StringBuilder sb = new StringBuilder();
 
-                    if (t != null) {
-                        sb.append(t.getLocalizedMessage())
-                                .append("\n");
-                    }
-                    if (status != null) {
-                        sb.append(String.format(Locale.getDefault(), "%d ==> %s",
-                                status.getCode(), status.getDescription()))
-                                .append("\n");
-                    }
                     if (message != null) {
                         sb.append(message);
+                    }
+                    if (t != null) {
+                        sb.append("\n");
+                        sb.append(t.getLocalizedMessage());
                     }
                     mAlertDialogBuilder.setMessage(sb.toString());
 

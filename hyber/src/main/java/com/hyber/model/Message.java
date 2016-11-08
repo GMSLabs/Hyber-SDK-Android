@@ -1,4 +1,4 @@
-package com.hyber;
+package com.hyber.model;
 
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -123,11 +123,11 @@ public class Message extends RealmObject {
         return isReported;
     }
 
-    void setReadStatus(boolean status) {
+    public void setReadStatus(boolean status) {
         isRead = status;
     }
 
-    void setReportedStatus(boolean status) {
+    public void setReportedStatus(boolean status) {
         isReported = status;
     }
 

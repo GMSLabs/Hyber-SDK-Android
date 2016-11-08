@@ -1,6 +1,6 @@
 package com.hyber.example.PhoneFormat;
 
-import com.hyber.HyberLogger;
+import com.hyber.log.HyberLogger;
 import com.hyber.example.ApplicationLoader;
 
 import java.io.ByteArrayOutputStream;

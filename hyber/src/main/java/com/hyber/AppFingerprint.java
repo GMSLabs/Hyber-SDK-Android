@@ -6,16 +6,18 @@ import android.content.pm.PackageManager;
 import android.content.pm.Signature;
 import android.util.Base64;
 
+import com.hyber.log.HyberLogger;
+
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
-final class HyberFingerprint {
+final class AppFingerprint {
 
-    private static final String TAG = "HyberFingerprint";
+    private static final String TAG = "AppFingerprint";
 
     private static String sFingerprint = null;
 
-    private HyberFingerprint() {
+    private AppFingerprint() {
 
     }
 
