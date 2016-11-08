@@ -15,7 +15,7 @@ import io.realm.RealmConfiguration;
 import io.realm.RealmResults;
 import io.realm.Sort;
 
-public class Repository {
+class Repository {
 
     private final RealmConfiguration realmConfig;
     private Realm realm;
@@ -23,7 +23,7 @@ public class Repository {
     public Repository() {
         realmConfig = new RealmConfiguration.Builder()
                 .schemaVersion(1)
-                .name("Hyber.realm")
+                .name("Hyber.io.realm")
                 .modules(new HyberSchemaModule())
                 .deleteRealmIfMigrationNeeded() //TODO add true migration
                 .build();

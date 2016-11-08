@@ -5,9 +5,8 @@ import android.support.v7.widget.RecyclerView;
 import android.view.ViewGroup;
 
 import com.hyber.Hyber;
-import com.hyber.model.Message;
 import com.hyber.HyberMessageViewHolder;
-import com.hyber.Repository;
+import com.hyber.model.Message;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,16 +31,11 @@ public abstract class HyberMessagesBaseRecyclerViewAdapter extends RecyclerView.
     private RealmFieldType animatePrimaryIdType;
     private long animateIsReportedColumnIndex;
     private RealmFieldType animateIsReportedType;
-    private Repository repo;
 
     public HyberMessagesBaseRecyclerViewAdapter(boolean automaticUpdate, boolean animateResults) {
         this.mAutomaticUpdate = automaticUpdate;
         this.mAnimateResults = animateResults;
-        this.repo = new Repository();
-        this.repo.open();
-        if (repo.getCurrentUser() != null) {
-            this.mRealmResults = repo.getMessages(repo.getCurrentUser());
-        }
+        this.mRealmResults = Hyber.getAllUserMessages();
         this.mRealmChangeListener = (!mAutomaticUpdate) ? null : getRealmChangeListener();
 
         setAnimatedResults();

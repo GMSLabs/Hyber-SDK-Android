@@ -388,6 +388,14 @@ public final class Hyber {
         });
     }
 
+    @Nullable
+    public static RealmResults<Message> getAllUserMessages() {
+        User user = repo.getCurrentUser();
+        if (user == null)
+            return null;
+        return repo.getMessages(user);
+    }
+
     private static void sendPushDeliveryReport(@NonNull final String messageId, @NonNull Long receivedAt,
                                                final HyberCallback<String, EmptyResult> callback) {
         getApiBusinessModel().sendPushDeliveryReport(messageId, receivedAt,

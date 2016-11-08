@@ -14,6 +14,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.RelativeLayout;
 
+import com.hyber.Hyber;
 import com.hyber.HyberMessageViewHolder;
 import com.hyber.example.R;
 import com.squareup.picasso.Callback;
@@ -43,7 +44,7 @@ public class MessagesRVAdapter extends HyberMessagesBaseRecyclerViewAdapter {
     private OnMessageAnswerListener onMessageAnswerListener;
 
     public MessagesRVAdapter(Context context) {
-        super(true, true);
+        super(true, true, Hyber.getAllUserMessages());
         this.mContextWeakReference = new WeakReference<>(context);
     }
 
