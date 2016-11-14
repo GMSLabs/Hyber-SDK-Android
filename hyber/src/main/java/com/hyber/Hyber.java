@@ -187,6 +187,7 @@ public final class Hyber {
         mMessageChangeListener = getMessageChangeListener();
         mMessageResults = repo.getAllUnreportedMessages();
         mMessageResults.addChangeListener(mMessageChangeListener);
+        mMessageChangeListener.onChange(repo.getAllUnreportedMessages());
 
         initDone = true;
     }

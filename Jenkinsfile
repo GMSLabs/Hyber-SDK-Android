@@ -24,7 +24,7 @@ node {
     parallel(
       tools: {
         sh "android-update-sdk \
-              --components=platform-tools,tools,build-tools-24.0.2 \
+              --components=platform-tools,tools,build-tools-25.0.0 \
               --accept-licenses=android-sdk-license-.+"
       },
       android: {
