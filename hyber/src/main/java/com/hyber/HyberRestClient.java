@@ -19,9 +19,7 @@ import rx.schedulers.Schedulers;
 
 final class HyberRestClient {
 
-    private static HyberApiService mHyberApiServiceMobileAbonents;
-    private static HyberApiService mHyberApiServicePushDrReceiver;
-    private static HyberApiService mHyberApiServicePushCallbackReceiver;
+    private static HyberApiService mHyberApiService;
 
     static {
         OkHttpClient okHttpClient = new OkHttpClient.Builder()
@@ -38,29 +36,13 @@ final class HyberRestClient {
                 .create();
 
         Retrofit mRetrofitMobileAbonents = new Retrofit.Builder()
-                .baseUrl(BuildConfig.HOST_mobile_abonents)
                 .client(okHttpClient)
+                .baseUrl("https://mobile.hyber.im")
                 .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
                 .addConverterFactory(GsonConverterFactory.create(gson))
                 .build();
 
-        Retrofit mRetrofitPushDrReceiver = new Retrofit.Builder()
-                .baseUrl(BuildConfig.HOST_push_dr_receiver)
-                .client(okHttpClient)
-                .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
-                .addConverterFactory(GsonConverterFactory.create(gson))
-                .build();
-
-        Retrofit mRetrofitPushCallbackReceiver = new Retrofit.Builder()
-                .baseUrl(BuildConfig.HOST_push_callback_receiver)
-                .client(okHttpClient)
-                .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
-                .addConverterFactory(GsonConverterFactory.create(gson))
-                .build();
-
-        mHyberApiServiceMobileAbonents = mRetrofitMobileAbonents.create(HyberApiService.class);
-        mHyberApiServicePushDrReceiver = mRetrofitPushDrReceiver.create(HyberApiService.class);
-        mHyberApiServicePushCallbackReceiver = mRetrofitPushCallbackReceiver.create(HyberApiService.class);
+        mHyberApiService = mRetrofitMobileAbonents.create(HyberApiService.class);
     }
 
     private HyberRestClient() {
@@ -69,42 +51,42 @@ final class HyberRestClient {
 
     static Observable<Response<RegisterUserRespModel>> registerUserObservable(
             @NonNull RegisterUserReqModel model) {
-        return mHyberApiServiceMobileAbonents.registerUserObservable(model)
+        return mHyberApiService.registerUserObservable(model)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread());
     }
 
     static Observable<Response<RefreshTokenRespModel>> refreshTokenObservable(
             @NonNull RefreshTokenReqModel model) {
-        return mHyberApiServiceMobileAbonents.refreshTokenObservable(model)
+        return mHyberApiService.refreshTokenObservable(model)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread());
     }
 
     static Observable<Response<UpdateUserRespModel>> updateUserObservable(
             @NonNull UpdateUserReqModel model) {
-        return mHyberApiServiceMobileAbonents.updateDeviceObservable(model)
+        return mHyberApiService.updateDeviceObservable(model)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread());
     }
 
     static Observable<Response<MessageHistoryRespEnvelope>> getMessageHistoryObservable(
             @NonNull MessageHistoryReqModel model) {
-        return mHyberApiServiceMobileAbonents.getMessageHistoryObservable(model)
+        return mHyberApiService.getMessageHistoryObservable(model)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread());
     }
 
     static Observable<Response<Void>> sendBidirectionalAnswerObservable(
             @NonNull BidirectionalAnswerReqModel model) {
-        return mHyberApiServicePushCallbackReceiver.sendBidirectionalAnswerObservable(model)
+        return mHyberApiService.sendBidirectionalAnswerObservable(model)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread());
     }
 
     static Observable<Response<Void>> sendPushDeliveryReportObservable(
             @NonNull PushDeliveryReportReqModel model) {
-        return mHyberApiServicePushDrReceiver.sendPushDeliveryReportObservable(model)
+        return mHyberApiService.sendPushDeliveryReportObservable(model)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread());
     }
