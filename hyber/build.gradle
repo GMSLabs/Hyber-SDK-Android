@@ -50,9 +50,12 @@ android {
 
         consumerProguardFiles 'proguard.pro'
 
-        buildConfigField 'String', 'HOST_mobile_abonents', api_host_mobile_abonents
-        buildConfigField 'String', 'HOST_push_dr_receiver', api_host_push_dr_receiver
-        buildConfigField 'String', 'HOST_push_callback_receiver', api_host_push_callback_receiver
+        buildConfigField 'String', 'API_URL_ma_register', api_url_ma_register
+        buildConfigField 'String', 'API_URL_ma_refreshtoken', api_url_ma_refreshtoken
+        buildConfigField 'String', 'API_URL_ma_update_device', api_url_ma_update_device
+        buildConfigField 'String', 'API_URL_ma_message_history', api_url_ma_message_history
+        buildConfigField 'String', 'API_URL_pd_receiver', api_url_pd_receiver
+        buildConfigField 'String', 'API_URL_pc_receiver', api_url_pc_receiver
     }
 
     lintOptions {

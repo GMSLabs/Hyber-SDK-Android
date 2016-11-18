@@ -7,22 +7,22 @@ import rx.Observable;
 
 interface HyberApiService {
 
-    @POST("mobile-abonents/register/device")
+    @POST(BuildConfig.API_URL_ma_register)
     Observable<Response<RegisterUserRespModel>> registerUserObservable(@Body RegisterUserReqModel body);
 
-    @POST("mobile-abonents/refreshtoken/device")
+    @POST(BuildConfig.API_URL_ma_refreshtoken)
     Observable<Response<RefreshTokenRespModel>> refreshTokenObservable(@Body RefreshTokenReqModel body);
 
-    @POST("mobile-abonents/update/device")
+    @POST(BuildConfig.API_URL_ma_update_device)
     Observable<Response<UpdateUserRespModel>> updateDeviceObservable(@Body UpdateUserReqModel body);
 
-    @POST("mobile-abonents/messages/history")
+    @POST(BuildConfig.API_URL_ma_message_history)
     Observable<Response<MessageHistoryRespEnvelope>> getMessageHistoryObservable(@Body MessageHistoryReqModel body);
 
-    @POST("push-dr-receiver/sdk_api/dr")
+    @POST(BuildConfig.API_URL_pd_receiver)
     Observable<Response<Void>> sendPushDeliveryReportObservable(@Body PushDeliveryReportReqModel body);
 
-    @POST("push-callback-receiver/api/callback")
+    @POST(BuildConfig.API_URL_pc_receiver)
     Observable<Response<Void>> sendBidirectionalAnswerObservable(@Body BidirectionalAnswerReqModel body);
 
 }
