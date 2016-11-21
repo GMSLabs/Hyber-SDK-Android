@@ -9,6 +9,7 @@ node {
     // Get some code from a GitHub repository
     checkout scm
 
+    sh "chmod +x ./gradlew"
     sh "chmod +x ./mocking.sh"
     sh "chmod +x ./provide_properties.sh"
     sh "chmod +x ./provide_keystore.sh"
@@ -51,6 +52,14 @@ node {
 
   stage ('Test example') {
     sh "./gradlew example:checkstyle example:testDevDebugUnitTest"
+  }
+
+  stage ('Build & Deploy new SDK') {
+    if (env.BRANCH_NAME == 'master-2.0') {
+      sh "./provide_properties.sh properties.zip prod"
+      sh "chmod +x ./build_and_deploy_sdk.sh"
+      sh "./build_and_deploy_sdk.sh"
+    }
   }
 
   stage ('Publication Hyber DEV to Fabric') {
