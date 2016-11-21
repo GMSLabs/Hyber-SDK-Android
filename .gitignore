@@ -18,3 +18,5 @@ local.properties
 /keystores
 keystores.zip
 properties.zip
+
+android-sdk/
