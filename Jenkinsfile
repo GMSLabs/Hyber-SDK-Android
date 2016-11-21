@@ -9,9 +9,8 @@ node {
     // Get some code from a GitHub repository
     checkout scm
 
-    sh "chmod +x ./mocking.sh"
-    sh "chmod +x ./provide_properties.sh"
-    sh "chmod +x ./provide_keystore.sh"
+    sh "git config --global user.name JenkinsBrainCI"
+    sh "git config --global user.email jenkinsbrainci@gmail.com"
 
     sh "./mocking.sh"
   }
