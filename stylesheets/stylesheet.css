@@ -34,6 +34,28 @@ a {
   background-color: rgba(255, 255, 255, 0.2);
   border-color: rgba(255, 255, 255, 0.3); }
 
+.simple-btn {
+  display: inline-block;
+  margin: 5px 0;
+  font-weight: 300px;
+  padding: 3px 10px;
+  font-size: 20px;
+  color: rgba(255, 255, 255, 1);
+  background-color: rgba(48, 191, 48, 0.9);
+  border-color: rgba(48, 191, 48, 1);
+  border-style: solid;
+  border-width: 1px;
+  border-radius: 6px;
+  transition: color 0.2s, background-color 0.2s, border-color 0.2s; }
+  .simple-btn + .simple-btn {
+    margin-left: 1rem; }
+
+.simple-btn:hover {
+  color: rgba(255, 255, 255, 1);
+  text-decoration: none;
+  background-color: rgba(48, 191, 48, 0.9);
+  border-color: rgba(48, 191, 48, 1); }
+
 @media screen and (min-width: 64em) {
   .btn {
     padding: 0.75rem 1rem; } }
