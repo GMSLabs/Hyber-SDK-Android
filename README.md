@@ -11,25 +11,25 @@ First of all you need to configure [Google Services Plugin][google-services-plug
 
 After that you need to initialize the Hyber inside onCreate method in your application class.
 ```
-    manifestPlaceholders = [hyber_client_api_key: "${hyber_client_api_key}"]
+    buildConfigField 'String', 'HYBER_CLIENT_API_KEY', hyber_client_api_key
 ```
 
 And after that you need to write next line to app level build.gradle file inside build config block
 ```java
-    Hyber.with(this).init();
+    Hyber.with(this, BuildConfig.HYBER_CLIENT_API_KEY)
+        .setNotificationListener(...)
+        .init();
 ```
 ***
 
 ### Download
 #### GRADLE
-Add next repository to build.gradle:
+Add next repository to project level build.gradle:
 ```groovy
-    repositories {
-        maven { url 'https://raw.github.com/Incuube/Hyber-SDK-Android/release/hyber/releases/' }
-    }
+    maven { url 'https://raw.github.com/Incuube/Hyber-SDK-Android/maven/' }
 ```
 
-Then add next dependencies to app level build.gradle file:
+Then add next dependencies to app level build.gradle:
 ```groovy
     compile 'com.hyber:hyber-messaging:2.2.0'
 ```
