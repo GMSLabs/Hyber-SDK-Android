@@ -5,7 +5,7 @@ repositories {
     mavenCentral()
 }
 
-project.group = 'com.hyber.android'
+project.group = 'com.hyber'
 
 dependencies {
     compile deps.jetbAnnotations
@@ -104,8 +104,8 @@ uploadArchives {
         }
 
         pom.project {
-            name 'Hyber-Android-SDK'
-            artifactId = 'hyber-android-sdk'
+            name 'Hyber-SDK-Android'
+            artifactId = 'hyber-messaging'
             packaging 'aar'
             description 'A library that gives you access to the powerful Hyber messaging cloud platform from your Android app.'
             url 'https://github.com/Incuube/Hyber-SDK-Android'
@@ -128,6 +128,10 @@ uploadArchives {
                 developer {
                     id 'hyber'
                     name 'Hyber'
+                }
+                developer {
+                    id 'andrewkochura'
+                    name 'Andrew Kochura'
                 }
             }
         }

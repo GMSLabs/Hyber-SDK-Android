@@ -31,7 +31,7 @@ Add next repository to build.gradle:
 
 Then add next dependencies to app level build.gradle file:
 ```groovy
-    compile 'com.hyber.android:hyber-messaging:2.2.0'
+    compile 'com.hyber:hyber-messaging:2.2.0'
 ```
 
 *Hyber SDK requires at minimum Java 7 or Android 4.1.*
