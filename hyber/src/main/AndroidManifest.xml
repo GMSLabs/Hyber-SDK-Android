@@ -13,10 +13,6 @@
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
     <application>
-        <meta-data
-            android:name="hyber_client_api_key"
-            android:value="${hyber_client_api_key}" />
-
         <!-- [START firebase_service] -->
         <service android:name=".HyberFCMService">
             <intent-filter>

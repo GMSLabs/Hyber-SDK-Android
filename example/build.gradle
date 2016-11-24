@@ -77,36 +77,28 @@ android {
         dev {
             applicationId "com.hyber.example.dev"
 
-            // TODO: Please update the Google Project number and Hyber client and app Id below to yours.
-            manifestPlaceholders = [manifestApplicationId      : "${applicationId}",
-                                    hyber_client_api_key       : "${hyber_client_api_key}"]
+            buildConfigField 'String', 'HYBER_CLIENT_API_KEY', hyber_client_api_key
 
             signingConfig signingConfigs.debug
         }
         td {
             applicationId "com.hyber.example.td"
 
-            // TODO: Please update the Google Project number and Hyber client and app Id below to yours.
-            manifestPlaceholders = [manifestApplicationId      : "${applicationId}",
-                                    hyber_client_api_key       : "${hyber_client_api_key}"]
+            buildConfigField 'String', 'HYBER_CLIENT_API_KEY', hyber_client_api_key
 
             signingConfig signingConfigs.debug
         }
         prod {
             applicationId "com.hyber.example.prod"
 
-            // TODO: Please update the Google Project number and Hyber client and app Id below to yours.
-            manifestPlaceholders = [manifestApplicationId      : "${applicationId}",
-                                    hyber_client_api_key       : "${hyber_client_api_key}"]
+            buildConfigField 'String', 'HYBER_CLIENT_API_KEY', hyber_client_api_key
 
             signingConfig signingConfigs.debug
         }
         prodd {
             applicationId "com.hyber.example.prodd"
 
-            // TODO: Please update the Google Project number and Hyber client and app Id below to yours.
-            manifestPlaceholders = [manifestApplicationId      : "${applicationId}",
-                                    hyber_client_api_key       : "${hyber_client_api_key}"]
+            buildConfigField 'String', 'HYBER_CLIENT_API_KEY', hyber_client_api_key
 
             signingConfig signingConfigs.debug
         }
