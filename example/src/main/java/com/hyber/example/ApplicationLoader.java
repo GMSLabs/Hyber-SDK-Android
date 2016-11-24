@@ -18,7 +18,10 @@ import com.crashlytics.android.Crashlytics;
 import com.google.firebase.crash.FirebaseCrash;
 import com.google.firebase.messaging.RemoteMessage;
 import com.google.gson.Gson;
-import com.hyber.*;
+import com.hyber.Hyber;
+import com.hyber.HyberLogger;
+import com.hyber.HyberMessageModel;
+import com.hyber.HyberStatus;
 import com.hyber.listener.HyberNotificationListener;
 
 import org.jetbrains.annotations.Nullable;
@@ -26,7 +29,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Locale;
 import java.util.Map;
 
-import io.fabric.sdk.android.*;
+import io.fabric.sdk.android.Fabric;
 
 public class ApplicationLoader extends Application {
 
