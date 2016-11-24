@@ -18,10 +18,7 @@ import com.crashlytics.android.Crashlytics;
 import com.google.firebase.crash.FirebaseCrash;
 import com.google.firebase.messaging.RemoteMessage;
 import com.google.gson.Gson;
-import com.hyber.Hyber;
-import com.hyber.HyberLogger;
-import com.hyber.HyberMessageModel;
-import com.hyber.HyberStatus;
+import com.hyber.*;
 import com.hyber.listener.HyberNotificationListener;
 
 import org.jetbrains.annotations.Nullable;
@@ -29,7 +26,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Locale;
 import java.util.Map;
 
-import io.fabric.sdk.android.Fabric;
+import io.fabric.sdk.android.*;
 
 public class ApplicationLoader extends Application {
 
@@ -50,7 +47,7 @@ public class ApplicationLoader extends Application {
         HyberLogger.plant(new HyberLogger.DebugTree(), new CrashReportingTree(), new UIErrorTree());
 
         //Initialisation Hyber SDK
-        Hyber.with(this)
+        Hyber.with(this, BuildConfig.HYBER_CLIENT_API_KEY)
                 .setNotificationListener(new HyberNotificationListener() {
                     @Override
                     public void onMessageReceived(RemoteMessage remoteMessage) {

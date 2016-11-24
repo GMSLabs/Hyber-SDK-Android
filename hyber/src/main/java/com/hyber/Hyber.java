@@ -99,24 +99,17 @@ public final class Hyber {
         return mInitBuilder;
     }
 
-    public static Hyber.Builder with(Context context) {
-        return new Hyber.Builder(context);
+    public static Hyber.Builder with(Context context, String clientApiKey) {
+        return new Hyber.Builder(context, clientApiKey);
     }
 
-    private static void init(Hyber.Builder inBuilder) {
+    private static void init(Hyber.Builder inBuilder, String hyberClientApiKey) {
         mInitBuilder = inBuilder;
 
         Context context = mInitBuilder.getContext();
         mInitBuilder.removeContext(); // Clear to prevent leaks.
 
-        try {
-            ApplicationInfo ai = context.getPackageManager()
-                    .getApplicationInfo(context.getPackageName(), PackageManager.GET_META_DATA);
-            Bundle bundle = ai.metaData;
-            Hyber.init(context, bundle.getString("hyber_client_api_key"));
-        } catch (PackageManager.NameNotFoundException e) {
-            HyberLogger.wtf(e);
-        }
+        Hyber.init(context, hyberClientApiKey);
     }
 
     private static void init(Context context, String hyberClientApiKey) {
@@ -465,6 +458,7 @@ public final class Hyber {
 
     public static final class Builder {
         private WeakReference<Context> mWeakContext;
+        private String mClientApiKey;
         private boolean mPromptLocation;
         private boolean mDisableGmsMissingPrompt;
         private HyberNotificationListener mNotificationListener;
@@ -473,8 +467,9 @@ public final class Hyber {
 
         }
 
-        private Builder(Context context) {
+        private Builder(Context context, String clientApiKey) {
             this.mWeakContext = new WeakReference<>(context);
+            this.mClientApiKey = clientApiKey;
         }
 
         public Builder setNotificationListener(@NonNull final HyberNotificationListener listener) {
@@ -493,7 +488,7 @@ public final class Hyber {
         }
 
         public void init() {
-            Hyber.init(this);
+            Hyber.init(this, this.mClientApiKey);
         }
 
         Context getContext() {
