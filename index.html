@@ -13,7 +13,7 @@
     <section class="page-header">
       <h1 class="project-name">Hyber SDK Android</h1>
       <h2 class="project-tagline">Powerfull messaging for Android</h2>
-      <a href="https://github.com/Incuube/Hyber-SDK-Android/raw/release/hyber/releases/com/hyber/android/hyber-android-sdk/2.2.0/hyber-android-sdk-2.2.0.aar" class="btn">Download AAR</a>
+      <a target="_blank" href="https://github.com/Incuube/Hyber-SDK-Android/raw/maven/com/hyber/hyber-messaging/2.2.0/hyber-messaging-2.2.0.aar" class="btn">Download AAR</a>
       <a href="https://github.com/Incuube/Hyber-SDK-Android" class="btn">View on GitHub</a>
     </section>
     <section class="main-content">
@@ -27,23 +27,25 @@
       <p>
         First of all you need to configure <a target="_blank" href="https://developers.google.com/android/guides/google-services-plugin">Google Services Plugin</a>
         and <a target="_blank" href="https://firebase.google.com/docs/cloud-messaging/android/client">Firebase Cloud Messaging</a></br>
-        After that you need to initialize the Hyber inside onCreate method in your application class
-        <pre class="prettyprint">manifestPlaceholders = [hyber_client_api_key: "${hyber_client_api_key}"]</pre>
         And after that you need to write next line to app level build.gradle file inside build config block
-        <pre class="prettyprint">Hyber.with(this).init();</pre>
+        <pre class="prettyprint">buildConfigField 'String', 'HYBER_CLIENT_API_KEY', hyber_client_api_key</pre>
+        After that you need to initialize the Hyber inside onCreate method in your application class
+        <pre class="prettyprint">Hyber.with(this, BuildConfig.HYBER_CLIENT_API_KEY)
+    .setNotificationListener(...)
+    .init();</pre>
       </p>
       <h3><a id="download" class="anchor" href="#download" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>
         Download
       </h3>
-      <p><a href="https://github.com/Incuube/Hyber-SDK-Android/raw/release/hyber/releases/com/hyber/android/hyber-android-sdk/2.2.0/hyber-android-sdk-2.2.0.aar" class="simple-btn">&darr; <span class="version-tag">Latest</span> AAR</a></p>
+      <p><a target="_blank" href="https://github.com/Incuube/Hyber-SDK-Android/raw/maven/com/hyber/hyber-messaging/2.2.0/hyber-messaging-2.2.0.aar" class="simple-btn">&darr; <span class="version-tag">Latest</span> AAR</a></p>
       <p>The source code to the Hyber, samples, and this website is <a href="https://github.com/Incuube/Hyber-SDK-Android">available on GitHub</a>.</p>
       <h4>
         Gradle
       </h4>
       <p>Add next repository to project level build.gradle:</p>
-      <pre class="prettyprint">maven { url 'https://raw.github.com/Incuube/Hyber-SDK-Android/release/hyber/releases/' }</pre>
+      <pre class="prettyprint">maven { url 'https://raw.github.com/Incuube/Hyber-SDK-Android/maven/' }</pre>
       <p>Then add next dependencies to app level build.gradle:</p>
-      <pre class="prettyprint">compile 'com.hyber.android:hyber-messaging:<span class="version pln"><em>(insert latest version)</em></span>'</pre>
+      <pre class="prettyprint">compile 'com.hyber:hyber-messaging:<span class="version pln"><em>(insert latest version)</em></span>'</pre>
       <h4>
         ProGuard
       </h4>
