@@ -124,9 +124,10 @@ final class HyberApiBusinessModel implements IHyberApiBusinessModel {
                 BaseResponse errorResp = new Gson().fromJson(errorBody, BaseResponse.class);
                 if (errorResp != null && errorResp.getError() != null
                         && errorResp.getError().getCode() != null
-                        && errorResp.getError().getDescription() != null
                         && errorResp.getError().getCode().intValue()
                         != HyberStatus.SDK_API_mobileAuthTokenExpired.getCode()
+                        && errorResp.getError().getCode().intValue()
+                        != HyberStatus.SDK_API_pushTokenExpired.getCode()
                         && errorResp.getError().getCode().intValue()
                         != HyberStatus.SDK_API_notCorrectAuthorizationDataOrTokenExpired.getCode()) {
                     return Observable.just((Response<T>) Response.error(ResponseBody.create(null, errorBody),
