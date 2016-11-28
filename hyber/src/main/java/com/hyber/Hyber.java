@@ -243,7 +243,6 @@ public final class Hyber {
                                         drReportSubscription.unsubscribe();
                                     }
                                 }
-                                mMessageChangeListener.onChange(repo.getAllUnreportedMessages());
                             }
                         }, new Action1<Throwable>() {
                             @Override
