@@ -19,14 +19,15 @@ import com.hyber.listener.HyberNotificationListener;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
+import java.util.Set;
 
 import io.realm.Realm;
 import io.realm.RealmChangeListener;
 import io.realm.RealmResults;
 import rx.Observable;
+import rx.Subscription;
 import rx.functions.Action1;
 
 public final class Hyber {
@@ -54,7 +55,8 @@ public final class Hyber {
     private static Repository repo;
     private static RealmChangeListener<RealmResults<Message>> mMessageChangeListener;
     private static RealmResults<Message> mMessageResults;
-    private static HashMap<String, Boolean> drInQueue;
+    private static Set<String> drInQueue;
+    private static Subscription drReportSubscription;
 
     private static Hyber instance = null;
 
@@ -172,7 +174,7 @@ public final class Hyber {
         clientApiKey = hyberClientApiKey;
         mContextReference = context.getApplicationContext();
 
-        drInQueue = new HashMap<>();
+        drInQueue = new HashSet<>();
 
         mMessageChangeListener = getMessageChangeListener();
         mMessageResults = repo.getAllUnreportedMessages();
@@ -186,30 +188,24 @@ public final class Hyber {
         return new RealmChangeListener<RealmResults<Message>>() {
             @Override
             public void onChange(RealmResults<Message> elements) {
+                if (drReportSubscription != null && !drReportSubscription.isUnsubscribed()) {
+                    drReportSubscription.unsubscribe();
+                }
+
                 for (Message message : elements) {
-                    if (!drInQueue.containsKey(message.getId())) {
-                        drInQueue.put(message.getId(), false);
-                    }
+                    drInQueue.add(message.getId());
                 }
 
-                List<String> messageIds = new ArrayList<>();
-                for (Map.Entry<String, Boolean> entry : drInQueue.entrySet()) {
-                    if (!entry.getValue()) {
-                        drInQueue.put(entry.getKey(), true);
-                        messageIds.add(entry.getKey());
-                    }
-                }
-
-                Observable.from(messageIds)
+                drReportSubscription = Observable.from(drInQueue)
                         .subscribe(new Action1<String>() {
                             @Override
                             public void call(String messageId) {
                                 HyberLogger.d("Message %s is changed", messageId);
-                                Message receivedMessage = repo.getMessageById(repo.getCurrentUser(), messageId);
+                                Message message = repo.getMessageById(repo.getCurrentUser(), messageId);
 
-                                if (receivedMessage != null) {
+                                if (message != null) {
                                     HyberLogger.d("Sending push delivery report with message id %s", messageId);
-                                    sendPushDeliveryReport(receivedMessage.getId(), receivedMessage.getDate().getTime(),
+                                    sendPushDeliveryReport(message.getId(), message.getDate().getTime(),
                                             new DeliveryReportListener() {
                                                 @Override
                                                 public void onDeliveryReportSent(@NonNull String messageId) {
@@ -228,15 +224,24 @@ public final class Hyber {
                                                     drInQueue.remove(messageId);
                                                     realm.commitTransaction();
                                                     realm.close();
+
+                                                    if (drInQueue.isEmpty() && drReportSubscription != null
+                                                            && !drReportSubscription.isUnsubscribed()) {
+                                                        drReportSubscription.unsubscribe();
+                                                    }
                                                 }
 
                                                 @Override
                                                 public void onFailure() {
-
+                                                    mMessageChangeListener.onChange(repo.getAllUnreportedMessages());
                                                 }
                                             });
                                 } else {
-                                    drInQueue.put(messageId, false);
+                                    drInQueue.remove(messageId);
+                                    if (drInQueue.isEmpty() && drReportSubscription != null
+                                            && !drReportSubscription.isUnsubscribed()) {
+                                        drReportSubscription.unsubscribe();
+                                    }
                                 }
                                 mMessageChangeListener.onChange(repo.getAllUnreportedMessages());
                             }
@@ -244,7 +249,7 @@ public final class Hyber {
                             @Override
                             public void call(Throwable throwable) {
                                 HyberLogger.e(throwable);
-                                drInQueue = new HashMap<>();
+                                mMessageChangeListener.onChange(repo.getAllUnreportedMessages());
                             }
                         });
             }
