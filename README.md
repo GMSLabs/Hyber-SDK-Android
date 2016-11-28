@@ -43,6 +43,18 @@ If you are using Proguard in your project add the following lines to your config
 
 ```
 
+### Logging
+For manipulation with logs from library you can create a subclass ```HyberLogger.Tree```.
+Example:
+```java
+private class CrashReportingTree extends HyberLogger.Tree {
+    @Override
+    protected void log(int priority, String tag, String message, Throwable t) {
+        if (priority <= Log.WARN) return; else {/*Do something with error*/}
+    }
+}
+```
+
 [release-svg]: http://github-release-version.herokuapp.com/github/Incuube/Hyber-SDK-Android/release.svg?style=flat
 [release-link]: https://github.com/Incuube/Hyber-SDK-Android/releases/latest
 
