@@ -34,13 +34,8 @@ public class MyMessagesRVAdapter extends HyberMessageHistoryBaseRecyclerViewAdap
         void onAction(@NonNull String action);
     }
 
-    public interface OnMessageAnswerListener {
-        void onAction(@NonNull String messageId, @NonNull String answerText);
-    }
-
     private WeakReference<Context> mContextWeakReference;
     private OnMessageActionListener onMessageActionListener;
-    private OnMessageAnswerListener onMessageAnswerListener;
 
     public MyMessagesRVAdapter(Context context) {
         super(true, true);
@@ -58,10 +53,6 @@ public class MyMessagesRVAdapter extends HyberMessageHistoryBaseRecyclerViewAdap
         this.onMessageActionListener = listener;
     }
 
-    public void setOnMessageAnswerListener(@Nullable OnMessageAnswerListener listener) {
-        this.onMessageAnswerListener = listener;
-    }
-
     class MyHolder extends MessageViewHolder {
 
         @BindView(R.id.messageId) AppCompatTextView messageId;
@@ -70,15 +61,10 @@ public class MyMessagesRVAdapter extends HyberMessageHistoryBaseRecyclerViewAdap
         @BindView(R.id.messageText) AppCompatTextView messageText;
         @BindView(R.id.messageImage) AppCompatImageView messageImage;
         @BindView(R.id.messageButton) AppCompatButton messageButton;
-        @BindView(R.id.answerButton) AppCompatImageButton answerButton;
         @BindView(R.id.messageDrStatus) AppCompatTextView messageDrStatus;
         @BindView(R.id.messageTime) AppCompatTextView messageTime;
-        @BindView(R.id.messageAnswerLayout) RelativeLayout messageAnswerLayout;
-        @BindView(R.id.messageInputAnswerEditText) TextInputEditText messageInputAnswerEditText;
-        @BindView(R.id.messageSendAnswerAppCompatImageButton) AppCompatImageButton messageSendAnswerAppCompatImageButton;
 
         private String mMessageId;
-        private boolean isAnswerMode = false;
         private String mAction;
 
         public MyHolder(View itemView) {
@@ -160,45 +146,6 @@ public class MyMessagesRVAdapter extends HyberMessageHistoryBaseRecyclerViewAdap
             } else {
                 this.messageButton.setVisibility(View.VISIBLE);
                 this.messageButton.setText(caption);
-            }
-        }
-
-        @Override
-        public void isMessageBidirectionalAvailable(@NonNull Boolean isBiDirMessage) {
-            messageAnswerLayout.setVisibility(View.GONE);
-            if (isBiDirMessage) {
-                this.answerButton.setVisibility(View.VISIBLE);
-                this.answerButton.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        if (isAnswerMode) {
-                            isAnswerMode = false;
-                            messageAnswerLayout.setVisibility(View.GONE);
-                        } else {
-                            isAnswerMode = true;
-                            messageAnswerLayout.setVisibility(View.VISIBLE);
-                            messageInputAnswerEditText.requestFocus();
-                            messageSendAnswerAppCompatImageButton.setOnClickListener(
-                                    new View.OnClickListener() {
-                                        @Override
-                                        public void onClick(View view) {
-                                            String answerMessage = messageInputAnswerEditText.getText().toString();
-                                            if (!answerMessage.isEmpty()) {
-                                                if (onMessageAnswerListener != null) {
-                                                    isAnswerMode = false;
-                                                    messageAnswerLayout.setVisibility(View.GONE);
-                                                    onMessageAnswerListener.onAction(mMessageId, answerMessage);
-                                                }
-                                            }
-                                        }
-                                    }
-                            );
-                        }
-                    }
-                });
-            } else {
-                this.answerButton.setVisibility(View.GONE);
-                this.answerButton.setOnClickListener(null);
             }
         }
 

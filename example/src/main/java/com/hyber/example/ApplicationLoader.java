@@ -9,10 +9,8 @@ import android.content.res.Configuration;
 import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.v4.app.NotificationCompat;
-import android.support.v7.app.AlertDialog;
-import android.support.v7.view.ContextThemeWrapper;
 import android.util.Log;
-import android.view.WindowManager;
+import android.widget.Toast;
 
 import com.crashlytics.android.Crashlytics;
 import com.google.firebase.crash.FirebaseCrash;
@@ -35,7 +33,6 @@ public class ApplicationLoader extends Application {
 
     public static volatile Context applicationContext;
     public static volatile Handler applicationHandler;
-    private AlertDialog mAlertDialog;
 
     @Override
     public void onCreate() {
@@ -159,55 +156,36 @@ public class ApplicationLoader extends Application {
             if (priority < Log.WARN) {
                 return;
             }
-            if (mAlertDialog != null && mAlertDialog.isShowing())
-                return;
 
-            applicationHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    if (mAlertDialog != null && mAlertDialog.isShowing())
-                        mAlertDialog.dismiss();
+            StringBuilder sb = new StringBuilder();
+            switch (priority) {
+                case Log.WARN:
+                    sb.append("WARN:");
+                    break;
+                case Log.ERROR:
+                    sb.append("ERROR:");
+                    break;
+                case Log.ASSERT:
+                    sb.append("ASSERT:");
+                    break;
+                default:
+                    sb.append("VERBOSE:");
+            }
 
-                    final AlertDialog.Builder mAlertDialogBuilder =
-                            new AlertDialog.Builder(new ContextThemeWrapper(ApplicationLoader.this, R.style.errorDialog));
+            if (t != null) {
+                sb.append(t.getLocalizedMessage())
+                        .append("\n");
+            }
+            if (status != null) {
+                sb.append(String.format(Locale.getDefault(), "%d ==> %s",
+                        status.getCode(), status.getDescription()))
+                        .append("\n");
+            }
+            if (message != null) {
+                sb.append(message);
+            }
 
-                    switch (priority) {
-                        case Log.WARN:
-                            mAlertDialogBuilder.setTitle("WARN");
-                            break;
-                        case Log.ERROR:
-                            mAlertDialogBuilder.setTitle("ERROR");
-                            break;
-                        case Log.ASSERT:
-                            mAlertDialogBuilder.setTitle("ASSERT");
-                            break;
-                        default:
-                            mAlertDialogBuilder.setTitle("VERBOSE");
-                    }
-
-                    StringBuilder sb = new StringBuilder();
-
-                    if (t != null) {
-                        sb.append(t.getLocalizedMessage())
-                                .append("\n");
-                    }
-                    if (status != null) {
-                        sb.append(String.format(Locale.getDefault(), "%d ==> %s",
-                                status.getCode(), status.getDescription()))
-                                .append("\n");
-                    }
-                    if (message != null) {
-                        sb.append(message);
-                    }
-                    mAlertDialogBuilder.setMessage(sb.toString());
-
-                    mAlertDialog = mAlertDialogBuilder.create();
-                    if (mAlertDialog.getWindow() != null) {
-                        mAlertDialog.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
-                        mAlertDialog.show();
-                    }
-                }
-            });
+            Toast.makeText(applicationContext, sb.toString(), Toast.LENGTH_LONG).show();
         }
     }
 

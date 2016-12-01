@@ -114,11 +114,16 @@ public class Repository {
         });
     }
 
-    void clearUserData(@NonNull User user) {
+    void clearUserData(@NonNull final User user) {
         checkUser(user);
-        getMessages(user).deleteAllFromRealm();
-        user.getSession().deleteFromRealm();
-        user.deleteFromRealm();
+        realm.executeTransaction(new Realm.Transaction() {
+            @Override
+            public void execute(Realm realm) {
+                getMessages(user).deleteAllFromRealm();
+                user.getSession().deleteFromRealm();
+                user.deleteFromRealm();
+            }
+        });
     }
 
     void clearAllData() {
