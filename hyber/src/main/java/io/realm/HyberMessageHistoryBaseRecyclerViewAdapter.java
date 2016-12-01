@@ -4,7 +4,6 @@ import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.view.ViewGroup;
 
-import com.hyber.Hyber;
 import com.hyber.Message;
 import com.hyber.MessageViewHolder;
 import com.hyber.Repository;
