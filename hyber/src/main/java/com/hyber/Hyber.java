@@ -11,6 +11,8 @@ import android.support.annotation.Nullable;
 import com.google.firebase.messaging.RemoteMessage;
 import com.hyber.handler.BidirectionalAnswerHandler;
 import com.hyber.handler.CheckAuthorizationHandler;
+import com.hyber.handler.CurrentUserHandler;
+import com.hyber.handler.LogoutUserHandler;
 import com.hyber.handler.MessageHistoryHandler;
 import com.hyber.handler.UserRegistrationHandler;
 import com.hyber.listener.DeliveryReportListener;
@@ -40,7 +42,6 @@ public final class Hyber {
     private static String clientApiKey;
     private static String installationID;
     private static String fingerprint;
-    private static boolean isBidirectionalAvailable = false;
     private static Hyber.Builder mInitBuilder;
     private static boolean initDone;
     private static boolean startedRegistration;
@@ -124,8 +125,6 @@ public final class Hyber {
                             mInitBuilder.mNotificationListener.onMessageReceived(remoteMessage);
                     }
                 });
-
-        isBidirectionalAvailable = /*TODO Add Bidirectional support controller*/ true;
 
         // START: Init validation
         if (hyberClientApiKey == null || hyberClientApiKey.isEmpty()) {
@@ -255,11 +254,6 @@ public final class Hyber {
         };
     }
 
-    public static boolean isBidirectionalAvailable() {
-        checkInitialized();
-        return isBidirectionalAvailable;
-    }
-
     static void onAppFocus() {
         foreground = true;
 
@@ -305,6 +299,22 @@ public final class Hyber {
             isAuthorized = true;
         repo.close();
         if (isAuthorized) {
+            handler.onSuccess();
+        } else {
+            handler.onFailure();
+        }
+    }
+
+    public static void getCurrentUser(final CurrentUserHandler handler) {
+        checkInitialized();
+        if (repo.getCurrentUser() != null)
+            handler.onCurrentUser(repo.getCurrentUser().getId(), repo.getCurrentUser().getPhone());
+    }
+
+    public static void logoutCurrentUser(final LogoutUserHandler handler) {
+        checkInitialized();
+        if (repo.getCurrentUser() != null) {
+            repo.clearUserData(repo.getCurrentUser());
             handler.onSuccess();
         } else {
             handler.onFailure();

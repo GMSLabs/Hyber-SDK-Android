@@ -12,13 +12,12 @@
             android:id="@+id/messages_RecyclerView"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_above="@+id/answerLayout"
-            android:layout_gravity="bottom" />
+            android:layout_above="@+id/answerLayout" />
 
         <RelativeLayout
             android:id="@+id/answerLayout"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="60dp"
             android:layout_alignParentBottom="true"
             android:gravity="bottom">
 

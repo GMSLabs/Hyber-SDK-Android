@@ -51,7 +51,7 @@ public class MessagesFragment extends Fragment {
     private LinearLayoutManager mLayoutManager;
     private OnMessagesFragmentInteractionListener mListener;
     private Unbinder unbinder;
-    private int mMaxHistoryRequests = 2;
+    private int mMaxHistoryRequests = 1;
     private Long mTimeForNextHistoryRequest;
 
     public MessagesFragment() {
@@ -100,11 +100,17 @@ public class MessagesFragment extends Fragment {
                             HyberLogger.e(e, "mAdapter count %d, position %d",
                                     mAdapter.getItemCount(), positionStart + itemCount - 1);
                         }
+
+                        if (mAnswerLayout.getVisibility() == View.GONE && mAdapter.getItemCount() > 0) {
+                            mAnswerLayout.setVisibility(View.VISIBLE);
+                        }
                     }
 
                     @Override
                     public void onItemRangeRemoved(int positionStart, int itemCount) {
-
+                        if (mAnswerLayout.getVisibility() == View.VISIBLE && mAdapter.getItemCount() == 0) {
+                            mAnswerLayout.setVisibility(View.GONE);
+                        }
                     }
 
                     @Override
@@ -112,6 +118,7 @@ public class MessagesFragment extends Fragment {
 
                     }
                 });
+
         mAdapter.setOnMessageActionListener(new MyMessagesRVAdapter.OnMessageActionListener() {
             @Override
             public void onAction(@NonNull String action) {
@@ -119,45 +126,14 @@ public class MessagesFragment extends Fragment {
             }
         });
 
-        if (Hyber.isBidirectionalAvailable()) {
-            mAnswerLayout.setVisibility(View.VISIBLE);
-            mAdapter.setOnMessageAnswerListener(new MyMessagesRVAdapter.OnMessageAnswerListener() {
-                @Override
-                public void onAction(@NonNull final String messageId, @NonNull final String answerText) {
-                    Toast.makeText(getActivity(),
-                            String.format(Locale.getDefault(),
-                                    "Message answer action.\nmessageId:%s\nanswerText:%s",
-                                    messageId, answerText),
-                            Toast.LENGTH_SHORT).show();
-                    Hyber.sendBidirectionalAnswer(messageId, answerText,
-                            new BidirectionalAnswerHandler() {
-                                @Override
-                                public void onSuccess() {
-                                    Toast.makeText(getActivity(),
-                                            String.format(Locale.getDefault(),
-                                                    "Success sent message answer!\nmessageId:%s\nanswerText:%s",
-                                                    messageId, answerText),
-                                            Toast.LENGTH_SHORT).show();
-                                }
-
-                                @Override
-                                public void onFailure(String message) {
-                                    Toast.makeText(getActivity(),
-                                            String.format(Locale.getDefault(),
-                                                    "Failure sent message answer!\nmessageId:%s\nanswerText:%s",
-                                                    messageId, answerText),
-                                            Toast.LENGTH_SHORT).show();
-                                }
-                            });
-                }
-            });
-        } else {
-            mAnswerLayout.setVisibility(View.GONE);
-            mAdapter.setOnMessageAnswerListener(null);
-        }
-
         mTimeForNextHistoryRequest = System.currentTimeMillis();
         getMessagesFromHistory(mTimeForNextHistoryRequest);
+
+        if (mAdapter.getItemCount() > 0) {
+            mAnswerLayout.setVisibility(View.VISIBLE);
+        } else {
+            mAnswerLayout.setVisibility(View.GONE);
+        }
 
         return view;
     }

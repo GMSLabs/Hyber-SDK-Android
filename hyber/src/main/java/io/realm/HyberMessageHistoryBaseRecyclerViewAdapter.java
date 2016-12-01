@@ -108,8 +108,6 @@ public abstract class HyberMessageHistoryBaseRecyclerViewAdapter extends Recycle
         viewHolder.setMessageAction(messageItem.getButtonUrl());
         viewHolder.setMessageCaption(messageItem.getButtonText());
 
-        viewHolder.isMessageBidirectionalAvailable(Hyber.isBidirectionalAvailable());
-
         viewHolder.setMessageDate(messageItem.getDate());
         viewHolder.setReadStatus(messageItem.isRead());
         viewHolder.setDeliveryReportStatus(messageItem.isReported());
