@@ -66,7 +66,9 @@ final class HyberApiBusinessModel implements IHyberApiBusinessModel {
                                 listener.onSuccess();
                             } else {
                                 if (response.body().getError() != null) {
-                                    HyberLogger.w(HyberStatus.byCode(response.body().getError().getCode()));
+                                    HyberLogger.w("%d ==> %s",
+                                            HyberStatus.byCode(response.body().getError().getCode()).getCode(),
+                                            HyberStatus.byCode(response.body().getError().getCode()).getDescription());
                                 } else {
                                     HyberLogger.tag(TAG);
                                     HyberLogger.wtf("User not registered, session data is not provided!");
@@ -90,26 +92,18 @@ final class HyberApiBusinessModel implements IHyberApiBusinessModel {
     }
 
     private void responseIsUnsuccessful(Response response) {
-        switch (response.code()) {
-            case 404: HyberLogger.e(HyberStatus.SDK_API_404Error, "url: %s\nresponse code: %d - %s",
+        try {
+            BaseResponse errorResp = new Gson().fromJson(response.errorBody().string(), BaseResponse.class);
+            if (errorResp != null && errorResp.getError() != null
+                    && errorResp.getError().getCode() != null) {
+                HyberLogger.e("url: %s\nresponse code: %d - %s\nHyber error: %d ==> %s",
+                        response.raw().request().url().toString(), response.code(), response.message(),
+                        HyberStatus.byCode(errorResp.getError().getCode()).getCode(),
+                        HyberStatus.byCode(errorResp.getError().getCode()).getDescription());
+            }
+        } catch (IOException | JsonSyntaxException e) {
+            HyberLogger.e(e, "url: %s\nresponse code: %d - %s",
                     response.raw().request().url().toString(), response.code(), response.message());
-                break;
-            case 500: HyberLogger.e(HyberStatus.SDK_API_500Error, "url: %s\nresponse code: %d - %s",
-                    response.raw().request().url().toString(), response.code(), response.message());
-                break;
-            default:
-                try {
-                    BaseResponse errorResp = new Gson().fromJson(response.errorBody().string(), BaseResponse.class);
-                    if (errorResp != null && errorResp.getError() != null
-                            && errorResp.getError().getCode() != null) {
-                        HyberLogger.e(HyberStatus.byCode(errorResp.getError().getCode()), "url: %s\nresponse code: %d - %s",
-                                response.raw().request().url().toString(), response.code(), response.message());
-                    }
-                } catch (IOException | JsonSyntaxException e) {
-                    HyberLogger.e(e);
-                    HyberLogger.e(HyberStatus.SDK_API_ResponseIsUnsuccessful, "url: %s\nresponse code: %d - %s",
-                            response.raw().request().url().toString(), response.code(), response.message());
-                }
         }
     }
 
@@ -231,8 +225,9 @@ final class HyberApiBusinessModel implements IHyberApiBusinessModel {
                             if (response.body().getError() == null) {
                                 listener.onSuccess();
                             } else {
-                                HyberLogger.i(HyberStatus.byCode(response.body().getError().getCode()),
-                                        "Response for update user device data api with error!");
+                                HyberLogger.i("Response for update user device data api with error\n%d ==> %s!",
+                                        HyberStatus.byCode(response.body().getError().getCode()).getCode(),
+                                        HyberStatus.byCode(response.body().getError().getCode()).getDescription());
                                 listener.onFailure();
                             }
                         } else {

@@ -127,32 +127,19 @@ public class ApplicationLoader extends Application {
     private class CrashReportingTree extends HyberLogger.Tree {
 
         @Override
-        protected void log(int priority, @Nullable String tag, @Nullable HyberStatus status, @Nullable String message,
-                           @Nullable Throwable t) {
-            if (priority <= Log.WARN) {
-                return;
-            }
-
+        protected void log(int priority, String tag, String message, Throwable t) {
             if (t != null) {
                 Crashlytics.logException(t);
                 FirebaseCrash.report(t);
             }
-
-            if (status != null) {
-                Crashlytics.log(priority, tag == null ? "MyHyber" : tag,
-                        String.format(Locale.getDefault(), "%d ==> %s",
-                                status.getCode(), status.getDescription()));
-                FirebaseCrash.logcat(priority, tag == null ? "MyHyber" : tag,
-                        String.format(Locale.getDefault(), "%d ==> %s", status.getCode(), status.getDescription()));
-            }
         }
+
     }
 
     private class UIErrorTree extends HyberLogger.Tree {
 
         @Override
-        protected void log(final int priority, @Nullable String tag, @Nullable final HyberStatus status,
-                           @Nullable final String message, @Nullable final Throwable t) {
+        protected void log(final int priority, @Nullable String tag, @Nullable final String message, @Nullable final Throwable t) {
             if (priority < Log.WARN) {
                 return;
             }
@@ -176,11 +163,7 @@ public class ApplicationLoader extends Application {
                 sb.append(t.getLocalizedMessage())
                         .append("\n");
             }
-            if (status != null) {
-                sb.append(String.format(Locale.getDefault(), "%d ==> %s",
-                        status.getCode(), status.getDescription()))
-                        .append("\n");
-            }
+
             if (message != null) {
                 sb.append(message);
             }
