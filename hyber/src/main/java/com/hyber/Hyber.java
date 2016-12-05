@@ -128,7 +128,7 @@ public final class Hyber {
 
         // START: Init validation
         if (hyberClientApiKey == null || hyberClientApiKey.isEmpty()) {
-            HyberLogger.e(HyberStatus.SDK_INTEGRATION_ClientApiKeyIsInvalid);
+            HyberLogger.e(HyberStatus.SDK_INTEGRATION_ClientApiKeyIsInvalid.getDescription());
             return;
         }
 
