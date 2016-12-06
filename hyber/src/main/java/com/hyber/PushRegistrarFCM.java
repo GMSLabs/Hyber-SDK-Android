@@ -13,6 +13,7 @@ import android.content.res.Resources;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.firebase.iid.FirebaseInstanceId;
+import com.hyber.log.HyberLogger;
 
 import java.util.concurrent.TimeUnit;
 
@@ -38,7 +39,7 @@ class PushRegistrarFCM implements PushRegistrator {
             }
         } catch (Throwable t) {
             HyberLogger.e(t, "Could not register with GCM due to an error with the AndroidManifest.xml "
-                                    + "file or with 'Google Play services'.");
+                    + "file or with 'Google Play services'.");
             registeredHandler.complete(null);
         }
     }

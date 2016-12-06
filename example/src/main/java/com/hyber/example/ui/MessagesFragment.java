@@ -1,7 +1,9 @@
-package com.hyber.example;
+package com.hyber.example.ui;
 
 import android.content.Context;
+import android.os.Build;
 import android.os.Bundle;
+import android.speech.tts.TextToSpeech;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.AppCompatEditText;
@@ -11,23 +13,22 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import com.hyber.Hyber;
-import com.hyber.HyberLogger;
-import com.hyber.example.adapter.MyMessagesRVAdapter;
-import com.hyber.handler.BidirectionalAnswerHandler;
-import com.hyber.handler.MessageHistoryHandler;
+import com.hyber.RealmRecyclerViewAdapter;
+import com.hyber.example.R;
+import com.hyber.example.ui.Adapters.MessagesRVAdapter;
+import com.hyber.handler.HyberCallback;
+import com.hyber.log.HyberLogger;
 
 import java.util.Locale;
+import java.util.UUID;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import butterknife.OnClick;
 import butterknife.Unbinder;
-import io.realm.HyberMessageHistoryBaseRecyclerViewAdapter;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -47,12 +48,14 @@ public class MessagesFragment extends Fragment {
     AppCompatEditText mInputAnswer;
     @BindView(R.id.sendAnswerAppCompatImageButton)
     AppCompatImageButton mSendAnswer;
-    private MyMessagesRVAdapter mAdapter;
+    private MessagesRVAdapter mAdapter;
     private LinearLayoutManager mLayoutManager;
     private OnMessagesFragmentInteractionListener mListener;
     private Unbinder unbinder;
-    private int mMaxHistoryRequests = 1;
+    private int mMaxHistoryRequests = 2;
     private Long mTimeForNextHistoryRequest;
+
+    private TextToSpeech textToSpeech;
 
     public MessagesFragment() {
         // Required empty public constructor
@@ -75,6 +78,34 @@ public class MessagesFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         HyberLogger.i("I'm alive!");
+
+        textToSpeech = new TextToSpeech(getActivity(), new TextToSpeech.OnInitListener() {
+            @Override
+            public void onInit(int status) {
+                HyberLogger.i("TTS", "TextToSpeech.OnInitListener.onInit...");
+                textToSpeech.setLanguage(Locale.US);
+            }
+        });
+    }
+
+    @Override
+    public void onPause() {
+        if (textToSpeech != null) {
+            textToSpeech.stop();
+            textToSpeech.shutdown();
+        }
+        super.onPause();
+    }
+
+    private void speakOut(String text) {
+        Toast.makeText(getActivity(), text, Toast.LENGTH_SHORT).show();
+        // A random String (Unique ID).
+        String utteranceId = UUID.randomUUID().toString();
+        if (Build.VERSION.SDK_INT < 21) {
+            textToSpeech.speak(text, TextToSpeech.QUEUE_FLUSH, null);
+        } else {
+            textToSpeech.speak(text, TextToSpeech.QUEUE_FLUSH, null, utteranceId);
+        }
     }
 
     @Override
@@ -88,10 +119,10 @@ public class MessagesFragment extends Fragment {
         mLayoutManager.setStackFromEnd(true);
 
         mRecyclerView.setLayoutManager(mLayoutManager);
-        mAdapter = new MyMessagesRVAdapter(getActivity());
+        mAdapter = new MessagesRVAdapter(getActivity(), Hyber.getAllUserMessages(), true, true);
         mRecyclerView.setAdapter(mAdapter);
         mAdapter.setOnChangeListener(
-                new HyberMessageHistoryBaseRecyclerViewAdapter.OnChangeListener() {
+                new RealmRecyclerViewAdapter.OnChangeListener() {
                     @Override
                     public void onItemRangeInserted(int positionStart, int itemCount) {
                         try {
@@ -100,17 +131,12 @@ public class MessagesFragment extends Fragment {
                             HyberLogger.e(e, "mAdapter count %d, position %d",
                                     mAdapter.getItemCount(), positionStart + itemCount - 1);
                         }
-
-                        if (mAnswerLayout.getVisibility() == View.GONE && mAdapter.getItemCount() > 0) {
-                            mAnswerLayout.setVisibility(View.VISIBLE);
-                        }
+                        speakOut(mAdapter.getItem(positionStart).getBody());
                     }
 
                     @Override
                     public void onItemRangeRemoved(int positionStart, int itemCount) {
-                        if (mAnswerLayout.getVisibility() == View.VISIBLE && mAdapter.getItemCount() == 0) {
-                            mAnswerLayout.setVisibility(View.GONE);
-                        }
+
                     }
 
                     @Override
@@ -118,8 +144,7 @@ public class MessagesFragment extends Fragment {
 
                     }
                 });
-
-        mAdapter.setOnMessageActionListener(new MyMessagesRVAdapter.OnMessageActionListener() {
+        mAdapter.setOnMessageActionListener(new MessagesRVAdapter.OnMessageActionListener() {
             @Override
             public void onAction(@NonNull String action) {
                 onMessageAction(action);
@@ -135,12 +160,15 @@ public class MessagesFragment extends Fragment {
             mAnswerLayout.setVisibility(View.GONE);
         }
 
+        mTimeForNextHistoryRequest = System.currentTimeMillis();
+        getMessagesFromHistory(mTimeForNextHistoryRequest);
+
         return view;
     }
 
     private void getMessagesFromHistory(long historyFromThisTimeToPast) {
         mMaxHistoryRequests -= 1;
-        Hyber.getMessageHistory(historyFromThisTimeToPast, new MessageHistoryHandler() {
+        Hyber.getMessageHistory(historyFromThisTimeToPast, new HyberCallback<Long, String>() {
             @Override
             public void onSuccess(@NonNull Long recommendedNextTime) {
                 mTimeForNextHistoryRequest = recommendedNextTime;
@@ -153,37 +181,6 @@ public class MessagesFragment extends Fragment {
                 Toast.makeText(getActivity(), message, Toast.LENGTH_SHORT).show();
             }
         });
-    }
-
-    @OnClick(R.id.sendAnswerAppCompatImageButton)
-    public void onClickSendAnswerAppCompatImageButton(View v) {
-        InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
-        imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
-        final String messageId = mAdapter.getMessageId(mAdapter.getItemCount() - 1);
-        final String answerText = mInputAnswer.getText().toString();
-        if (!answerText.isEmpty()) {
-            Hyber.sendBidirectionalAnswer(messageId, answerText, new BidirectionalAnswerHandler() {
-                @Override
-                public void onSuccess() {
-                    Toast.makeText(getActivity(),
-                            String.format(Locale.getDefault(),
-                                    "Success sent message answer!\nmessageId:%s\nanswerText:%s",
-                                    messageId, answerText),
-                            Toast.LENGTH_SHORT).show();
-                    mInputAnswer.setText("");
-                    mInputAnswer.clearFocus();
-                }
-
-                @Override
-                public void onFailure(String message) {
-                    Toast.makeText(getActivity(),
-                            String.format(Locale.getDefault(),
-                                    "Failure sent message answer!\nmessageId:%s\nanswerText:%s",
-                                    messageId, answerText),
-                            Toast.LENGTH_SHORT).show();
-                }
-            });
-        }
     }
 
     public void onMessageAction(@NonNull String action) {

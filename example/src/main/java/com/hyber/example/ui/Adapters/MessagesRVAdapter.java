@@ -1,4 +1,4 @@
-package com.hyber.example.adapter;
+package com.hyber.example.ui.Adapters;
 
 import android.content.Context;
 import android.graphics.Color;
@@ -11,8 +11,9 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.hyber.MessageViewHolder;
+import com.hyber.HyberMessageViewHolder;
 import com.hyber.example.R;
+import com.hyber.model.Message;
 import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 
@@ -23,9 +24,10 @@ import java.util.Locale;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import io.realm.HyberMessageHistoryBaseRecyclerViewAdapter;
+import io.realm.HyberMessageAdapter;
+import io.realm.RealmResults;
 
-public class MyMessagesRVAdapter extends HyberMessageHistoryBaseRecyclerViewAdapter {
+public class MessagesRVAdapter extends HyberMessageAdapter {
 
     public interface OnMessageActionListener {
         void onAction(@NonNull String action);
@@ -34,13 +36,13 @@ public class MyMessagesRVAdapter extends HyberMessageHistoryBaseRecyclerViewAdap
     private WeakReference<Context> mContextWeakReference;
     private OnMessageActionListener onMessageActionListener;
 
-    public MyMessagesRVAdapter(Context context) {
-        super(true, true);
+    public MessagesRVAdapter(Context context, RealmResults<Message> results, boolean autoUpdate, boolean animateResults) {
+        super(context, results, autoUpdate, animateResults);
         this.mContextWeakReference = new WeakReference<>(context);
     }
 
     @Override
-    public MessageViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public HyberMessageViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View itemView = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.item_message, parent, false);
         return new MyHolder(itemView);
@@ -50,18 +52,27 @@ public class MyMessagesRVAdapter extends HyberMessageHistoryBaseRecyclerViewAdap
         this.onMessageActionListener = listener;
     }
 
-    class MyHolder extends MessageViewHolder {
+    class MyHolder extends HyberMessageViewHolder {
 
-        @BindView(R.id.messageId) AppCompatTextView messageId;
-        @BindView(R.id.messagePartner) AppCompatTextView messagePartner;
-        @BindView(R.id.messageAlphaName) AppCompatTextView messageAlphaName;
-        @BindView(R.id.messageText) AppCompatTextView messageText;
-        @BindView(R.id.messageImage) AppCompatImageView messageImage;
-        @BindView(R.id.messageButton) AppCompatButton messageButton;
-        @BindView(R.id.messageDrStatus) AppCompatTextView messageDrStatus;
-        @BindView(R.id.messageTime) AppCompatTextView messageTime;
+        @BindView(R.id.messageId)
+        AppCompatTextView messageId;
+        @BindView(R.id.messagePartner)
+        AppCompatTextView messagePartner;
+        @BindView(R.id.messageAlphaName)
+        AppCompatTextView messageAlphaName;
+        @BindView(R.id.messageText)
+        AppCompatTextView messageText;
+        @BindView(R.id.messageImage)
+        AppCompatImageView messageImage;
+        @BindView(R.id.messageButton)
+        AppCompatButton messageButton;
+        @BindView(R.id.messageDrStatus)
+        AppCompatTextView messageDrStatus;
+        @BindView(R.id.messageTime)
+        AppCompatTextView messageTime;
 
         private String mMessageId;
+        private boolean isAnswerMode = false;
         private String mAction;
 
         public MyHolder(View itemView) {
@@ -76,19 +87,19 @@ public class MyMessagesRVAdapter extends HyberMessageHistoryBaseRecyclerViewAdap
         }
 
         @Override
-        public void setPartner(@NonNull String partner) {
+        public void setMessagePartner(@NonNull String partner) {
             messagePartner.setText(partner);
         }
 
         @Override
-        public void setMessageAlphaName(@Nullable String alphaName) {
+        public void setMessageTitle(@Nullable String alphaName) {
             if (alphaName == null)
                 return;
             this.messageAlphaName.setText(alphaName);
         }
 
         @Override
-        public void setMessageText(@Nullable String text) {
+        public void setMessageBody(@Nullable String text) {
             if (text == null)
                 return;
             this.messageText.setText(text);
@@ -118,7 +129,7 @@ public class MyMessagesRVAdapter extends HyberMessageHistoryBaseRecyclerViewAdap
         }
 
         @Override
-        public void setMessageAction(@Nullable String action) {
+        public void setMessageButtonUrl(@Nullable String action) {
             if (action == null) {
                 this.messageButton.setVisibility(View.GONE);
                 this.messageButton.setOnClickListener(null);
@@ -137,7 +148,7 @@ public class MyMessagesRVAdapter extends HyberMessageHistoryBaseRecyclerViewAdap
         }
 
         @Override
-        public void setMessageCaption(@Nullable String caption) {
+        public void setMessageButtonText(@Nullable String caption) {
             if (caption == null) {
                 this.messageButton.setVisibility(View.GONE);
             } else {
@@ -153,12 +164,12 @@ public class MyMessagesRVAdapter extends HyberMessageHistoryBaseRecyclerViewAdap
         }
 
         @Override
-        public void setReadStatus(@NonNull Boolean readStatus) {
+        public void setMessageIsRead(@NonNull Boolean readStatus) {
 
         }
 
         @Override
-        public void setDeliveryReportStatus(@NonNull Boolean drStatus) {
+        public void setMessageIsReported(@NonNull Boolean drStatus) {
             if (drStatus) {
                 this.messageDrStatus.setText("reported");
                 this.messageDrStatus.setTextColor(Color.GREEN);

@@ -6,6 +6,9 @@ import android.support.annotation.NonNull;
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
+import com.hyber.log.HyberLogger;
+import com.hyber.model.Session;
+import com.hyber.model.User;
 
 import java.io.IOException;
 
@@ -15,20 +18,20 @@ import rx.Observable;
 import rx.functions.Action1;
 import rx.functions.Func1;
 
-final class HyberApiBusinessModel implements IHyberApiBusinessModel {
+final class ApiBusinessModel implements IHyberApiBusinessModel {
 
-    private static final String TAG = "HyberApiBusinessModel";
+    private static final String TAG = "ApiBusinessModel";
 
-    private static HyberApiBusinessModel mInstance;
+    private static ApiBusinessModel mInstance;
     private Context mContextReference;
 
-    private HyberApiBusinessModel(@NonNull Context context) {
+    private ApiBusinessModel(@NonNull Context context) {
         this.mContextReference = context;
     }
 
-    static synchronized HyberApiBusinessModel getInstance(@NonNull Context context) {
+    static synchronized ApiBusinessModel getInstance(@NonNull Context context) {
         if (mInstance == null) {
-            mInstance = new HyberApiBusinessModel(context);
+            mInstance = new ApiBusinessModel(context);
         }
         return mInstance;
     }
@@ -67,8 +70,8 @@ final class HyberApiBusinessModel implements IHyberApiBusinessModel {
                             } else {
                                 if (response.body().getError() != null) {
                                     HyberLogger.w("%d ==> %s",
-                                            HyberStatus.byCode(response.body().getError().getCode()).getCode(),
-                                            HyberStatus.byCode(response.body().getError().getCode()).getDescription());
+                                            ErrorStatus.byCode(response.body().getError().getCode()).getCode(),
+                                            ErrorStatus.byCode(response.body().getError().getCode()).getDescription());
                                 } else {
                                     HyberLogger.tag(TAG);
                                     HyberLogger.wtf("User not registered, session data is not provided!");
@@ -98,8 +101,8 @@ final class HyberApiBusinessModel implements IHyberApiBusinessModel {
                     && errorResp.getError().getCode() != null) {
                 HyberLogger.e("url: %s\nresponse code: %d - %s\nHyber error: %d ==> %s",
                         response.raw().request().url().toString(), response.code(), response.message(),
-                        HyberStatus.byCode(errorResp.getError().getCode()).getCode(),
-                        HyberStatus.byCode(errorResp.getError().getCode()).getDescription());
+                        ErrorStatus.byCode(errorResp.getError().getCode()).getCode(),
+                        ErrorStatus.byCode(errorResp.getError().getCode()).getDescription());
             }
         } catch (IOException | JsonSyntaxException e) {
             HyberLogger.e(e, "url: %s\nresponse code: %d - %s",
@@ -119,11 +122,11 @@ final class HyberApiBusinessModel implements IHyberApiBusinessModel {
                 if (errorResp != null && errorResp.getError() != null
                         && errorResp.getError().getCode() != null
                         && errorResp.getError().getCode().intValue()
-                        != HyberStatus.SDK_API_mobileAuthTokenExpired.getCode()
+                        != ErrorStatus.SDK_API_mobileAuthTokenExpired.getCode()
                         && errorResp.getError().getCode().intValue()
-                        != HyberStatus.SDK_API_pushTokenExpired.getCode()
+                        != ErrorStatus.SDK_API_pushTokenExpired.getCode()
                         && errorResp.getError().getCode().intValue()
-                        != HyberStatus.SDK_API_notCorrectAuthorizationDataOrTokenExpired.getCode()) {
+                        != ErrorStatus.SDK_API_notCorrectAuthorizationDataOrTokenExpired.getCode()) {
                     return Observable.just((Response<T>) Response.error(ResponseBody.create(null, errorBody),
                             currResponse.raw()));
                 }
@@ -226,8 +229,8 @@ final class HyberApiBusinessModel implements IHyberApiBusinessModel {
                                 listener.onSuccess();
                             } else {
                                 HyberLogger.i("Response for update user device data api with error\n%d ==> %s!",
-                                        HyberStatus.byCode(response.body().getError().getCode()).getCode(),
-                                        HyberStatus.byCode(response.body().getError().getCode()).getDescription());
+                                        ErrorStatus.byCode(response.body().getError().getCode()).getCode(),
+                                        ErrorStatus.byCode(response.body().getError().getCode()).getDescription());
                                 listener.onFailure();
                             }
                         } else {

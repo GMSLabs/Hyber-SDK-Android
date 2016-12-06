@@ -5,11 +5,13 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
 
+import com.hyber.log.HyberLogger;
+
 import java.lang.ref.WeakReference;
 
 final class HyberActivityLifecycleHandler {
 
-    private static final String TAG = "HyberFingerprint";
+    private static final String TAG = "AppFingerprint";
 
     private static final int DELAY_MILLS = 2000;
     private static boolean nextResumeIsFirstActivity;

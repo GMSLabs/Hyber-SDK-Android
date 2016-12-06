@@ -1,5 +1,7 @@
 package com.hyber;
 
+import com.hyber.model.User;
+
 import java.io.IOException;
 
 import okhttp3.Interceptor;

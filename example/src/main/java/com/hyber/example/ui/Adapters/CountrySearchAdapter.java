@@ -4,11 +4,11 @@ import android.content.Context;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.hyber.HyberLogger;
 import com.hyber.example.AndroidUtilities;
 import com.hyber.example.Utilities;
 import com.hyber.example.ui.Adapters.CountryAdapter.Country;
 import com.hyber.example.ui.Cells.TextSettingsCell;
+import com.hyber.log.HyberLogger;
 
 import java.util.ArrayList;
 import java.util.HashMap;

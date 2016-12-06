@@ -1,4 +1,4 @@
-package com.hyber;
+package com.hyber.model;
 
 import io.realm.annotations.RealmModule;
 
