@@ -29,47 +29,9 @@ subprojects { project ->
             mavenCentral()
         }
         dependencies {
-            classpath 'com.android.tools.build:gradle:2.2.2'
+            classpath 'com.android.tools.build:gradle:2.3.0-beta2'
             classpath 'com.google.gms:google-services:3.0.0'
             classpath 'io.realm:realm-gradle-plugin:2.1.1'
         }
     }
 }
-
-ext {
-    minSdkVersion = 16
-    targetSdkVersion = 24
-    compileSdkVersion = 24
-    buildToolsVersion = '25.0.0'
-    sourceCompatibilityVersion = JavaVersion.VERSION_1_7
-    targetCompatibilityVersion = JavaVersion.VERSION_1_7
-}
-
-def googleLibraryVersion = '9.6.1'
-def supportLibraryVersion = '24.2.1'
-def retrofitVersion = '2.1.0'
-
-ext.deps = [
-        jetbAnnotations    : 'org.jetbrains:annotations:13.0',
-
-        // Android
-        playServicesBase   : "com.google.android.gms:play-services-base:$googleLibraryVersion",
-        firebaseMessaging  : "com.google.firebase:firebase-messaging:$googleLibraryVersion",
-        supportRecyclerView: "com.android.support:recyclerview-v7:$supportLibraryVersion",
-
-        // Third Party
-        rxandroid          : 'io.reactivex:rxandroid:1.2.1',
-        rxjava             : 'io.reactivex:rxjava:1.1.6',
-        retrofit           : "com.squareup.retrofit2:retrofit:$retrofitVersion",
-        retrofitGsonConv   : "com.squareup.retrofit2:converter-gson:$retrofitVersion",
-        retrofitRxAdapter  : "com.squareup.retrofit2:adapter-rxjava:$retrofitVersion",
-        okhttp             : 'com.squareup.okhttp3:okhttp:3.4.1',
-        javaDiffUtils      : 'com.googlecode.java-diff-utils:diffutils:1.3.0',
-
-        // Test dependencies
-        junit              : 'junit:junit:4.12',
-        stetho             : 'com.facebook.stetho:stetho:1.4.1',
-        stethoOkHttp       : 'com.facebook.stetho:stetho-okhttp3:1.4.1',
-        stethoRealm        : 'com.uphyca:stetho_realm:2.0.0'
-
-]

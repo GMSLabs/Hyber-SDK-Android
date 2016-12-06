@@ -469,7 +469,7 @@ public final class HyberLogger {
     /**
      * A facade for handling logging calls. Install instances via {@link #plant HyberLogger.plant()}.
      */
-    public static abstract class Tree {
+    public abstract static class Tree {
         final ThreadLocal<String> explicitTag = new ThreadLocal<>();
 
         String getTag() {

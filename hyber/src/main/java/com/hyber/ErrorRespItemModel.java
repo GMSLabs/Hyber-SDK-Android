@@ -1,34 +1,17 @@
 package com.hyber;
 
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-
 import com.google.gson.annotations.SerializedName;
 
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+
+@NoArgsConstructor
+@Getter
 class ErrorRespItemModel {
 
     @SerializedName("code")
-    private Integer mCode;
+    private Integer code;
     @SerializedName("description")
-    private String mDescription;
-
-    public ErrorRespItemModel() {
-
-    }
-
-    public ErrorRespItemModel(@NonNull Integer code, @NonNull String description) {
-        this.mCode = code;
-        this.mDescription = description;
-    }
-
-    @Nullable
-    Integer getCode() {
-        return mCode;
-    }
-
-    @Nullable
-    String getDescription() {
-        return mDescription;
-    }
+    private String description;
 
 }

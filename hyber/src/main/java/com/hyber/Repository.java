@@ -4,11 +4,10 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 import com.hyber.log.HyberLogger;
-import com.hyber.model.HyberSchemaModule;
+import com.hyber.model.Device;
+import com.hyber.model.HyberModule;
 import com.hyber.model.Message;
 import com.hyber.model.User;
-
-import java.util.Date;
 
 import io.realm.Realm;
 import io.realm.RealmConfiguration;
@@ -22,10 +21,10 @@ public class Repository {
 
     public Repository() {
         realmConfig = new RealmConfiguration.Builder()
-                .schemaVersion(1)
-                .name("Hyber.realm")
-                .modules(new HyberSchemaModule())
-                .deleteRealmIfMigrationNeeded() //TODO add true migration
+                .schemaVersion(0)
+                .name("hyber.realm")
+                .modules(new HyberModule())
+                .deleteRealmIfMigrationNeeded()
                 .build();
     }
 
@@ -37,18 +36,31 @@ public class Repository {
         return Realm.getInstance(realmConfig);
     }
 
-    @Nullable
-    public User getCurrentUser() {
-        return realm.where(User.class)
-                .equalTo(User.INDEX_NUMBER, 0)
-                .findFirst();
+    public void executeTransaction(Realm.Transaction transaction) {
+        realm.executeTransaction(transaction);
     }
 
+    public void executeTransactionAsync(Realm.Transaction transaction) {
+        realm.executeTransactionAsync(transaction);
+    }
+
+    @Nullable
+    public User getCurrentUser() {
+        return realm.where(User.class).findFirst();
+    }
+
+    @Nullable
     public RealmResults<Message> getMessages(@NonNull User user) {
         checkUser(user);
         return realm.where(Message.class)
                 .equalTo(Message.USER_ID, user.getId())
                 .findAllSorted(Message.DATE, Sort.ASCENDING);
+    }
+
+    @Nullable
+    public RealmResults<Device> getDevices(@NonNull User user) {
+        checkUser(user);
+        return realm.where(Device.class).equalTo(Device.USER_ID, user.getId()).findAll();
     }
 
     @Nullable
@@ -77,19 +89,14 @@ public class Repository {
         });
     }
 
-    void updateUserSession(@NonNull final User user,
-                           @NonNull @lombok.NonNull final String token,
-                           @NonNull @lombok.NonNull final String refreshToken,
-                           @NonNull @lombok.NonNull final Date expirationDate) {
+    void updateFcmToken(@NonNull @lombok.NonNull final User user, @NonNull @lombok.NonNull final String fcmToken) {
         checkUser(user);
         realm.executeTransaction(new Realm.Transaction() {
             @Override
             public void execute(Realm realm) {
-                user.getSession().setToken(token);
-                user.getSession().setRefreshToken(refreshToken);
-                user.getSession().setExpirationDate(expirationDate);
-                user.getSession().setExpired(false);
-                HyberLogger.i("session is updated");
+                user.setFcmToken(fcmToken);
+                user.setIsFcmTokenSent(false);
+                HyberLogger.i("Fcm token is updated for user with id %s", user.getId());
             }
         });
     }
@@ -125,7 +132,7 @@ public class Repository {
             @Override
             public void execute(Realm realm) {
                 getMessages(user).deleteAllFromRealm();
-                user.getSession().deleteFromRealm();
+                getDevices(user).deleteAllFromRealm();
                 user.deleteFromRealm();
             }
         });

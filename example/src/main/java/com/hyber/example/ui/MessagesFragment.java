@@ -1,6 +1,7 @@
 package com.hyber.example.ui;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import android.speech.tts.TextToSpeech;
@@ -21,13 +22,17 @@ import com.hyber.RealmRecyclerViewAdapter;
 import com.hyber.example.R;
 import com.hyber.example.ui.Adapters.MessagesRVAdapter;
 import com.hyber.handler.HyberCallback;
+import com.hyber.handler.HyberError;
+import com.hyber.handler.LogoutUserHandler;
 import com.hyber.log.HyberLogger;
+import com.hyber.model.Message;
 
 import java.util.Locale;
 import java.util.UUID;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
 import butterknife.Unbinder;
 
 /**
@@ -55,7 +60,7 @@ public class MessagesFragment extends Fragment {
     private int mMaxHistoryRequests = 2;
     private Long mTimeForNextHistoryRequest;
 
-    private TextToSpeech textToSpeech;
+    private TextToSpeech mTTS;
 
     public MessagesFragment() {
         // Required empty public constructor
@@ -79,32 +84,66 @@ public class MessagesFragment extends Fragment {
         super.onCreate(savedInstanceState);
         HyberLogger.i("I'm alive!");
 
-        textToSpeech = new TextToSpeech(getActivity(), new TextToSpeech.OnInitListener() {
+        mTTS = new TextToSpeech(getActivity(), new TextToSpeech.OnInitListener() {
             @Override
             public void onInit(int status) {
-                HyberLogger.i("TTS", "TextToSpeech.OnInitListener.onInit...");
-                textToSpeech.setLanguage(Locale.US);
+                // TODO Auto-generated method stub
+                if (status == TextToSpeech.SUCCESS) {
+                    Locale locale = Locale.US;
+                    int result = mTTS.setLanguage(locale);
+                    if (result == TextToSpeech.LANG_MISSING_DATA
+                            || result == TextToSpeech.LANG_NOT_SUPPORTED) {
+                        HyberLogger.e("TTS", "Sorry, this language is unsupported");
+                    }
+                } else {
+                    HyberLogger.e("TTS", "Error!");
+                }
             }
         });
     }
 
-    @Override
-    public void onPause() {
-        if (textToSpeech != null) {
-            textToSpeech.stop();
-            textToSpeech.shutdown();
-        }
-        super.onPause();
-    }
-
     private void speakOut(String text) {
-        Toast.makeText(getActivity(), text, Toast.LENGTH_SHORT).show();
+        boolean isEnglish = true;
+        for (char c : text.toCharArray()) {
+            if (Character.UnicodeBlock.of(c) != Character.UnicodeBlock.BASIC_LATIN) {
+                isEnglish = false;
+                break;
+            }
+        }
+        Locale locale;
+        if (isEnglish) {
+            locale = Locale.ENGLISH;
+        } else {
+            locale = new Locale("ru");
+        }
+        mTTS.setLanguage(locale);
         // A random String (Unique ID).
         String utteranceId = UUID.randomUUID().toString();
         if (Build.VERSION.SDK_INT < 21) {
-            textToSpeech.speak(text, TextToSpeech.QUEUE_FLUSH, null);
+            mTTS.speak(text, TextToSpeech.QUEUE_FLUSH, null);
         } else {
-            textToSpeech.speak(text, TextToSpeech.QUEUE_FLUSH, null, utteranceId);
+            mTTS.speak(text, TextToSpeech.QUEUE_FLUSH, null, utteranceId);
+        }
+    }
+
+    @OnClick(R.id.sendAnswerAppCompatImageButton)
+    public void sendCallbackOnClick() {
+        Message message = mAdapter.getItem(mAdapter.getItemCount() - 1);
+        if (message != null) {
+            Hyber.sendMessageCallback(message.getId(), mInputAnswer.getText().toString(),
+                    new HyberCallback<String, HyberError>() {
+                        @Override
+                        public void onSuccess(String result) {
+                            Toast.makeText(getActivity(), result, Toast.LENGTH_SHORT).show();
+                        }
+
+                        @Override
+                        public void onFailure(HyberError error) {
+                            if (error.getStatus() == HyberError.HyberErrorStatus.UNAUTHORIZED) {
+                                logout();
+                            }
+                        }
+                    });
         }
     }
 
@@ -119,7 +158,7 @@ public class MessagesFragment extends Fragment {
         mLayoutManager.setStackFromEnd(true);
 
         mRecyclerView.setLayoutManager(mLayoutManager);
-        mAdapter = new MessagesRVAdapter(getActivity(), Hyber.getAllUserMessages(), true, true);
+        mAdapter = new MessagesRVAdapter(getActivity(), Hyber.getAllUserMessages());
         mRecyclerView.setAdapter(mAdapter);
         mAdapter.setOnChangeListener(
                 new RealmRecyclerViewAdapter.OnChangeListener() {
@@ -151,9 +190,6 @@ public class MessagesFragment extends Fragment {
             }
         });
 
-        mTimeForNextHistoryRequest = System.currentTimeMillis();
-        getMessagesFromHistory(mTimeForNextHistoryRequest);
-
         if (mAdapter.getItemCount() > 0) {
             mAnswerLayout.setVisibility(View.VISIBLE);
         } else {
@@ -168,7 +204,7 @@ public class MessagesFragment extends Fragment {
 
     private void getMessagesFromHistory(long historyFromThisTimeToPast) {
         mMaxHistoryRequests -= 1;
-        Hyber.getMessageHistory(historyFromThisTimeToPast, new HyberCallback<Long, String>() {
+        Hyber.getMessageHistory(historyFromThisTimeToPast, new HyberCallback<Long, HyberError>() {
             @Override
             public void onSuccess(@NonNull Long recommendedNextTime) {
                 mTimeForNextHistoryRequest = recommendedNextTime;
@@ -177,8 +213,10 @@ public class MessagesFragment extends Fragment {
             }
 
             @Override
-            public void onFailure(String message) {
-                Toast.makeText(getActivity(), message, Toast.LENGTH_SHORT).show();
+            public void onFailure(HyberError error) {
+                if (error.getStatus() == HyberError.HyberErrorStatus.UNAUTHORIZED) {
+                    logout();
+                }
             }
         });
     }
@@ -208,8 +246,28 @@ public class MessagesFragment extends Fragment {
 
     @Override
     public void onDestroyView() {
-        super.onDestroyView();
+        // Don't forget to shutdown mTTS!
+        if (mTTS != null) {
+            mTTS.stop();
+            mTTS.shutdown();
+        }
         unbinder.unbind();
+        super.onDestroyView();
+    }
+
+    private void logout() {
+        Hyber.logoutCurrentUser(new LogoutUserHandler() {
+            @Override
+            public void onSuccess() {
+                Intent intent = new Intent(getActivity(), SplashActivity.class);
+                getActivity().startActivity(intent);
+            }
+
+            @Override
+            public void onFailure() {
+                Toast.makeText(getActivity(), "Logout on failure", Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     /**

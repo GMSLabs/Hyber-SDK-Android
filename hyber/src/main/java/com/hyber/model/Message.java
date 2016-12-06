@@ -1,126 +1,75 @@
 package com.hyber.model;
 
-import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 import java.util.Date;
 
 import io.realm.RealmObject;
-import io.realm.annotations.Index;
 import io.realm.annotations.PrimaryKey;
 import io.realm.annotations.RealmClass;
 import io.realm.annotations.Required;
+import lombok.Getter;
+import lombok.NonNull;
+import lombok.experimental.Builder;
 
+@Getter
+@Builder
 @RealmClass
 public class Message extends RealmObject {
 
-    public static final String ID = "mId";
-    public static final String USER = "mUser";
-    public static final String PARTNER = "mPartner";
-    public static final String TITLE = "mTitle";
-    public static final String BODY = "mBody";
-    public static final String DATE = "mDate";
-    public static final String IMAGE_URL = "mImageUrl";
-    public static final String BUTTON_URL = "mButtonUrl";
-    public static final String BUTTON_TEXT = "mButtonText";
+    public static final String ID = "id";
+    public static final String USER = "user";
+    public static final String PARTNER = "partner";
+    public static final String TITLE = "title";
+    public static final String BODY = "body";
+    public static final String DATE = "date";
+    public static final String IMAGE_URL = "imageUrl";
+    public static final String BUTTON_URL = "buttonUrl";
+    public static final String BUTTON_TEXT = "buttonText";
     public static final String IS_READ = "isRead";
     public static final String IS_REPORTED = "isReported";
-    public static final String USER_ID = "mUser.mId";
+    public static final String USER_ID = "user." + User.ID;
 
     @PrimaryKey
+    @NonNull
+    private String id;
+    private User user;
     @Required
-    @Index
-    private String mId;
-    private User mUser;
+    @NonNull
+    private String partner;
+    private String title;
+    private String body;
     @Required
-    private String mPartner;
-    private String mTitle;
-    private String mBody;
+    @NonNull
+    private Date date;
+    private String imageUrl;
+    private String buttonUrl;
+    private String buttonText;
     @Required
-    private Date mDate;
-    private String mImageUrl;
-    private String mButtonUrl;
-    private String mButtonText;
-    @Required
+    @NonNull
     private Boolean isRead;
     @Required
+    @NonNull
     private Boolean isReported;
 
     public Message() {
-
     }
 
-    public Message(@NonNull @lombok.NonNull String id, @NonNull @lombok.NonNull User user,
-                   @NonNull @lombok.NonNull String partner, @Nullable String title, @Nullable String body,
-                   @NonNull @lombok.NonNull Date date,
+    public Message(@NonNull String id, @NonNull User user, @NonNull String partner,
+                   @Nullable String title, @Nullable String body, @NonNull Date date,
                    @Nullable String imageUrl, @Nullable String buttonUrl, @Nullable String buttonText,
-                   @NonNull @lombok.NonNull Boolean isRead, @NonNull @lombok.NonNull Boolean isReported) {
-        this.mId = id;
-        this.mUser = user;
-        this.mPartner = partner;
-        this.mTitle = title;
-        this.mBody = body;
-        this.mDate = date;
-        this.mImageUrl = imageUrl;
-        this.mButtonUrl = buttonUrl;
-        this.mButtonText = buttonText;
+                   @NonNull Boolean isRead, @NonNull Boolean isReported) {
+        this.id = id;
+        this.user = user;
+        this.partner = partner;
+        this.title = title;
+        this.body = body;
+        this.date = date;
+        this.imageUrl = imageUrl;
+        this.buttonUrl = buttonUrl;
+        this.buttonText = buttonText;
         this.isRead = isRead;
         this.isReported = isReported;
-    }
-
-    @NonNull
-    public String getId() {
-        return mId;
-    }
-
-    @NonNull
-    public User getUser() {
-        return mUser;
-    }
-
-    @NonNull
-    public String getPartner() {
-        return mPartner;
-    }
-
-    @Nullable
-    public String getTitle() {
-        return mTitle;
-    }
-
-    @Nullable
-    public String getBody() {
-        return mBody;
-    }
-
-    @NonNull
-    public Date getDate() {
-        return mDate;
-    }
-
-    @Nullable
-    public String getImageUrl() {
-        return mImageUrl;
-    }
-
-    @Nullable
-    public String getButtonUrl() {
-        return mButtonUrl;
-    }
-
-    @Nullable
-    public String getButtonText() {
-        return mButtonText;
-    }
-
-    @NonNull
-    public Boolean isRead() {
-        return isRead;
-    }
-
-    @NonNull
-    public Boolean isReported() {
-        return isReported;
     }
 
     public void setReadStatus(boolean status) {

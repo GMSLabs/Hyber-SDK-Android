@@ -1,6 +1,7 @@
 <resources>
 
     <string name="action_settings">Настройки</string>
+    <string name="title_activity_main">Главный эран</string>
     <string name="title_activity_auth">Авторизация</string>
 
     <string name="StartText">Пожалуйста, подтвердите ваш код страны и введите ваш номер телефона.</string>
@@ -14,5 +15,11 @@
 
     <string name="Loading">Загрузка…</string>
     <string name="NoResult">Не найдено</string>
+
+    <string name="Revoke">Отозвать</string>
+    <string name="Cancel">Отмена</string>
+
+    <string name="RevokeConfirmTitle">Отзыв девайса</string>
+    <string name="RevokeConfirmText">Вы действительно хотите отозвать этот девайс?</string>
 
 </resources>

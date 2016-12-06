@@ -33,7 +33,8 @@ import butterknife.OnClick;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener,
-        MessagesFragment.OnMessagesFragmentInteractionListener {
+        MessagesFragment.OnMessagesFragmentInteractionListener,
+        DevicesFragment.OnDevicesFragmentInteractionListener {
 
     @BindView(R.id.toolbar)
     Toolbar toolbar;
@@ -50,6 +51,7 @@ public class MainActivity extends AppCompatActivity
     private TextView name;
 
     private MessagesFragment mMessagesFragment;
+    private DevicesFragment mDevicesFragment;
 
     boolean doubleBackToExitPressedOnce = false;
 
@@ -154,6 +156,11 @@ public class MainActivity extends AppCompatActivity
                     mMessagesFragment = MessagesFragment.newInstance();
                 replaceMainFragment(mMessagesFragment);
                 break;
+            case R.id.nav_devices:
+                if (mDevicesFragment == null)
+                    mDevicesFragment = DevicesFragment.newInstance();
+                replaceMainFragment(mDevicesFragment);
+                break;
             default:
                 break;
         }
@@ -168,4 +175,8 @@ public class MainActivity extends AppCompatActivity
         transaction.commit();
     }
 
+    @Override
+    public void onDeviceRevokeRequestActionInteraction(@NonNull String deviceId) {
+//        Hyber.deviceRevokeRequest(deviceId);
+    }
 }

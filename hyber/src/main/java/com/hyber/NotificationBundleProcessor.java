@@ -52,7 +52,7 @@ final class NotificationBundleProcessor {
             String messageData = remoteMessage.getData().get("message");
             if (messageData != null) {
                 try {
-                    HyberMessageModel messageModel = new Gson().fromJson(messageData, HyberMessageModel.class);
+                    MessageRespModel messageModel = new Gson().fromJson(messageData, MessageRespModel.class);
 
                     Repository repo = new Repository();
                     repo.open();
@@ -65,26 +65,26 @@ final class NotificationBundleProcessor {
 
                     boolean isRead = false;
                     boolean isReported = false;
-                    Message message = repo.getMessageById(user, messageModel.getId());
+                    Message message = repo.getMessageById(user, messageModel.getMessageId());
                     if (message != null) {
-                        isRead = message.isRead();
-                        isReported = message.isReported();
+                        isRead = message.getIsRead();
+                        isReported = message.getIsReported();
                     }
 
-                    Message hyberMessage = new Message(
-                            messageModel.getId(),
-                            user,
-                            "push",
-                            messageModel.getAlpha(),
-                            messageModel.getText(),
-                            new Date(),
-                            messageModel.getOptions() == null ? null : messageModel.getOptions().getImageUrl(),
-                            messageModel.getOptions() == null ? null : messageModel.getOptions().getActionUrl(),
-                            messageModel.getOptions() == null ? null : messageModel.getOptions().getCaptionText(),
-                            isRead, isReported);
+                    Message.MessageBuilder mb = Message.builder();
+                    mb.id(messageModel.getMessageId());
+                    mb.user(user);
+                    mb.partner(messageModel.getPartner() != null ? messageModel.getPartner() : "push");
+                    mb.title(messageModel.getTitle());
+                    mb.body(messageModel.getBody());
+                    mb.date(messageModel.getTime() != null ? messageModel.getTime() : new Date());
+                    mb.imageUrl(messageModel.getImage() != null ? messageModel.getImage().getUrl() : null);
+                    mb.buttonUrl(messageModel.getButton() != null ? messageModel.getButton().getUrl() : null);
+                    mb.buttonText(messageModel.getButton() != null ? messageModel.getButton().getText() : null);
+                    mb.isRead(isRead);
+                    mb.isReported(isReported);
 
-                    repo.saveMessageOrUpdate(hyberMessage);
-
+                    repo.saveMessageOrUpdate(mb.build());
                     repo.close();
                 } catch (Exception e) {
                     HyberLogger.e(e);

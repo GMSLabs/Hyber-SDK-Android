@@ -1,17 +1,15 @@
 package com.hyber;
 
-import android.support.annotation.Nullable;
-
 import com.google.gson.annotations.SerializedName;
 
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+
+@NoArgsConstructor
+@Getter
 class BaseResponse {
 
     @SerializedName("error")
-    private ErrorRespItemModel mError;
-
-    @Nullable
-    ErrorRespItemModel getError() {
-        return mError;
-    }
+    private ErrorRespItemModel error;
 
 }

@@ -17,7 +17,7 @@ import com.google.firebase.crash.FirebaseCrash;
 import com.google.firebase.messaging.RemoteMessage;
 import com.google.gson.Gson;
 import com.hyber.Hyber;
-import com.hyber.HyberMessageModel;
+import com.hyber.MessageRespModel;
 import com.hyber.example.ui.SplashActivity;
 import com.hyber.handler.HyberNotificationListener;
 import com.hyber.log.HyberLogger;
@@ -100,13 +100,13 @@ public class ApplicationLoader extends Application {
 
                 PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, i, PendingIntent.FLAG_UPDATE_CURRENT);
 
-                HyberMessageModel messageModel = new Gson().fromJson(messageData, HyberMessageModel.class);
+                MessageRespModel messageModel = new Gson().fromJson(messageData, MessageRespModel.class);
 
                 NotificationCompat.Builder mBuilder =
                         new NotificationCompat.Builder(ApplicationLoader.this)
                                 .setSmallIcon(R.mipmap.ic_launcher)
-                                .setContentTitle(messageModel.getAlpha())
-                                .setContentText(messageModel.getText())
+                                .setContentTitle(messageModel.getTitle())
+                                .setContentText(messageModel.getBody())
                                 .setAutoCancel(true)
                                 .setPriority(NotificationCompat.PRIORITY_MAX)
                                 .setContentIntent(pendingIntent);
@@ -138,37 +138,48 @@ public class ApplicationLoader extends Application {
     private class UIErrorTree extends HyberLogger.Tree {
 
         @Override
-        protected void log(final int priority, @Nullable String tag, @Nullable final String message, @Nullable final Throwable t) {
+        protected void log(final int priority, @Nullable String tag, @Nullable final String message,
+                           @Nullable final Throwable t) {
             if (priority < Log.WARN) {
                 return;
             }
 
-            StringBuilder sb = new StringBuilder();
-            switch (priority) {
-                case Log.WARN:
-                    sb.append("WARN:");
-                    break;
-                case Log.ERROR:
-                    sb.append("ERROR:");
-                    break;
-                case Log.ASSERT:
-                    sb.append("ASSERT:");
-                    break;
-                default:
-                    sb.append("VERBOSE:");
-            }
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
 
-            if (t != null) {
-                sb.append(t.getLocalizedMessage())
-                        .append("\n");
-            }
+                    StringBuilder sb = new StringBuilder();
+                    switch (priority) {
+                        case Log.WARN:
+                            sb.append("WARN:");
+                            break;
+                        case Log.ERROR:
+                            sb.append("ERROR:");
+                            break;
+                        case Log.ASSERT:
+                            sb.append("ASSERT:");
+                            break;
+                        default:
+                            sb.append("VERBOSE:");
+                    }
 
-            if (message != null) {
-                sb.append(message);
-            }
+                    if (t != null) {
+                        sb.append(t.getLocalizedMessage())
+                                .append("\n");
+                    }
 
-            Toast.makeText(applicationContext, sb.toString(), Toast.LENGTH_LONG).show();
+                    if (message != null) {
+                        sb.append(message);
+                    }
+
+                    Toast.makeText(applicationContext, sb.toString(), Toast.LENGTH_LONG).show();
+                }
+            });
         }
+    }
+
+    private void runOnUiThread(Runnable r) {
+        applicationHandler.post(r);
     }
 
 }

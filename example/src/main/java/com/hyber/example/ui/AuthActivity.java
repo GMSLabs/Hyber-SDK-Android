@@ -27,6 +27,7 @@ import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.hyber.Hyber;
 import com.hyber.example.AndroidUtilities;
@@ -40,6 +41,8 @@ import com.hyber.example.ui.Components.LayoutHelper;
 import com.hyber.example.ui.Components.SlideView;
 import com.hyber.handler.EmptyResult;
 import com.hyber.handler.HyberCallback;
+import com.hyber.handler.HyberError;
+import com.hyber.handler.LogoutUserHandler;
 import com.hyber.log.HyberLogger;
 
 import java.io.BufferedReader;
@@ -581,26 +584,47 @@ public class AuthActivity extends AppCompatActivity {
 
             needShowProgress();
             try {
-                Hyber.userRegistration(Utilities.parseLong(phone), new HyberCallback<EmptyResult, EmptyResult>() {
-                    @Override
-                    public void onSuccess(EmptyResult result) {
-                        String s = String.format(Locale.getDefault(), "User registration onSuccess\nWith phone %s", phone);
-                        HyberLogger.i(s);
-                        needHideProgress();
-                        startActivity(new Intent(AuthActivity.this, MainActivity.class));
-                    }
+                Hyber.userRegistration(String.valueOf(Utilities.parseLong(phone)), String.valueOf(Utilities.parseLong(phone)),
+                        new HyberCallback<EmptyResult, HyberError>() {
+                            @Override
+                            public void onSuccess(EmptyResult result) {
+                                String s = String.format(Locale.getDefault(),
+                                        "User registration onSuccess\nWith phone %s", phone);
+                                HyberLogger.i(s);
+                                needHideProgress();
+                                startActivity(new Intent(AuthActivity.this, MainActivity.class));
+                            }
 
-                    @Override
-                    public void onFailure(EmptyResult error) {
-                        String s = String.format(Locale.getDefault(), "User registration onFailure\nWith phone %s", phone);
-                        HyberLogger.i(s);
-                        needHideProgress();
-                    }
-                });
+                            @Override
+                            public void onFailure(HyberError error) {
+                                String s = String.format(Locale.getDefault(),
+                                        "User registration onFailure\nWith phone %s", phone);
+                                HyberLogger.i(s);
+                                needHideProgress();
+                                if (error.getStatus() == HyberError.HyberErrorStatus.UNAUTHORIZED) {
+                                    logout();
+                                }
+                            }
+                        });
             } catch (Exception e) {
                 HyberLogger.e(e);
                 needHideProgress();
             }
+        }
+
+        private void logout() {
+            Hyber.logoutCurrentUser(new LogoutUserHandler() {
+                @Override
+                public void onSuccess() {
+                    Intent intent = new Intent(AuthActivity.this, SplashActivity.class);
+                    AuthActivity.this.startActivity(intent);
+                }
+
+                @Override
+                public void onFailure() {
+                    Toast.makeText(AuthActivity.this, "Logout on failure", Toast.LENGTH_SHORT).show();
+                }
+            });
         }
 
         @Override

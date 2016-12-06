@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.v7.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/holder"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="3dp"
+    android:descendantFocusability="beforeDescendants"
+    android:focusable="true"
+    android:focusableInTouchMode="true">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:layout_margin="5dp">
+
+        <RelativeLayout
+            android:layout_width="60dp"
+            android:layout_height="60dp">
+
+            <android.support.v7.widget.AppCompatImageView
+                android:id="@+id/osType"
+                android:layout_width="60dp"
+                android:layout_height="60dp"
+                tools:src="@mipmap/apple_icon" />
+
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentTop="true"
+            android:layout_centerHorizontal="true"
+            android:layout_marginEnd="63dp"
+            android:layout_marginLeft="63dp"
+            android:layout_marginRight="63dp"
+            android:layout_marginStart="63dp">
+
+            <android.support.v7.widget.AppCompatTextView
+                android:id="@+id/osVersion"
+                android:layout_width="50dp"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:layout_toRightOf="@+id/deviceType"
+                android:gravity="center_horizontal"
+                android:textSize="12sp"
+                tools:text="Test" />
+
+            <android.support.v7.widget.AppCompatTextView
+                android:id="@+id/deviceName"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_horizontal"
+                android:textSize="15sp"
+                tools:text="Test" />
+
+            <android.support.v7.widget.AppCompatImageView
+                android:id="@+id/deviceType"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:layout_alignParentBottom="true"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true"
+                tools:src="@mipmap/tablet_icon" />
+
+            <android.support.v7.widget.AppCompatTextView
+                android:id="@+id/updatedAt"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:layout_toEndOf="@+id/osVersion"
+                android:layout_toRightOf="@+id/osVersion"
+                android:gravity="end"
+                android:textSize="12sp"
+                tools:text="Test" />
+
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentTop="true">
+
+            <android.support.v7.widget.AppCompatImageButton
+                android:id="@+id/revoke"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_gravity="end"
+                android:background="@mipmap/delete_icon"
+                android:layout_centerVertical="true"
+                android:layout_centerHorizontal="true" />
+
+        </RelativeLayout>
+
+    </RelativeLayout>
+
+</android.support.v7.widget.CardView>

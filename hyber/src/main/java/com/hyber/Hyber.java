@@ -3,9 +3,6 @@ package com.hyber;
 import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.content.pm.ApplicationInfo;
-import android.content.pm.PackageManager;
-import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.support.annotation.NonNull;
@@ -15,9 +12,11 @@ import com.google.firebase.messaging.RemoteMessage;
 import com.hyber.handler.CurrentUserHandler;
 import com.hyber.handler.EmptyResult;
 import com.hyber.handler.HyberCallback;
+import com.hyber.handler.HyberError;
 import com.hyber.handler.HyberNotificationListener;
 import com.hyber.handler.LogoutUserHandler;
 import com.hyber.log.HyberLogger;
+import com.hyber.model.Device;
 import com.hyber.model.Message;
 import com.hyber.model.User;
 
@@ -28,6 +27,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import io.realm.OrderedRealmCollection;
 import io.realm.Realm;
 import io.realm.RealmChangeListener;
 import io.realm.RealmResults;
@@ -42,7 +42,6 @@ public final class Hyber {
     private static final String TAG = "Hyber";
     private static Context mContextReference;
     private static String clientApiKey;
-    private static String installationID;
     private static String fingerprint;
     private static Hyber.Builder mInitBuilder;
     private static boolean initDone;
@@ -51,7 +50,6 @@ public final class Hyber {
     private static boolean foreground;
 
     private static String lastRegistrationId;
-    private static boolean registerForPushFired;
 
     private static ApiBusinessModel mApiBusinessModel;
 
@@ -72,12 +70,6 @@ public final class Hyber {
 
     static String getClientApiKey() {
         return clientApiKey;
-    }
-
-    static String getInstallationID() {
-        if (installationID == null)
-            installationID = InstallationId.id(getAppContext());
-        return installationID;
     }
 
     static String getFingerprint() {
@@ -133,7 +125,7 @@ public final class Hyber {
             return;
         }
 
-        switch (OsUtils.getDeviceType()) {
+        switch (Utils.getDeviceType()) {
             //TODO Validate integration params
             case FCM:
                 HyberLogger.i("Firebase messaging on board!");
@@ -181,6 +173,12 @@ public final class Hyber {
         mMessageResults.addChangeListener(mMessageChangeListener);
 
         initDone = true;
+
+        try {
+            startRegistrationOrOnSession();
+        } catch (Throwable throwable) {
+            HyberLogger.e(throwable);
+        }
     }
 
     private static RealmChangeListener<RealmResults<Message>> getMessageChangeListener() {
@@ -210,7 +208,7 @@ public final class Hyber {
 
                                 if (receivedMessage != null) {
                                     HyberLogger.d("Sending push delivery report with message id %s", messageId);
-                                    sendPushDeliveryReport(receivedMessage.getId(), receivedMessage.getDate().getTime(),
+                                    sendPushDeliveryReport(receivedMessage.getId(), receivedMessage.getDate(),
                                             new HyberCallback<String, EmptyResult>() {
                                                 @Override
                                                 public void onSuccess(@NonNull String messageId) {
@@ -222,7 +220,7 @@ public final class Hyber {
                                                     if (rm != null) {
                                                         rm.setReportedStatus(true);
                                                         HyberLogger.i("Message %s set delivery report status is %s",
-                                                                rm.getId(), rm.isReported());
+                                                                rm.getId(), rm.getIsReported());
                                                     } else {
                                                         HyberLogger.w("Message %s local not found", messageId);
                                                     }
@@ -262,9 +260,9 @@ public final class Hyber {
         }
     }
 
-    public static void userRegistration(@NonNull Long phone, final HyberCallback<EmptyResult, EmptyResult> callback) {
+    public static void userRegistration(@NonNull String phone, @NonNull String password, final HyberCallback<EmptyResult, HyberError> callback) {
         checkInitialized();
-        getApiBusinessModel().authorize(phone, new ApiBusinessModel.AuthorizationListener() {
+        getApiBusinessModel().authorize(phone, password, new ApiBusinessModel.AuthorizationListener() {
             @Override
             public void onSuccess() {
                 callback.onSuccess(new EmptyResult());
@@ -282,8 +280,8 @@ public final class Hyber {
             }
 
             @Override
-            public void onFailure() {
-                callback.onFailure(new EmptyResult());
+            public void onFailure(HyberError status) {
+                callback.onFailure(status);
             }
         });
     }
@@ -319,74 +317,64 @@ public final class Hyber {
         }
     }
 
-    public static void sendBidirectionalAnswer(@NonNull String messageId, @NonNull String answerText,
-                                               final HyberCallback<String, EmptyResult> callback) {
+    public static void sendMessageCallback(@NonNull String messageId, @NonNull String answerText,
+                                           final HyberCallback<String, HyberError> callback) {
         checkInitialized();
-        getApiBusinessModel().sendBidirectionalAnswer(messageId, answerText,
-                new ApiBusinessModel.SendBidirectionalAnswerListener() {
+        getApiBusinessModel().sendMessageCallback(messageId, answerText,
+                new ApiBusinessModel.SendMessageCallbackListener() {
                     @Override
                     public void onSuccess(@NonNull String messageId) {
                         callback.onSuccess(messageId);
                     }
 
                     @Override
-                    public void onFailure() {
-                        callback.onFailure(new EmptyResult());
+                    public void onFailure(@lombok.NonNull HyberError status) {
+                        callback.onFailure(status);
                     }
                 });
     }
 
-    public static void getMessageHistory(@NonNull Long startDate, final HyberCallback<Long, String> callback) {
+    public static void getAllDevices(final HyberCallback<EmptyResult, HyberError> callback) {
         checkInitialized();
-        getApiBusinessModel().getMessageHistory(startDate, new ApiBusinessModel.MessageHistoryListener() {
+        getApiBusinessModel().getAllDevices(new ApiBusinessModel.AllDevicesListener() {
             @Override
-            public void onSuccess(@NonNull final Long startDate, @NonNull final MessageHistoryRespEnvelope envelope) {
-                if (!envelope.getMessages().isEmpty()) {
-                    Repository repo = new Repository();
-                    repo.open();
-
-                    User user = repo.getCurrentUser();
-                    if (user == null) {
-                        callback.onFailure("Hyber user is not created");
-                        return;
-                    }
-
-                    List<Message> messages = new ArrayList<>();
-
-                    for (MessageRespModel respModel : envelope.getMessages()) {
-
-                        boolean isRead = false;
-                        boolean isReported = true;
-                        Message message = repo.getMessageById(user, respModel.getId());
-                        if (message != null) {
-                            isRead = message.isRead();
-                            isReported = message.isReported();
-                        }
-
-                        if (respModel.getOptions() == null) {
-                            messages.add(new Message(
-                                    respModel.getId(), user, respModel.getPartner(),
-                                    respModel.getTitle(), respModel.getBody(), new Date(respModel.getTime()),
-                                    null, null, null, isRead, isReported
-                            ));
-                        } else {
-                            messages.add(new Message(
-                                    respModel.getId(), user, respModel.getPartner(),
-                                    respModel.getTitle(), respModel.getBody(), new Date(respModel.getTime()),
-                                    respModel.getOptions().getImageUrl(), respModel.getOptions().getAction(),
-                                    respModel.getOptions().getCaption(), isRead, isReported
-                            ));
-                        }
-                    }
-                    repo.saveMessagesOrUpdate(user, messages);
-                    repo.close();
-                }
-                callback.onSuccess(envelope.getTimeLastMessage());
+            public void onSuccess() {
+                callback.onSuccess(new EmptyResult());
             }
 
             @Override
-            public void onFailure() {
-                callback.onFailure(/*TODO*/ "TODO");
+            public void onFailure(@lombok.NonNull HyberError status) {
+                callback.onFailure(status);
+            }
+        });
+    }
+
+    public static void revokeDevices(List<String> deviceIds, final HyberCallback<EmptyResult, HyberError> callback) {
+        checkInitialized();
+        getApiBusinessModel().revokeDevices(deviceIds, new ApiBusinessModel.RevokeDevicesListener() {
+            @Override
+            public void onSuccess() {
+                callback.onSuccess(new EmptyResult());
+            }
+
+            @Override
+            public void onFailure(@lombok.NonNull HyberError status) {
+                callback.onFailure(status);
+            }
+        });
+    }
+
+    public static void getMessageHistory(@NonNull Long startDate, final HyberCallback<Long, HyberError> callback) {
+        checkInitialized();
+        getApiBusinessModel().getMessageHistory(startDate, new ApiBusinessModel.MessageHistoryListener() {
+            @Override
+            public void onSuccess(@NonNull Long startDate) {
+                callback.onSuccess(startDate);
+            }
+
+            @Override
+            public void onFailure(@lombok.NonNull HyberError status) {
+                callback.onFailure(status);
             }
         });
     }
@@ -399,10 +387,18 @@ public final class Hyber {
         return repo.getMessages(user);
     }
 
-    private static void sendPushDeliveryReport(@NonNull final String messageId, @NonNull Long receivedAt,
+    @Nullable
+    public static OrderedRealmCollection<Device> getAllUserDevices() {
+        User user = repo.getCurrentUser();
+        if (user == null)
+            return null;
+        return repo.getDevices(user);
+    }
+
+    private static void sendPushDeliveryReport(@NonNull final String messageId, @NonNull Date receivedAt,
                                                final HyberCallback<String, EmptyResult> callback) {
-        getApiBusinessModel().sendPushDeliveryReport(messageId, receivedAt,
-                new ApiBusinessModel.SendPushDeliveryReportListener() {
+        getApiBusinessModel().sendMessageDeliveryReport(messageId, receivedAt,
+                new ApiBusinessModel.SendMessageDeliveryReportListener() {
                     @Override
                     public void onSuccess(@NonNull String messageId) {
                         callback.onSuccess(messageId);
@@ -423,7 +419,7 @@ public final class Hyber {
 
         PushRegistrator pushRegistrator;
 
-        switch (OsUtils.getDeviceType()) {
+        switch (Utils.getDeviceType()) {
             case FCM:
                 pushRegistrator = new PushRegistrarFCM();
                 break;
@@ -435,7 +431,6 @@ public final class Hyber {
             @Override
             public void complete(String id) {
                 lastRegistrationId = id;
-                registerForPushFired = true;
                 updateDeviceData();
             }
         });
@@ -445,13 +440,18 @@ public final class Hyber {
         return mContextReference;
     }
 
-    private static void updateDeviceData() {
-        HyberLogger.d("updateDeviceData: registerForPushFired:" + registerForPushFired);
+    static void updateDeviceData() {
+        getApiBusinessModel().sendDeviceData(new ApiBusinessModel.SendDeviceDataListener() {
+            @Override
+            public void onSuccess() {
+                HyberLogger.i("Refreshed FCM token sent to Hyber.");
+            }
 
-        if (!registerForPushFired)
-            return;
-
-        //TODO
+            @Override
+            public void onFailure() {
+                HyberLogger.d("Refreshed FCM token can not sent to Hyber.");
+            }
+        });
     }
 
     static SharedPreferences getHyberPreferences(Context context) {

@@ -11,7 +11,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.hyber.HyberMessageViewHolder;
+import com.hyber.example.HyberMessageViewHolder;
 import com.hyber.example.R;
 import com.hyber.model.Message;
 import com.squareup.picasso.Callback;
@@ -24,10 +24,10 @@ import java.util.Locale;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import io.realm.HyberMessageAdapter;
+import io.realm.HyberMessagesAdapter;
 import io.realm.RealmResults;
 
-public class MessagesRVAdapter extends HyberMessageAdapter {
+public class MessagesRVAdapter extends HyberMessagesAdapter {
 
     public interface OnMessageActionListener {
         void onAction(@NonNull String action);
@@ -36,8 +36,8 @@ public class MessagesRVAdapter extends HyberMessageAdapter {
     private WeakReference<Context> mContextWeakReference;
     private OnMessageActionListener onMessageActionListener;
 
-    public MessagesRVAdapter(Context context, RealmResults<Message> results, boolean autoUpdate, boolean animateResults) {
-        super(context, results, autoUpdate, animateResults);
+    public MessagesRVAdapter(Context context, RealmResults<Message> results) {
+        super(context, results);
         this.mContextWeakReference = new WeakReference<>(context);
     }
 
