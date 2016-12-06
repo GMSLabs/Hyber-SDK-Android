@@ -17,14 +17,13 @@ import com.google.firebase.crash.FirebaseCrash;
 import com.google.firebase.messaging.RemoteMessage;
 import com.google.gson.Gson;
 import com.hyber.Hyber;
-import com.hyber.HyberLogger;
 import com.hyber.HyberMessageModel;
-import com.hyber.HyberStatus;
-import com.hyber.listener.HyberNotificationListener;
+import com.hyber.example.ui.SplashActivity;
+import com.hyber.handler.HyberNotificationListener;
+import com.hyber.log.HyberLogger;
 
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Locale;
 import java.util.Map;
 
 import io.fabric.sdk.android.Fabric;

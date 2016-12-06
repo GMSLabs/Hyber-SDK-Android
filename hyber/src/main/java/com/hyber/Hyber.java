@@ -3,33 +3,35 @@ package com.hyber;
 import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 import com.google.firebase.messaging.RemoteMessage;
-import com.hyber.handler.BidirectionalAnswerHandler;
-import com.hyber.handler.CheckAuthorizationHandler;
 import com.hyber.handler.CurrentUserHandler;
+import com.hyber.handler.EmptyResult;
+import com.hyber.handler.HyberCallback;
+import com.hyber.handler.HyberNotificationListener;
 import com.hyber.handler.LogoutUserHandler;
-import com.hyber.handler.MessageHistoryHandler;
-import com.hyber.handler.UserRegistrationHandler;
-import com.hyber.listener.DeliveryReportListener;
-import com.hyber.listener.HyberNotificationListener;
+import com.hyber.log.HyberLogger;
+import com.hyber.model.Message;
+import com.hyber.model.User;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashSet;
+import java.util.HashMap;
 import java.util.List;
-import java.util.Set;
+import java.util.Map;
 
 import io.realm.Realm;
 import io.realm.RealmChangeListener;
 import io.realm.RealmResults;
 import rx.Observable;
-import rx.Subscription;
 import rx.functions.Action1;
 
 public final class Hyber {
@@ -51,13 +53,12 @@ public final class Hyber {
     private static String lastRegistrationId;
     private static boolean registerForPushFired;
 
-    private static HyberApiBusinessModel mHyberApiBusinessModel;
+    private static ApiBusinessModel mApiBusinessModel;
 
     private static Repository repo;
     private static RealmChangeListener<RealmResults<Message>> mMessageChangeListener;
     private static RealmResults<Message> mMessageResults;
-    private static Set<String> drInQueue;
-    private static Subscription drReportSubscription;
+    private static HashMap<String, Boolean> drInQueue;
 
     private static Hyber instance = null;
 
@@ -75,24 +76,24 @@ public final class Hyber {
 
     static String getInstallationID() {
         if (installationID == null)
-            installationID = HyberInstallation.id(getAppContext());
+            installationID = InstallationId.id(getAppContext());
         return installationID;
     }
 
     static String getFingerprint() {
         if (fingerprint == null)
-            fingerprint = HyberFingerprint.keyHash(getAppContext());
+            fingerprint = AppFingerprint.keyHash(getAppContext());
         return fingerprint;
     }
 
-    static HyberApiBusinessModel getApiBusinessModel() {
-        if (mHyberApiBusinessModel == null)
-            mHyberApiBusinessModel = HyberApiBusinessModel.getInstance(getAppContext());
-        return mHyberApiBusinessModel;
+    static ApiBusinessModel getApiBusinessModel() {
+        if (mApiBusinessModel == null)
+            mApiBusinessModel = ApiBusinessModel.getInstance(getAppContext());
+        return mApiBusinessModel;
     }
 
-    public static HyberDataSourceController dataSourceController() {
-        return HyberDataSourceController.getInstance();
+    public static DataSourceController dataSourceController() {
+        return DataSourceController.getInstance();
     }
 
     static Builder getInitBuilder() {
@@ -113,7 +114,7 @@ public final class Hyber {
     }
 
     private static void init(Context context, String hyberClientApiKey) {
-        HyberDataSourceController.with(context);
+        DataSourceController.with(context);
         repo = new Repository();
         repo.open();
 
@@ -128,7 +129,7 @@ public final class Hyber {
 
         // START: Init validation
         if (hyberClientApiKey == null || hyberClientApiKey.isEmpty()) {
-            HyberLogger.e(HyberStatus.SDK_INTEGRATION_ClientApiKeyIsInvalid.getDescription());
+            HyberLogger.e(ErrorStatus.SDK_INTEGRATION_ClientApiKeyIsInvalid.toString());
             return;
         }
 
@@ -173,12 +174,11 @@ public final class Hyber {
         clientApiKey = hyberClientApiKey;
         mContextReference = context.getApplicationContext();
 
-        drInQueue = new HashSet<>();
+        drInQueue = new HashMap<>();
 
         mMessageChangeListener = getMessageChangeListener();
         mMessageResults = repo.getAllUnreportedMessages();
         mMessageResults.addChangeListener(mMessageChangeListener);
-        mMessageChangeListener.onChange(repo.getAllUnreportedMessages());
 
         initDone = true;
     }
@@ -187,27 +187,33 @@ public final class Hyber {
         return new RealmChangeListener<RealmResults<Message>>() {
             @Override
             public void onChange(RealmResults<Message> elements) {
-                if (drReportSubscription != null && !drReportSubscription.isUnsubscribed()) {
-                    drReportSubscription.unsubscribe();
-                }
-
                 for (Message message : elements) {
-                    drInQueue.add(message.getId());
+                    if (!drInQueue.containsKey(message.getId())) {
+                        drInQueue.put(message.getId(), false);
+                    }
                 }
 
-                drReportSubscription = Observable.from(drInQueue)
+                List<String> messageIds = new ArrayList<>();
+                for (Map.Entry<String, Boolean> entry : drInQueue.entrySet()) {
+                    if (!entry.getValue()) {
+                        drInQueue.put(entry.getKey(), true);
+                        messageIds.add(entry.getKey());
+                    }
+                }
+
+                Observable.from(messageIds)
                         .subscribe(new Action1<String>() {
                             @Override
                             public void call(String messageId) {
                                 HyberLogger.d("Message %s is changed", messageId);
-                                Message message = repo.getMessageById(repo.getCurrentUser(), messageId);
+                                Message receivedMessage = repo.getMessageById(repo.getCurrentUser(), messageId);
 
-                                if (message != null) {
+                                if (receivedMessage != null) {
                                     HyberLogger.d("Sending push delivery report with message id %s", messageId);
-                                    sendPushDeliveryReport(message.getId(), message.getDate().getTime(),
-                                            new DeliveryReportListener() {
+                                    sendPushDeliveryReport(receivedMessage.getId(), receivedMessage.getDate().getTime(),
+                                            new HyberCallback<String, EmptyResult>() {
                                                 @Override
-                                                public void onDeliveryReportSent(@NonNull String messageId) {
+                                                public void onSuccess(@NonNull String messageId) {
                                                     Realm realm = repo.getNewRealmInstance();
                                                     HyberLogger.i("Push delivery report onSuccess\nWith message id %s",
                                                             messageId);
@@ -223,31 +229,23 @@ public final class Hyber {
                                                     drInQueue.remove(messageId);
                                                     realm.commitTransaction();
                                                     realm.close();
-
-                                                    if (drInQueue.isEmpty() && drReportSubscription != null
-                                                            && !drReportSubscription.isUnsubscribed()) {
-                                                        drReportSubscription.unsubscribe();
-                                                    }
                                                 }
 
                                                 @Override
-                                                public void onFailure() {
-                                                    mMessageChangeListener.onChange(repo.getAllUnreportedMessages());
+                                                public void onFailure(EmptyResult error) {
+
                                                 }
                                             });
                                 } else {
-                                    drInQueue.remove(messageId);
-                                    if (drInQueue.isEmpty() && drReportSubscription != null
-                                            && !drReportSubscription.isUnsubscribed()) {
-                                        drReportSubscription.unsubscribe();
-                                    }
+                                    drInQueue.put(messageId, false);
                                 }
+                                mMessageChangeListener.onChange(repo.getAllUnreportedMessages());
                             }
                         }, new Action1<Throwable>() {
                             @Override
                             public void call(Throwable throwable) {
                                 HyberLogger.e(throwable);
-                                mMessageChangeListener.onChange(repo.getAllUnreportedMessages());
+                                drInQueue = new HashMap<>();
                             }
                         });
             }
@@ -264,13 +262,13 @@ public final class Hyber {
         }
     }
 
-    public static void userRegistration(@NonNull Long phone, final UserRegistrationHandler handler) {
+    public static void userRegistration(@NonNull Long phone, final HyberCallback<EmptyResult, EmptyResult> callback) {
         checkInitialized();
-        getApiBusinessModel().authorize(phone, new HyberApiBusinessModel.AuthorizationListener() {
+        getApiBusinessModel().authorize(phone, new ApiBusinessModel.AuthorizationListener() {
             @Override
             public void onSuccess() {
-                handler.onSuccess();
-                getApiBusinessModel().sendDeviceData(new HyberApiBusinessModel.SendDeviceDataListener() {
+                callback.onSuccess(new EmptyResult());
+                getApiBusinessModel().sendDeviceData(new ApiBusinessModel.SendDeviceDataListener() {
                     @Override
                     public void onSuccess() {
                         HyberLogger.i("Send device data is success");
@@ -285,12 +283,12 @@ public final class Hyber {
 
             @Override
             public void onFailure() {
-                handler.onFailure();
+                callback.onFailure(new EmptyResult());
             }
         });
     }
 
-    public static void isAuthorized(final CheckAuthorizationHandler handler) {
+    public static void isAuthorized(final HyberCallback<EmptyResult, EmptyResult> callback) {
         checkInitialized();
         boolean isAuthorized = false;
         Repository repo = new Repository();
@@ -299,9 +297,9 @@ public final class Hyber {
             isAuthorized = true;
         repo.close();
         if (isAuthorized) {
-            handler.onSuccess();
+            callback.onSuccess(new EmptyResult());
         } else {
-            handler.onFailure();
+            callback.onFailure(new EmptyResult());
         }
     }
 
@@ -322,25 +320,25 @@ public final class Hyber {
     }
 
     public static void sendBidirectionalAnswer(@NonNull String messageId, @NonNull String answerText,
-                                               final BidirectionalAnswerHandler handler) {
+                                               final HyberCallback<String, EmptyResult> callback) {
         checkInitialized();
         getApiBusinessModel().sendBidirectionalAnswer(messageId, answerText,
-                new HyberApiBusinessModel.SendBidirectionalAnswerListener() {
+                new ApiBusinessModel.SendBidirectionalAnswerListener() {
                     @Override
                     public void onSuccess(@NonNull String messageId) {
-                        handler.onSuccess();
+                        callback.onSuccess(messageId);
                     }
 
                     @Override
                     public void onFailure() {
-                        handler.onFailure(/*TODO*/ "TODO");
+                        callback.onFailure(new EmptyResult());
                     }
                 });
     }
 
-    public static void getMessageHistory(@NonNull Long startDate, final MessageHistoryHandler handler) {
+    public static void getMessageHistory(@NonNull Long startDate, final HyberCallback<Long, String> callback) {
         checkInitialized();
-        getApiBusinessModel().getMessageHistory(startDate, new HyberApiBusinessModel.MessageHistoryListener() {
+        getApiBusinessModel().getMessageHistory(startDate, new ApiBusinessModel.MessageHistoryListener() {
             @Override
             public void onSuccess(@NonNull final Long startDate, @NonNull final MessageHistoryRespEnvelope envelope) {
                 if (!envelope.getMessages().isEmpty()) {
@@ -349,7 +347,7 @@ public final class Hyber {
 
                     User user = repo.getCurrentUser();
                     if (user == null) {
-                        handler.onFailure("Hyber user is not created");
+                        callback.onFailure("Hyber user is not created");
                         return;
                     }
 
@@ -383,28 +381,36 @@ public final class Hyber {
                     repo.saveMessagesOrUpdate(user, messages);
                     repo.close();
                 }
-                handler.onSuccess(envelope.getTimeLastMessage());
+                callback.onSuccess(envelope.getTimeLastMessage());
             }
 
             @Override
             public void onFailure() {
-                handler.onFailure(/*TODO*/ "TODO");
+                callback.onFailure(/*TODO*/ "TODO");
             }
         });
     }
 
+    @Nullable
+    public static RealmResults<Message> getAllUserMessages() {
+        User user = repo.getCurrentUser();
+        if (user == null)
+            return null;
+        return repo.getMessages(user);
+    }
+
     private static void sendPushDeliveryReport(@NonNull final String messageId, @NonNull Long receivedAt,
-                                               final DeliveryReportListener handler) {
+                                               final HyberCallback<String, EmptyResult> callback) {
         getApiBusinessModel().sendPushDeliveryReport(messageId, receivedAt,
-                new HyberApiBusinessModel.SendPushDeliveryReportListener() {
+                new ApiBusinessModel.SendPushDeliveryReportListener() {
                     @Override
                     public void onSuccess(@NonNull String messageId) {
-                        handler.onDeliveryReportSent(messageId);
+                        callback.onSuccess(messageId);
                     }
 
                     @Override
                     public void onFailure() {
-                        handler.onFailure();
+                        callback.onFailure(new EmptyResult());
                     }
                 });
     }

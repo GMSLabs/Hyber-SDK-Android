@@ -1,6 +1,6 @@
 package com.hyber.example;
 
-import com.hyber.HyberLogger;
+import com.hyber.log.HyberLogger;
 
 public final class LocaleController {
 

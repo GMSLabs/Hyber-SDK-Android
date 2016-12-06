@@ -1,6 +1,6 @@
 package com.hyber;
 
-public enum HyberStatus {
+public enum ErrorStatus {
 
     SDK_ChuckNorrisError(1001, "SDK API Chuck Norris error"),
 
@@ -35,18 +35,18 @@ public enum HyberStatus {
     private int mCode;
     private String mDescription;
 
-    HyberStatus(int code, String description) {
+    ErrorStatus(int code, String description) {
         this.mCode = code;
         this.mDescription = description;
     }
 
-    public static HyberStatus byCode(int code) {
-        for (HyberStatus status : HyberStatus.values()) {
+    public static ErrorStatus byCode(int code) {
+        for (ErrorStatus status : ErrorStatus.values()) {
             if (status.getCode() == code) {
                 return status;
             }
         }
-        return HyberStatus.SDK_ChuckNorrisError;
+        return ErrorStatus.SDK_ChuckNorrisError;
     }
 
     public Integer getCode() {

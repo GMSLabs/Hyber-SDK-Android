@@ -3,6 +3,11 @@ package com.hyber;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
+import com.hyber.log.HyberLogger;
+import com.hyber.model.HyberSchemaModule;
+import com.hyber.model.Message;
+import com.hyber.model.User;
+
 import java.util.Date;
 
 import io.realm.Realm;

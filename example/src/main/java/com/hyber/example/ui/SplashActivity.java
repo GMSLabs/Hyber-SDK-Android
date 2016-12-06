@@ -1,4 +1,4 @@
-package com.hyber.example;
+package com.hyber.example.ui;
 
 import android.animation.ObjectAnimator;
 import android.content.Intent;
@@ -8,16 +8,19 @@ import android.support.v7.app.AppCompatActivity;
 import android.widget.ProgressBar;
 
 import com.hyber.Hyber;
-import com.hyber.HyberLogger;
-import com.hyber.example.ui.AuthActivity;
-import com.hyber.handler.CheckAuthorizationHandler;
+import com.hyber.example.AndroidUtilities;
+import com.hyber.example.R;
+import com.hyber.handler.EmptyResult;
+import com.hyber.handler.HyberCallback;
+import com.hyber.log.HyberLogger;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
 public class SplashActivity extends AppCompatActivity {
 
-    @BindView(R.id.progressBar) ProgressBar mProgress;
+    @BindView(R.id.progressBar)
+    ProgressBar mProgress;
     private final int maxProgress = 100;
     private final int progressWaitMills = 100;
     private final int minProgressStep = 3;
@@ -40,15 +43,15 @@ public class SplashActivity extends AppCompatActivity {
 
         new ProgressTask().execute();
 
-        Hyber.isAuthorized(new CheckAuthorizationHandler() {
+        Hyber.isAuthorized(new HyberCallback<EmptyResult, EmptyResult>() {
             @Override
-            public void onSuccess() {
+            public void onSuccess(EmptyResult result) {
                 isFinished = true;
                 startActivity(new Intent(SplashActivity.this, MainActivity.class));
             }
 
             @Override
-            public void onFailure() {
+            public void onFailure(EmptyResult error) {
                 isFinished = true;
                 startActivity(new Intent(SplashActivity.this, AuthActivity.class));
             }

@@ -1,4 +1,4 @@
-package com.hyber.example;
+package com.hyber.example.ui;
 
 import android.content.Intent;
 import android.net.Uri;
@@ -21,9 +21,11 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.hyber.Hyber;
-import com.hyber.HyberLogger;
+import com.hyber.example.AndroidUtilities;
+import com.hyber.example.R;
 import com.hyber.handler.CurrentUserHandler;
 import com.hyber.handler.LogoutUserHandler;
+import com.hyber.log.HyberLogger;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;

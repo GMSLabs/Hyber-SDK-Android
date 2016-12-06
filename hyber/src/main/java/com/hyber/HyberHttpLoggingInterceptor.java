@@ -1,5 +1,7 @@
 package com.hyber;
 
+import com.hyber.log.HyberLogger;
+
 import java.io.EOFException;
 import java.io.IOException;
 import java.nio.charset.Charset;
@@ -34,11 +36,13 @@ public class HyberHttpLoggingInterceptor implements Interceptor {
     private static final Charset UTF8 = Charset.forName("UTF-8");
 
     public enum Level {
-        /** No logs. */
+        /**
+         * No logs.
+         */
         NONE,
         /**
          * Logs request and response lines.
-         *
+         * <p>
          * <p>Example:
          * <pre>{@code
          * --> POST /greeting http/1.1 (3-byte body)
@@ -49,7 +53,7 @@ public class HyberHttpLoggingInterceptor implements Interceptor {
         BASIC,
         /**
          * Logs request and response lines and their respective headers.
-         *
+         * <p>
          * <p>Example:
          * <pre>{@code
          * --> POST /greeting http/1.1
@@ -67,7 +71,7 @@ public class HyberHttpLoggingInterceptor implements Interceptor {
         HEADERS,
         /**
          * Logs request and response lines and their respective headers and bodies (if present).
-         *
+         * <p>
          * <p>Example:
          * <pre>{@code
          * --> POST /greeting http/1.1
@@ -92,9 +96,12 @@ public class HyberHttpLoggingInterceptor implements Interceptor {
     public interface Logger {
         void log(String message);
 
-        /** A {@link Logger} defaults output appropriate for the current platform. */
+        /**
+         * A {@link Logger} defaults output appropriate for the current platform.
+         */
         Logger DEFAULT = new Logger() {
-            @Override public void log(String message) {
+            @Override
+            public void log(String message) {
                 Platform.get().log(INFO, message, null);
             }
         };
@@ -112,7 +119,9 @@ public class HyberHttpLoggingInterceptor implements Interceptor {
 
     private volatile Level level = Level.NONE;
 
-    /** Change the level at which this interceptor logs. */
+    /**
+     * Change the level at which this interceptor logs.
+     */
     HyberHttpLoggingInterceptor setLevel(Level level) {
         if (level == null) throw new NullPointerException("level == null. Use Level.NONE instead.");
         this.level = level;
@@ -123,7 +132,8 @@ public class HyberHttpLoggingInterceptor implements Interceptor {
         return level;
     }
 
-    @Override public Response intercept(Chain chain) throws IOException {
+    @Override
+    public Response intercept(Chain chain) throws IOException {
         Level level = this.level;
         StringBuilder logRequestSB = new StringBuilder();
         StringBuilder logResponseSB = new StringBuilder();

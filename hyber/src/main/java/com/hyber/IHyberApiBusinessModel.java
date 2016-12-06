@@ -5,17 +5,17 @@ import android.support.annotation.NonNull;
 interface IHyberApiBusinessModel {
 
     void authorize(@NonNull Long phone,
-                   @NonNull HyberApiBusinessModel.AuthorizationListener listener);
+                   @NonNull ApiBusinessModel.AuthorizationListener listener);
 
-    void sendDeviceData(@NonNull HyberApiBusinessModel.SendDeviceDataListener listener);
+    void sendDeviceData(@NonNull ApiBusinessModel.SendDeviceDataListener listener);
 
     void sendBidirectionalAnswer(@NonNull String messageId, @NonNull String answerText,
-                                 @NonNull HyberApiBusinessModel.SendBidirectionalAnswerListener listener);
+                                 @NonNull ApiBusinessModel.SendBidirectionalAnswerListener listener);
 
     void sendPushDeliveryReport(@NonNull String messageId, @NonNull Long receivedAt,
-                                @NonNull HyberApiBusinessModel.SendPushDeliveryReportListener listener);
+                                @NonNull ApiBusinessModel.SendPushDeliveryReportListener listener);
 
     void getMessageHistory(@NonNull Long startDate,
-                           @NonNull HyberApiBusinessModel.MessageHistoryListener listener);
+                           @NonNull ApiBusinessModel.MessageHistoryListener listener);
 
 }
