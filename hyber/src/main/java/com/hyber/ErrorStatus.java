@@ -1,43 +1,69 @@
 package com.hyber;
 
+import com.hyber.handler.HyberError.HyberErrorStatus;
+
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+
+import static com.hyber.handler.HyberError.HyberErrorStatus.INCORRECT_DEVICE_ID;
+import static com.hyber.handler.HyberError.HyberErrorStatus.INCORRECT_MESSAGE_ID;
+import static com.hyber.handler.HyberError.HyberErrorStatus.INTERNAL_ERROR;
+import static com.hyber.handler.HyberError.HyberErrorStatus.MESSAGE_CALLBACK_NOT_ALLOWED;
+import static com.hyber.handler.HyberError.HyberErrorStatus.MESSAGE_HISTORY_INCORRECT_START_TIME;
+import static com.hyber.handler.HyberError.HyberErrorStatus.MESSAGE_HISTORY_NOT_ALLOWED;
+import static com.hyber.handler.HyberError.HyberErrorStatus.SDK_CONFIGURED_INCORRECTLY;
+import static com.hyber.handler.HyberError.HyberErrorStatus.TOKEN_IS_EXPIRED;
+import static com.hyber.handler.HyberError.HyberErrorStatus.UNAUTHORIZED;
+
+
+@NoArgsConstructor
+@Getter
 public enum ErrorStatus {
 
-    SDK_ChuckNorrisError(1001, "SDK API Chuck Norris error"),
+    SDK_API_ChuckNorrisError(1001, INTERNAL_ERROR, "SDK API Chuck Norris error"),
 
-    SDK_INTEGRATION_ClientApiKeyIsInvalid(1011, "Hyber Client Api Key is invalid"),
+    SDK_INTEGRATION_ClientApiKeyIsInvalid(1011, SDK_CONFIGURED_INCORRECTLY, "Hyber Client Api Key is invalid"),
 
-    SDK_API_ResponseIsUnsuccessful(1020, "Hyber API response is unsuccessful"),
-    SDK_API_403Error(1021, "Hyber API 403 error"),
-    SDK_API_404Error(1022, "Hyber API 404 error"),
-    SDK_API_500Error(1023, "Hyber API 500 error"),
+    /**
+     * Start errors with HTTP Status 400
+     **/
+    mobileIncorrectHeadersFormat(2100, INTERNAL_ERROR, "Headers format is incorrect"),
+    mobileIncorrectJsonFormat(2101, INTERNAL_ERROR, "Json format is incorrect"),
+    mobilePushSettingsNotConfigured(2201, SDK_CONFIGURED_INCORRECTLY, "Mobile settings not configured"),
+    mobileIncorrectClientApiKey(2202, SDK_CONFIGURED_INCORRECTLY, "The Client API key is incorrect"),
+    mobileIncorrectAndroidFingerprint(2203, SDK_CONFIGURED_INCORRECTLY, "The Android Fingerprint is incorrect"),
+    mobileIncorrectIosBundleId(2204, SDK_CONFIGURED_INCORRECTLY, "The iOS Bundle id is incorrect"),
+    /** End errors with HTTP Status 400 **/
 
-    SDK_API_notCorrectAuthorizationFormat(1131, "Incorrect auth format"),
-    SDK_API_pushSettingsNotFound(1126, "Push not configured"),
-    SDK_API_pushAndroidFingerprintIsIncorrect(1152, "Push Android fingerprint is incorrect"),
-    //TODO code duplicate SDK_API_phoneNumberNotExist(1104, "Phone number missing"),
-    SDK_API_internalException(1127, "Internal server error"),
-    SDK_API_bindingFailed(1128, "Malformed request"),
+    /**
+     * Start errors with HTTP Status 401
+     **/
+    mobileIncorrectPhoneOrPassword(2301, UNAUTHORIZED, "Incorrect phone or password"),
+    mobileIncorrectSessionId(2302, UNAUTHORIZED, "The session id is incorrect"),
+    mobileIncorrectAccessToken(2303, UNAUTHORIZED, "The access token is incorrect"),
+    /** End errors with HTTP Status 401 **/
 
-    SDK_API_mobileOsTypeNotFound(1101, "os type not found"),
-    SDK_API_mobileOsVersionNotFound(1102, "os version not found"),
-    SDK_API_mobileDeviceTypeNotFound(1103, "device type not found"),
-    SDK_API_notCorrectAuthorizationDataOrTokenExpired(1104, "not correct authorization data or token has expired"),
-    SDK_API_refreshTokenNotExist(1105, "refreshToken not exist or not correct"),
-    SDK_API_mobileStartDateGetMessagesNotExist(1106, "startDate not exist"),
-    SDK_API_mobileNotAllowedGetMessagesHistory(1107, "not allowed get messages history"),
-    SDK_API_pushIncorrectAuthenticationData(1108, "incorrect authorization data"),
-    SDK_API_pushTokenExpired(1109, "token is expired"),
-    SDK_API_incorrectMessageId(1110, "incorrect message ID"),
-    SDK_API_mobileNotCorrectAuthToken(1111, "not correctAuthToken"),
-    SDK_API_mobileAuthTokenExpired(1112, "authToken has expired"),
-    SDK_API_mobileAbonentWithInstallationIdNotFound(1113, "abonent with authToken not found");
+    /**
+     * Start errors with HTTP Status 200
+     **/
+    mobileExpiredTimestamp(2401, TOKEN_IS_EXPIRED, "The timestamp is expired"),
+    mobileMessageHistoryNotAllowed(2402, MESSAGE_HISTORY_NOT_ALLOWED, "The message history not allowed"),
+    mobileMessageHistoryIncorrectStartTime(2403, MESSAGE_HISTORY_INCORRECT_START_TIME, "Incorrect message history start time"),
+    mobileMessageCallbackNotAllowed(2404, MESSAGE_CALLBACK_NOT_ALLOWED, "The bidirectional answer not allowed"),
+    mobileIncorrectMessageId(2405, INCORRECT_MESSAGE_ID, "The message id is incorrect"),
+    mobileIncorrectDeviceId(2406, INCORRECT_DEVICE_ID, "The device id is incorrect");
+    /**
+     * End errors with HTTP Status 200
+     **/
 
-    private int mCode;
-    private String mDescription;
+    private int code;
+    private String description;
+    private HyberErrorStatus externalHyberErrorStatus;
 
-    ErrorStatus(int code, String description) {
-        this.mCode = code;
-        this.mDescription = description;
+    ErrorStatus(int code, HyberErrorStatus externalHyberErrorStatus, String description) {
+        this.code = code;
+        this.externalHyberErrorStatus = externalHyberErrorStatus;
+        this.description = description;
     }
 
     public static ErrorStatus byCode(int code) {
@@ -46,15 +72,7 @@ public enum ErrorStatus {
                 return status;
             }
         }
-        return ErrorStatus.SDK_ChuckNorrisError;
-    }
-
-    public Integer getCode() {
-        return mCode;
-    }
-
-    public String getDescription() {
-        return mDescription;
+        return ErrorStatus.SDK_API_ChuckNorrisError;
     }
 
 }

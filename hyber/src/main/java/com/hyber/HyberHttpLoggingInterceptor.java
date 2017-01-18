@@ -1,6 +1,6 @@
 package com.hyber;
 
-import com.hyber.log.HyberLogger;
+import android.util.Log;
 
 import java.io.EOFException;
 import java.io.IOException;
@@ -33,6 +33,7 @@ import static okhttp3.internal.platform.Platform.INFO;
  */
 
 public class HyberHttpLoggingInterceptor implements Interceptor {
+    private static final String TAG = HyberHttpLoggingInterceptor.class.getSimpleName();
     private static final Charset UTF8 = Charset.forName("UTF-8");
 
     public enum Level {
@@ -208,12 +209,12 @@ public class HyberHttpLoggingInterceptor implements Interceptor {
             response = chain.proceed(request);
         } catch (Exception e) {
             logResponseSB.append(String.format(Locale.getDefault(), "<-- HTTP FAILED: %s", e));
-            HyberLogger.e(logRequestSB.toString());
-            HyberLogger.e(logResponseSB.toString());
+            Log.e(TAG, logRequestSB.toString());
+            Log.e(TAG, logResponseSB.toString());
             throw e;
         }
 
-        HyberLogger.d(logRequestSB.toString());
+        Log.d(TAG, logRequestSB.toString());
 
         ResponseBody responseBody = response.body();
 
@@ -266,7 +267,7 @@ public class HyberHttpLoggingInterceptor implements Interceptor {
             }
         }
 
-        HyberLogger.d(logResponseSB.toString());
+        Log.d(TAG, logResponseSB.toString());
 
         return response;
     }

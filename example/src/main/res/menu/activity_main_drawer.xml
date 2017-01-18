@@ -4,8 +4,12 @@
     <group android:checkableBehavior="single">
         <item
             android:id="@+id/nav_messages"
-            android:icon="@drawable/ic_menu_send"
+            android:icon="@android:drawable/ic_dialog_email"
             android:title="Messages" />
+        <item
+            android:id="@+id/nav_devices"
+            android:icon="@drawable/common_full_open_on_phone"
+            android:title="Devices" />
     </group>
 
 </menu>

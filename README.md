@@ -37,6 +37,83 @@ Then add next dependencies to app level build.gradle:
 *Hyber SDK requires at minimum Java 7 or Android 4.1.*
 ***
 
+### User control
+#### User authorization management
+```java
+    //User registration
+    Hyber.userRegistration(phone, password, new HyberCallback<EmptyResult, HyberError>() {
+        @Override
+        public void onSuccess() { /*User session is active*/ }
+        @Override
+        public void onFailure(HyberError error) { /*Something went wrong*/ }
+    });
+
+    //User logout
+    Hyber.logoutCurrentUser(new LogoutUserHandler() {
+        @Override
+        public void onSuccess() { /*User is logout*/ }
+        @Override
+        public void onFailure(HyberError error) { /*Something went wrong*/ }
+    });
+
+    //Check user auth status
+    Hyber.isAuthorized(new HyberCallback<EmptyResult, EmptyResult>() {
+        @Override
+        public void onSuccess(EmptyResult result) { /*User is authorized*/ }
+        @Override
+        public void onFailure(EmptyResult error) { /*User is not authorized*/ }
+    });
+
+    //Get current user info
+    Hyber.getCurrentUser(new CurrentUserHandler() {
+        @Override
+        public void onCurrentUser(String id, String phone) { /*Return current user id and phone*/ }
+    });
+```
+#### User's messages management
+```java
+    //Get access to stored user's messages and add change listeners
+    Hyber.getAllUserMessages();
+
+    //Get all user's messages from server and save it to local storage
+    Hyber.getMessageHistory(historyStartTime, new HyberCallback<Long, HyberError>() {
+        @Override
+        public void onSuccess(@NonNull Long recommendedNextTime) { /*User's message list loaded and saved successfuly*/ }
+        @Override
+        public void onFailure(HyberError error) { /*Something went wrong*/ }
+    });
+
+    //Send answer for message
+    Hyber.sendMessageCallback(messageId, answer, new HyberCallback<String, HyberError>() {
+        @Override
+        public void onSuccess(String result) { /*Answer is sent*/ }
+        @Override
+        public void onFailure(HyberError error) { /*Something went wrong*/ }
+    });
+```
+#### User's devices management
+```java
+    //Get access to stored user's devices and add change listeners
+    Hyber.getAllUserDevices();
+
+    //Get all user's devices from server and save it to local storage
+    Hyber.getAllDevices(new HyberCallback<EmptyResult, HyberError>() {
+        @Override
+        public void onSuccess(EmptyResult result) { /*User's device list loaded and saved successfuly*/ }
+        @Override
+        public void onFailure(HyberError error) { /*Something went wrong*/ }
+    });
+
+    //Revoke devices from user's authorized device list
+    Hyber.revokeDevices(deviceIds, new HyberCallback<EmptyResult, HyberError>() {
+        @Override
+        public void onSuccess(EmptyResult result) { /*Devices is revoked*/ }
+        @Override
+        public void onFailure(HyberError error) { /*Something went wrong*/ }
+    });
+```
+***
+
 ### PROGUARD
 If you are using Proguard in your project add the following lines to your configuration:
 ```proguard

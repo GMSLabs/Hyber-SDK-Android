@@ -3,6 +3,7 @@ package com.hyber;
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.iid.FirebaseInstanceIdService;
 import com.hyber.log.HyberLogger;
+import com.hyber.model.User;
 
 public class HyberFirebaseInstanceIDService extends FirebaseInstanceIdService {
 
@@ -21,23 +22,16 @@ public class HyberFirebaseInstanceIDService extends FirebaseInstanceIdService {
 
         HyberLogger.tag(TAG).i("Refreshed FCM token: %s", refreshedToken);
 
-        sendRegistrationToServer();
+        Repository repo = new Repository();
+        repo.open();
+        User user = repo.getCurrentUser();
+        if (user != null && refreshedToken != null) {
+            repo.updateFcmToken(user, refreshedToken);
+        }
+        repo.close();
+
+        Hyber.updateDeviceData();
     }
     // [END refresh_token]
-
-    private void sendRegistrationToServer() {
-        ApiBusinessModel.getInstance(this)
-                .sendDeviceData(new ApiBusinessModel.SendDeviceDataListener() {
-                    @Override
-                    public void onSuccess() {
-                        HyberLogger.i("Refreshed FCM token sent to Hyber.");
-                    }
-
-                    @Override
-                    public void onFailure() {
-                        HyberLogger.d("Refreshed FCM token can not sent to Hyber.");
-                    }
-                });
-    }
 
 }
