@@ -13,7 +13,7 @@
     <section class="page-header">
       <h1 class="project-name">Hyber SDK Android</h1>
       <h2 class="project-tagline">Powerfull messaging for Android</h2>
-      <a target="_blank" href="https://github.com/Incuube/Hyber-SDK-Android/raw/maven/com/hyber/hyber-messaging/2.2.0/hyber-messaging-2.2.0.aar" class="btn">Download AAR</a>
+      <a target="_blank" href="https://github.com/Incuube/Hyber-SDK-Android/raw/maven/com/hyber/hyber-messaging/2.1.0/hyber-messaging-2.1.0.aar" class="btn">Download AAR</a>
       <a href="https://github.com/Incuube/Hyber-SDK-Android" class="btn">View on GitHub</a>
     </section>
     <section class="main-content">
@@ -27,9 +27,9 @@
       <p>
         First of all you need to configure <a target="_blank" href="https://developers.google.com/android/guides/google-services-plugin">Google Services Plugin</a>
         and <a target="_blank" href="https://firebase.google.com/docs/cloud-messaging/android/client">Firebase Cloud Messaging</a></br>
-        And after that you need to write next line to app level build.gradle file inside build config block
+        After that you need to initialize the Hyber inside onCreate method in your application class.
         <pre class="prettyprint">buildConfigField 'String', 'HYBER_CLIENT_API_KEY', hyber_client_api_key</pre>
-        After that you need to initialize the Hyber inside onCreate method in your application class
+        And after that you need to write next line to app level build.gradle file inside build config block
         <pre class="prettyprint">Hyber.with(this, BuildConfig.HYBER_CLIENT_API_KEY)
     .setNotificationListener(...)
     .init();</pre>
@@ -37,7 +37,7 @@
       <h3><a id="download" class="anchor" href="#download" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>
         Download
       </h3>
-      <p><a target="_blank" href="https://github.com/Incuube/Hyber-SDK-Android/raw/maven/com/hyber/hyber-messaging/2.2.0/hyber-messaging-2.2.0.aar" class="simple-btn">&darr; <span class="version-tag">Latest</span> AAR</a></p>
+      <p><a target="_blank" href="https://github.com/Incuube/Hyber-SDK-Android/raw/maven/com/hyber/hyber-messaging/2.1.0/hyber-messaging-2.1.0.aar" class="simple-btn">&darr; <span class="version-tag">Latest</span> AAR</a></p>
       <p>The source code to the Hyber, samples, and this website is <a href="https://github.com/Incuube/Hyber-SDK-Android">available on GitHub</a>.</p>
       <h4>
         Gradle
@@ -46,9 +46,98 @@
       <pre class="prettyprint">maven { url 'https://raw.github.com/Incuube/Hyber-SDK-Android/maven/' }</pre>
       <p>Then add next dependencies to app level build.gradle:</p>
       <pre class="prettyprint">compile 'com.hyber:hyber-messaging:<span class="version pln"><em>(insert latest version)</em></span>'</pre>
+
+      <h3><a id="download" class="anchor" href="#user_control" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>
+        User control
+      </h3>
       <h4>
-        ProGuard
+        User authorization management
       </h4>
+      <h5>
+        User registration
+      </h5>
+      <pre class="prettyprint">Hyber.userRegistration(phone, password, new HyberCallback<EmptyResult, HyberError>() {
+    @Override public void onSuccess() { /*User session is active*/ }
+    @Override public void onFailure(HyberError error) { /*Something went wrong*/ }
+    });</pre>
+      <h5>
+        User logout
+      </h5>
+      <pre class="prettyprint">Hyber.logoutCurrentUser(new LogoutUserHandler() {
+    @Override public void onSuccess() { /*User is logout*/ }
+    @Override public void onFailure(HyberError error) { /*Something went wrong*/ }
+    });</pre>
+      <h5>
+        Check user auth status
+      </h5>
+      <pre class="prettyprint">Hyber.isAuthorized(new HyberCallback<EmptyResult, EmptyResult>() {
+    @Override public void onSuccess(EmptyResult result) { /*User is authorized*/ }
+    @Override public void onFailure(EmptyResult error) { /*User is not authorized*/ }
+    });</pre>
+      <h5>
+        Get current user info
+      </h5>
+      <pre class="prettyprint">Hyber.getCurrentUser(new CurrentUserHandler() {
+    @Override public void onCurrentUser(String id, String phone) { /*Return current user id and phone*/ }
+    });</pre>
+      <h4>
+      User's messages management
+      </h4>
+      <h5>
+        Get access to stored user's messages and add change listeners
+      </h5>
+      <pre class="prettyprint">Hyber.getAllUserMessages();</pre>
+      <h5>
+        Get all user's messages from server and save it to local storage
+      </h5>
+      <pre class="prettyprint">Hyber.getMessageHistory(historyStartTime, new HyberCallback<Long, HyberError>() {
+    @Override public void onSuccess(@NonNull Long recommendedNextTime) { /*User's message list loaded and saved successfuly*/ }
+    @Override public void onFailure(HyberError error) { /*Something went wrong*/ }
+    });</pre>
+      <h5>
+        Send answer for message
+      </h5>
+      <pre class="prettyprint">Hyber.sendMessageCallback(messageId, answer, new HyberCallback<String, HyberError>() {
+    @Override public void onSuccess(String result) { /*Answer is sent*/ }
+    @Override public void onFailure(HyberError error) { /*Something went wrong*/ }
+    });</pre>
+      <h4>
+        User's devices management
+      </h4>
+      <h5>
+        Get access to stored user's devices and add change listeners
+      </h5>
+      <pre class="prettyprint">Hyber.getAllUserDevices();</pre>
+      <h5>
+        Get all user's devices from server and save it to local storage
+      </h5>
+      <pre class="prettyprint">Hyber.getAllDevices(new HyberCallback<EmptyResult, HyberError>() {
+    @Override public void onSuccess(EmptyResult result) { /*User's device list loaded and saved successfuly*/ }
+    @Override public void onFailure(HyberError error) { /*Something went wrong*/ }
+    });</pre>
+      <h5>
+        Revoke devices from user's authorized device list
+      </h5>
+    @Override public void onSuccess(EmptyResult result) { /*Devices is revoked*/ }
+    @Override public void onFailure(HyberError error) { /*Something went wrong*/ }
+    });</pre>
+
+      <h3>
+        Logging
+      </h3>
+      <p>
+        For manipulation with logs from library you can create a subclass <pre class="prettyprint">HyberLogger.Tree</pre>.
+        Example:
+        <pre class="prettyprint">private class CrashReportingTree extends HyberLogger.Tree {
+        @Override protected void log(int priority, String tag, String message, Throwable t) {
+            if (priority <= Log.WARN) return; else {/*Do something with error*/}
+        }
+    }</pre>
+      </p>
+
+      <h3>
+        ProGuard
+      </h3>
       <p>If you are using Proguard in your project add the following lines to your configuration:</p>
       <pre class="prettyprint"></pre>
       <p>Hyber requires at minimum Java 7 or Android 4.1.</p>
