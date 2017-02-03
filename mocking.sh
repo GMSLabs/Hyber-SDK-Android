@@ -4,7 +4,11 @@
 set -e
 
 # List of all modules
-modules=( ./ hyber example )
+modules=(
+    ./
+    hyber
+    example
+)
 
 for module in "${modules[@]}"
 do
