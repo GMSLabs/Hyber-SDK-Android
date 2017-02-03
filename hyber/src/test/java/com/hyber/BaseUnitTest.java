@@ -10,8 +10,10 @@ import static org.junit.Assert.assertTrue;
  * @see <a href="http://d.android.com/tools/testing">Testing documentation</a>
  */
 public class BaseUnitTest {
+
     @Test
     public void addition_isCorrect() throws Exception {
         assertTrue(true);
     }
+
 }

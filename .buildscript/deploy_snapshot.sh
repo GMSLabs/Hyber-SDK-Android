@@ -22,5 +22,6 @@ elif [ "$TRAVIS_BRANCH" != "$BRANCH" ]; then
 else
   echo "FAKE of Deploying snapshot..."
 #  do build and deploy tasks
+  printenv
   echo "FAKE of Snapshot deployed!"
 fi

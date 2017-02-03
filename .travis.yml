@@ -1,12 +1,17 @@
 language: android
+sudo: false
+jdk: oraclejdk8
+env:
+  matrix:
+    - ANDROID_TARGET=android-22 ANDROID_ABI=armeabi-v7a
+  global:
+    # wait up to 10 minutes for adb to connect to emulator
+    - ADB_INSTALL_TIMEOUT=10
 
-jdk:
-   - oraclejdk8
-
-#env:
-#  global:
-#    - ANDROID_TARGET=android-24
-#    - ANDROID_ABI=armeabi-v7a
+branches:
+  except:
+    - gh-pages
+    - maven
 
 android:
   components:
@@ -14,41 +19,62 @@ android:
     - tools # see https://github.com/travis-ci/travis-ci/issues/6040#issuecomment-219367943)
     - platform-tools
     - build-tools-25.0.2
+    - android-22
     - android-25
     - extra-android-support
     - extra-android-m2repository
     - extra-google-google_play_services
     - extra-google-m2repository
-#    - sys-img-${ANDROID_ABI}-${ANDROID_TARGET}
+    - sys-img-${ANDROID_ABI}-${ANDROID_TARGET}
 
 licenses:
     - 'android-sdk-license-.+'
 
-before_script:
-  - chmod +x ./mocking.sh
-  - ./mocking.sh
-#  - echo no | android create avd --force -n test -t $ANDROID_TARGET --abi $ANDROID_ABI
-#  - emulator -avd test -no-audio -no-window &
-#  - android-wait-for-emulator
-#  - adb shell input keyevent 82 &
-
-script:
-  - ./gradlew clean lint checkstyle test #connectedCheck
-
-after_success:
-  - chmod +x .buildscript/*
-  - .buildscript/deploy_snapshot.sh
-
-branches:
-  except:
-    - gh-pages
-    - maven
-
-notifications:
-  email: false
-
-sudo: false
+before_cache:
+  - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
+  - rm -fr $HOME/.gradle/caches/*/plugin-resolution/
 
 cache:
   directories:
-    - $HOME/.m2
+    - $HOME/.gradle/caches/
+    - $HOME/.gradle/wrapper/
+
+#addons:
+#  apt_packages:
+#    - pandoc
+#  artifacts:
+#    paths:
+#      - $(git ls-files -o | grep build/outputs | tr "\n" ":")
+
+before_install:
+  - pip install --user codecov
+
+before_script:
+  - chmod +x ./mocking.sh
+  - ./mocking.sh
+  - echo no | android create avd --force --name test --target $ANDROID_TARGET --abi $ANDROID_ABI
+  - emulator -avd test -no-skin -no-audio -no-window &
+
+script:
+  - ./gradlew jacocoTestDevDebugUnitTestReport lintDevDebug checkstyle assembleDevDebugAndroidTest -PdisablePreDex --continue --stacktrace
+  - android-wait-for-emulator
+  - adb devices
+  - adb shell input keyevent 82 &
+  - ./gradlew connectedDevDebugAndroidTest -PdisablePreDex --continue --stacktrace
+  - rm -f $HOME/.gradle/caches/3.3/plugin-resolution/cache.properties.lock
+
+after_success:
+  - bash <(curl -s https://codecov.io/bash)
+  - chmod +x .buildscript/*
+  - .buildscript/deploy_snapshot.sh
+
+#after_failure:
+#  - pandoc builder/build/reports/tests/index.html -t plain | sed -n '/^Failed tests/,/default-package/p'
+
+#after_script:
+#  # print lint results details
+#  - for f in app/build/outputs/lint-results.html; do pandoc $f -t plain; done
+#  - for f in data/build/outputs/lint-results.html; do pandoc $f -t plain; done
+
+notifications:
+  email: false
