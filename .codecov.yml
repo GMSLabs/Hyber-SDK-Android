@@ -1,0 +1,25 @@
+codecov:
+  branch: master-2.0
+
+  notify:
+    after_n_builds: 1
+    countdown: 10
+    delay: 30
+
+coverage:
+  precision: 2
+  round: down
+  range: "50...100"
+
+  notify:
+      slack:
+        default:
+          url: "secret:yQdt6JOrZ0IPFVfc6FqM56IaIZrkEi85btSnDvrfyhYrvBwpcLHxGZGBiFfkav3NeTwLKYyJ40JczZvWxhx59Suyp/64rg6Yc73nRgoXM04wWL+Mv76ATmSBhP5eVZ8DShFaLjtk9wluutJb89JskAEYprN98fGyj6gHZZyPlbs="
+          branches: master-2.0
+          attachments: "sunburst, diff"
+
+  status:
+      project:
+        default:
+          enabled: yes
+          target: auto
