@@ -1,6 +1,7 @@
 # Hyber SDK for Android
 [![Release][release-svg]][release-link]
 [![Build Status][ci-build-status-svg]][ci-build-status]
+[![Codecov Status][codecov-svg]][codecov]
 
 A library that gives you access to the powerful Hyber cloud platform from your Android app.
 For more information about Hyber and its features, see [hyber.im][hyber.im].
@@ -137,6 +138,9 @@ private class CrashReportingTree extends HyberLogger.Tree {
 
 [ci-build-status-svg]: https://travis-ci.org/Incuube/Hyber-SDK-Android.svg?branch=master-2.0
 [ci-build-status]: https://travis-ci.org/Incuube/Hyber-SDK-Android
+
+[codecov-svg]: https://codecov.io/gh/Incuube/Hyber-SDK-Android/branch/master/graph/badge.svg
+[codecov]: https://codecov.io/gh/Incuube/Hyber-SDK-Android
 
 [hyber.im]: https://hyber.im/
 [google-services-plugin]: https://developers.google.com/android/guides/google-services-plugin

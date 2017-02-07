@@ -21,6 +21,20 @@ public class BaseInstrumentedTest {
         // Context of the app under test.
         Context appContext = InstrumentationRegistry.getTargetContext();
 
-        assertEquals("com.hyber.example", appContext.getPackageName());
+        switch (appContext.getPackageName()) {
+            case "com.hyber.example.dev":
+                assertEquals("com.hyber.example.dev", appContext.getPackageName());
+                break;
+            case "com.hyber.example.td":
+                assertEquals("com.hyber.example.td", appContext.getPackageName());
+                break;
+            case "com.hyber.example.prod":
+                assertEquals("com.hyber.example.prod", appContext.getPackageName());
+                break;
+            case "com.hyber.example.prodd":
+                assertEquals("com.hyber.example.prodd", appContext.getPackageName());
+                break;
+            default: assertEquals("UNDEFINED", appContext.getPackageName());
+        }
     }
 }
