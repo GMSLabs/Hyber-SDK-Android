@@ -56,7 +56,7 @@ before_script:
   - emulator -avd test -no-skin -no-audio -no-window &
 
 script:
-  - ./gradlew jacocoTestDevDebugUnitTestReport lintDevDebug checkstyle assembleDevDebugAndroidTest -PdisablePreDex --continue --stacktrace
+  - ./gradlew lintDevDebug checkstyle assembleDevDebugAndroidTest -PdisablePreDex --continue --stacktrace
   - android-wait-for-emulator
   - adb devices
   - adb shell input keyevent 82 &
@@ -64,6 +64,7 @@ script:
   - rm -f $HOME/.gradle/caches/3.3/plugin-resolution/cache.properties.lock
 
 after_success:
+  - ./gradlew hyber:jacocoTestDebugUnitTestReport example:jacocoTestDevDebugUnitTestReport -PdisablePreDex --continue --stacktrace
   - bash <(curl -s https://codecov.io/bash)
   - chmod +x .buildscript/*
   - .buildscript/deploy_snapshot.sh
@@ -77,4 +78,4 @@ after_success:
 #  - for f in data/build/outputs/lint-results.html; do pandoc $f -t plain; done
 
 notifications:
-  email: false
+  email: true
