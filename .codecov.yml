@@ -2,6 +2,7 @@ codecov:
   branch: master-2.0
 
   notify:
+    require_ci_to_pass: yes
     after_n_builds: 1
     countdown: 10
     delay: 30
