@@ -28,6 +28,16 @@ public class Repository {
                 .build();
     }
 
+    /**
+     * Constructor specially for tests
+     * @param mockRealm = mocked Realm
+     * @param mockRealmConfig = mocked RealmConfiguration
+     */
+    public Repository(Realm mockRealm, RealmConfiguration mockRealmConfig) {
+        realm = mockRealm;
+        realmConfig = mockRealmConfig;
+    }
+
     public void open() {
         realm = Realm.getInstance(realmConfig);
     }
