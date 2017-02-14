@@ -6,7 +6,7 @@ set -e
 TYPE_DEV="dev"
 TYPE_TD="td"
 TYPE_PROD="prod"
-#TYPE_PRODD="prodd"
+TYPE_PRODD="prodd"
 
 #if [ -z ${JENKINS_HOME// } ]
 #then
@@ -18,19 +18,19 @@ TYPE_PROD="prod"
 #fi
 
 # Defaults
-PROP_FILE_NAME="$1"
-BUILD_TYPE="$2"
+#PROP_FILE_NAME="$1"
+BUILD_TYPE="$1"
 PROP_FOLDER="./properties"
 #PROP_FOLDER="${JENKINS_HOME}/privates/Hyber-SDK-Android/properties"
 
-if [ -z ${PROP_FILE_NAME// } ]
-then
-    echo ERROR: PROP_FILE_NAME argument is not correct
-    echo "This script will not work without a PROP_FILE_NAME - first argument"
-    exit 1 # terminate and indicate error
-else
-    echo "PROP_FILE_NAME is ${PROP_FILE_NAME}"
-fi
+#if [ -z ${PROP_FILE_NAME// } ]
+#then
+#    echo ERROR: PROP_FILE_NAME argument is not correct
+#    echo "This script will not work without a PROP_FILE_NAME - first argument"
+#    exit 1 # terminate and indicate error
+#else
+#    echo "PROP_FILE_NAME is ${PROP_FILE_NAME}"
+#fi
 
 if [ "$BUILD_TYPE" = "$TYPE_DEV" ] || [ "$BUILD_TYPE" = "$TYPE_TD" ] || [ "$BUILD_TYPE" = "$TYPE_PROD" ] || [ "$BUILD_TYPE" = "$TYPE_PRODD" ]
 then
@@ -48,13 +48,13 @@ else
     exit 1 # terminate and indicate error
 fi
 
-if [ -e ${PROP_FOLDER}/${PROP_FILE_NAME} ]
-then
-    echo "Properties file is ${PROP_FOLDER}/${PROP_FILE_NAME}"
-else
-    echo ERROR: ${PROP_FILE_NAME} could not be found
-    exit 1 # terminate and indicate error
-fi
+#if [ -e ${PROP_FOLDER}/${PROP_FILE_NAME} ]
+#then
+#    echo "Properties file is ${PROP_FOLDER}/${PROP_FILE_NAME}"
+#else
+#    echo ERROR: ${PROP_FILE_NAME} could not be found
+#    exit 1 # terminate and indicate error
+#fi
 
 #rm -rf ./properties
 #unzip ${PROP_FOLDER}/${PROP_FILE_NAME} -d ./
