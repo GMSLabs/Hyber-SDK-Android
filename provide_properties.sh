@@ -6,21 +6,22 @@ set -e
 TYPE_DEV="dev"
 TYPE_TD="td"
 TYPE_PROD="prod"
-TYPE_PRODD="prodd"
+#TYPE_PRODD="prodd"
 
-if [ -z ${JENKINS_HOME// } ]
-then
-    echo ERROR: JENKINS_HOME environment variable is not find
-    echo "This script will not work without a JENKINS_HOME"
-    exit 1 # terminate and indicate error
-else
-    echo "JENKINS_HOME watch to ${JENKINS_HOME}"
-fi
+#if [ -z ${JENKINS_HOME// } ]
+#then
+#    echo ERROR: JENKINS_HOME environment variable is not find
+#    echo "This script will not work without a JENKINS_HOME"
+#    exit 1 # terminate and indicate error
+#else
+#    echo "JENKINS_HOME watch to ${JENKINS_HOME}"
+#fi
 
 # Defaults
 PROP_FILE_NAME="$1"
 BUILD_TYPE="$2"
-PROP_FOLDER="${JENKINS_HOME}/privates/Hyber-SDK-Android/properties"
+PROP_FOLDER="./properties"
+#PROP_FOLDER="${JENKINS_HOME}/privates/Hyber-SDK-Android/properties"
 
 if [ -z ${PROP_FILE_NAME// } ]
 then
@@ -55,8 +56,8 @@ else
     exit 1 # terminate and indicate error
 fi
 
-rm -rf ./properties
-unzip ${PROP_FOLDER}/${PROP_FILE_NAME} -d ./
+#rm -rf ./properties
+#unzip ${PROP_FOLDER}/${PROP_FILE_NAME} -d ./
 
 # List of all modules
 modules=( hyber example )
