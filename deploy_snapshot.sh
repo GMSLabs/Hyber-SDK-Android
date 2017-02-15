@@ -13,8 +13,6 @@ FABRIC_GROUP=""
 FABRIC_NOTES=""
 FABRIC_DESCRIPTION=""
 
-
-
 set -e
 
 if [ "$TRAVIS_REPO_SLUG" != "$SLUG" ]; then
@@ -27,19 +25,19 @@ elif [ "$TRAVIS_BRANCH" != "$BRANCH" ]; then
   echo "Skipping snapshot deployment: wrong branch. Expected '$BRANCH' but was '$TRAVIS_BRANCH'."
 else
   echo "Decrypt properties"
-  openssl aes-256-cbc -K $encrypted_6ea3b168b74f_key -iv $encrypted_6ea3b168b74f_iv -in properties.zip.enc -out properties.zip -d
+  openssl aes-256-cbc -d -K ${encrypted_openssl_key} -iv ${encrypted_openssl_iv} -in properties.zip.enc -out properties.zip
   echo "Decrypt keystores"
-  openssl aes-256-cbc -K $encrypted_6ea3b168b74f_key -iv $encrypted_6ea3b168b74f_iv -in keystores.zip.enc -out keystores.zip -d
+  openssl aes-256-cbc -d -K ${encrypted_openssl_key} -iv ${encrypted_openssl_iv} -in keystores.zip.enc -out keystores.zip
 
   echo "Unzip properties"
-  unzip -P ${ZIP_PASSWORD_PROP} properties.zip
+  unzip -P ${encrypted_zip_password} properties.zip
   echo "Unzip keystores"
-  unzip -P ${ZIP_PASSWORD_KEYS} keystores.zip
+  unzip -P ${encrypted_zip_password} keystores.zip
 
   echo "Provide DEV properties"
-  ./provide_properties.sh properties.zip dev
+  ./provide_properties.sh dev
   echo "Provide DEV keystores"
-  ./provide_keystore.sh keystores.zip dev
+  ./provide_keystore.sh dev
   echo "Initialize Fabric params for DEV"
   FABRIC_GROUP='hyber-android,hyber-developers,hyber-testers'
   FABRIC_NOTES="$TRAVIS_COMMIT_MESSAGE"
@@ -51,9 +49,9 @@ else
   echo "DEV snapshot is deployed!"
 
   echo "Provide TD properties"
-  ./provide_properties.sh properties.zip td
+  ./provide_properties.sh td
   echo "Provide TD keystores"
-  ./provide_keystore.sh keystores.zip td
+  ./provide_keystore.sh td
   echo "Initialize Fabric params for TD"
   FABRIC_GROUP='hyber-android,hyber-developers,hyber-testers,hyber-td'
   FABRIC_NOTES="$TRAVIS_COMMIT_MESSAGE"
@@ -65,9 +63,9 @@ else
   echo "TD snapshot is deployed!"
 
   echo "Provide PROD properties"
-  ./provide_properties.sh properties.zip prod
+  ./provide_properties.sh prod
   echo "Provide PROD keystores"
-  ./provide_keystore.sh keystores.zip prod
+  ./provide_keystore.sh prod
   echo "Initialize Fabric params for PROD"
   FABRIC_GROUP='hyber-android,hyber-developers,hyber-testers,hyber-td,hyber-managers'
   FABRIC_NOTES="$TRAVIS_COMMIT_MESSAGE"
@@ -77,5 +75,4 @@ else
   echo "Deploy PROD snapshot..."
   ./gradlew example:fabricGenerateResourcesProdDebug example:crashlyticsUploadDistributionProdDebug
   echo "PROD snapshot is deployed!"
-
 fi

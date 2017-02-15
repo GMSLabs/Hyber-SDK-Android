@@ -6,7 +6,7 @@ set -e
 TYPE_DEV="dev"
 TYPE_TD="td"
 TYPE_PROD="prod"
-#TYPE_PRODD="prodd"
+TYPE_PRODD="prodd"
 
 #if [ -z ${JENKINS_HOME// } ]
 #then
@@ -18,19 +18,19 @@ TYPE_PROD="prod"
 #fi
 
 # Defaults
-KEYSTORE_FILE_NAME="$1"
-BUILD_TYPE="$2"
+#KEYSTORE_FILE_NAME="$1"
+BUILD_TYPE="$1"
 KEYSTORE_FOLDER="./keystores"
 #KEYSTORE_FOLDER="${JENKINS_HOME}/privates/Hyber-SDK-Android/keystores"
 
-if [ -z ${KEYSTORE_FILE_NAME// } ]
-then
-    echo ERROR: PROP_FILE_NAME argument is not correct
-    echo "This script will not work without a KEYSTORE_FILE_NAME - first argument"
-    exit 1 # terminate and indicate error
-else
-    echo "KEYSTORE_FILE_NAME is ${KEYSTORE_FILE_NAME}"
-fi
+#if [ -z ${KEYSTORE_FILE_NAME// } ]
+#then
+#    echo ERROR: PROP_FILE_NAME argument is not correct
+#    echo "This script will not work without a KEYSTORE_FILE_NAME - first argument"
+#    exit 1 # terminate and indicate error
+#else
+#    echo "KEYSTORE_FILE_NAME is ${KEYSTORE_FILE_NAME}"
+#fi
 
 if [ "$BUILD_TYPE" = "$TYPE_DEV" ] || [ "$BUILD_TYPE" = "$TYPE_TD" ] || [ "$BUILD_TYPE" = "$TYPE_PROD" ] || [ "$BUILD_TYPE" = "$TYPE_PRODD" ]
 then
@@ -48,13 +48,13 @@ else
     exit 1 # terminate and indicate error
 fi
 
-if [ -e ${KEYSTORE_FOLDER}/${KEYSTORE_FILE_NAME} ]
-then
-    echo "Keystore file is ${KEYSTORE_FOLDER}/${KEYSTORE_FILE_NAME}"
-else
-    echo ERROR: ${KEYSTORE_FILE_NAME} could not be found
-    exit 1 # terminate and indicate error
-fi
+#if [ -e ${KEYSTORE_FOLDER}/${KEYSTORE_FILE_NAME} ]
+#then
+#    echo "Keystore file is ${KEYSTORE_FOLDER}/${KEYSTORE_FILE_NAME}"
+#else
+#    echo ERROR: ${KEYSTORE_FILE_NAME} could not be found
+#    exit 1 # terminate and indicate error
+#fi
 
 #rm -rf ./keystores
 #unzip ${KEYSTORE_FOLDER}/${KEYSTORE_FILE_NAME} -d ./
