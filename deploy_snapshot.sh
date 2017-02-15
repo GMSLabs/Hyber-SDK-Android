@@ -13,6 +13,8 @@ FABRIC_GROUP=""
 FABRIC_NOTES=""
 FABRIC_DESCRIPTION=""
 
+
+
 set -e
 
 if [ "$TRAVIS_REPO_SLUG" != "$SLUG" ]; then
@@ -25,9 +27,14 @@ elif [ "$TRAVIS_BRANCH" != "$BRANCH" ]; then
   echo "Skipping snapshot deployment: wrong branch. Expected '$BRANCH' but was '$TRAVIS_BRANCH'."
 else
   echo "Decrypt properties"
-  openssl aes-256-cbc -K $encrypted_d1ceb7cf5733_key -iv $encrypted_d1ceb7cf5733_iv -in properties.zip.enc -out properties.zip -d
+  openssl aes-256-cbc -K $encrypted_6ea3b168b74f_key -iv $encrypted_6ea3b168b74f_iv -in properties.zip.enc -out properties.zip -d
   echo "Decrypt keystores"
-  openssl aes-256-cbc -K $encrypted_d1ceb7cf5733_key -iv $encrypted_d1ceb7cf5733_iv -in keystores.zip.enc -out keystores.zip -d
+  openssl aes-256-cbc -K $encrypted_6ea3b168b74f_key -iv $encrypted_6ea3b168b74f_iv -in keystores.zip.enc -out keystores.zip -d
+
+  echo "Unzip properties"
+  unzip -P ${ZIP_PASSWORD_PROP} properties.zip
+  echo "Unzip keystores"
+  unzip -P ${ZIP_PASSWORD_KEYS} keystores.zip
 
   echo "Provide DEV properties"
   ./provide_properties.sh properties.zip dev

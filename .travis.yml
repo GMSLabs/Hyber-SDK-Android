@@ -7,6 +7,8 @@ env:
   global:
     # wait up to 10 minutes for adb to connect to emulator
     - ADB_INSTALL_TIMEOUT=10
+    - secure: "rXSaGmYiHh3cS0QptL0wbzjOmf3kdo0WoDoGmos7p98JSZ6dEgH2keQ5sfyuE9nvJsT8jZRnV8X8d3iBG2kCpgmToVcOQ/NVHj36A/BIxlXQLE2HggOaH1S08BlS3qpFgI1kwv/2nQEVSlqfo1MyTg1YE4jq6ISd7OezKi598MgyMLOHgIS+EHfUJm5FzNBPxVMEKn/pn92MktDs+swk0N//ewof8d0eylVIXvelj6hT9oKyGGgaaQyvuUvwYk7Yn3gnDais0drOEqzbCQQUj+ufQW/hKN17KYZfZ2gWF75WyBXtYp1iHEZCAFwDoBOU85MT6ciBq32pPISDU2aPFOA3UwVqvXh9MOECBJRMFGAf41gcErvWbe3I5CulYhxsqpwQeFIC80kJ7ih0QFZty2OSxtLgL1gaNFUoyZky3qh3/iahd/TAtIj4V/Mu1+zrQmW/T3Zx/HXBruBIksi/qFM5LiSEMjEZ0TwZ/aXGU6wj5rb6tOii5eVUunIh96HAYqieSGeeno0svI9pVtm7l5hpG3N+FyPuTOf9WPRwrpblRETiYnBf6O0KdrgrOAeMcme+TQtldIOgBUqNs5Hmv55DsRt1ZvIkvTTD8uBX1zBjf9qpqS18wKQGYglbhBdIyWMKQibrvCOjfpnCHrtW3jOSW+xgg59HML7JLpFPXiI="
+    - secure: "jLnLGtjL+y0nD3IVJX4otdzUuqN2jPfDLNtWHn8N7SLsA+B3ImMpWrqRUqY4elhDEL4Esesq20x+W7HFtQuqNlhlMVR3X+CjKPkZN7XEzQ/fBYXB/nbi3lHdEfGR7Fn6POTGtYkprR9pgHcNBf3z9fVNasPwwnPk6VMz25MgYNFjy6p7k9R46yM5GLSMdqHHBiPTYNHIRVhjOXiyFiaemQBnMPITDMuS/uyT3joZWQdaIn5s6CGmzMaQpFZWmSnDzWq0zaSZj/QJqRf4k324ZvqOYxSScHtgldLYMxHTjBULjbykLLrYs2gMqjUnahr73ZjqESwXXb6DML64l7hmpbBTJxiX9QZpYYxhiOlPaEo/U6DI0HYybdUFpyvbMs/fDRYwLPv2Lk0kMTsPoog16KGhupStkLL5nPLekhmLDzXBH1ErpgGb1xsHCUkVgtxslKo1iYTlKZ4dePFAT6H236P658iC1rOq0oNB1V2sAJ9Sx8m/TPJA73ld0c1F9Iv/IDTLESZmlDeI8Y7qtumAjixluLfRZjFYUBmTUbhvyxxN0mwrutFw6HGRbBrxiGt1wwJ0q8DBXe7E6OomNoioLM65r4dID912gCNyWMSWy/pfFrpU7m+tIGM0idJkvShqptvMBeyX44O4/c1QXoxlbN7twUllHNYSU4HXefYZhSA="
 
 branches:
   except:
@@ -66,8 +68,7 @@ script:
 after_success:
   - ./gradlew hyber:jacocoTestDebugUnitTestReport example:jacocoTestDevDebugUnitTestReport -PdisablePreDex --continue --stacktrace
   - bash <(curl -s https://codecov.io/bash)
-  - chmod +x .buildscript/*
-  - .buildscript/deploy_snapshot.sh
+  - ./deploy_snapshot.sh
 
 #after_failure:
 #  - pandoc builder/build/reports/tests/index.html -t plain | sed -n '/^Failed tests/,/default-package/p'
