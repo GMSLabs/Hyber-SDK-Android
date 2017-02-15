@@ -9,9 +9,9 @@ SLUG="Incuube/Hyber-SDK-Android"
 JDK="oraclejdk8"
 BRANCH="master-2.0"
 
-FABRIC_GROUP=""
-FABRIC_NOTES=""
-FABRIC_DESCRIPTION=""
+export FABRIC_GROUP=""
+export FABRIC_NOTES=""
+export FABRIC_DESCRIPTION=""
 
 set -e
 
@@ -39,9 +39,9 @@ else
   echo "Provide DEV keystores"
   ./provide_keystore.sh dev
   echo "Initialize Fabric params for DEV"
-  FABRIC_GROUP='hyber-android,hyber-developers,hyber-testers'
-  FABRIC_NOTES="$TRAVIS_COMMIT_MESSAGE"
-  FABRIC_DESCRIPTION="Build from commit $TRAVIS_COMMIT"
+  export FABRIC_GROUP='hyber-android,hyber-developers,hyber-testers'
+  export FABRIC_NOTES="$TRAVIS_COMMIT_MESSAGE"
+  export FABRIC_DESCRIPTION="Build from commit $TRAVIS_COMMIT"
   echo "Build DEV snapshot..."
   ./gradlew clean example:assembleDevDebug
   echo "Deploy DEV snapshot..."
@@ -53,9 +53,9 @@ else
   echo "Provide TD keystores"
   ./provide_keystore.sh td
   echo "Initialize Fabric params for TD"
-  FABRIC_GROUP='hyber-android,hyber-developers,hyber-testers,hyber-td'
-  FABRIC_NOTES="$TRAVIS_COMMIT_MESSAGE"
-  FABRIC_DESCRIPTION="Build from commit $TRAVIS_COMMIT"
+  export FABRIC_GROUP='hyber-android,hyber-developers,hyber-testers,hyber-td'
+  export FABRIC_NOTES="$TRAVIS_COMMIT_MESSAGE"
+  export FABRIC_DESCRIPTION="Build from commit $TRAVIS_COMMIT"
   echo "Build TD snapshot..."
   ./gradlew clean example:assembleTdDebug
   echo "Deploy TD snapshot..."
@@ -67,9 +67,9 @@ else
   echo "Provide PROD keystores"
   ./provide_keystore.sh prod
   echo "Initialize Fabric params for PROD"
-  FABRIC_GROUP='hyber-android,hyber-developers,hyber-testers,hyber-td,hyber-managers'
-  FABRIC_NOTES="$TRAVIS_COMMIT_MESSAGE"
-  FABRIC_DESCRIPTION="Build from commit $TRAVIS_COMMIT"
+  export FABRIC_GROUP='hyber-android,hyber-developers,hyber-testers,hyber-td,hyber-managers'
+  export FABRIC_NOTES="$TRAVIS_COMMIT_MESSAGE"
+  export FABRIC_DESCRIPTION="Build from commit $TRAVIS_COMMIT"
   echo "Build PROD snapshot..."
   ./gradlew clean example:assembleProdDebug
   echo "Deploy PROD snapshot..."
