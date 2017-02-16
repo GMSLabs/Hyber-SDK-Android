@@ -132,7 +132,7 @@ dependencies {
 
     // Analytics
     compile 'com.google.firebase:firebase-crash:10.0.1'
-    compile('com.crashlytics.sdk.android:crashlytics:2.6.3@aar') {
+    compile('com.crashlytics.sdk.android:crashlytics:2.6.6@aar') {
         transitive = true;
     }
 
