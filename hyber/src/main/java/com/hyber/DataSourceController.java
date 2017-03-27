@@ -2,34 +2,34 @@ package com.hyber;
 
 import android.content.Context;
 
-import com.facebook.stetho.Stetho;
-import com.uphyca.stetho_realm.RealmInspectorModulesProvider;
+//import com.facebook.stetho.Stetho;
+//import com.uphyca.stetho_realm.RealmInspectorModulesProvider;
 
-import java.util.regex.Pattern;
+//import java.util.regex.Pattern;
 
 import io.realm.Realm;
 
 public final class DataSourceController {
 
-    private static final int REALM_PROVIDER_LIMIT = 1000;
+//    private static final int REALM_PROVIDER_LIMIT = 1000;
     private static DataSourceController singleton = null;
 
     private DataSourceController(Context context) {
         Realm.init(context);
 
-        RealmInspectorModulesProvider rimProvider = RealmInspectorModulesProvider.builder(context)
-                .withFolder(context.getFilesDir())
-                .withMetaTables()
-                .withDescendingOrder()
-                .withLimit(REALM_PROVIDER_LIMIT)
-                .databaseNamePattern(Pattern.compile(".+\\.realm"))
-                .build();
-
-        Stetho.initialize(
-                Stetho.newInitializerBuilder(context)
-                        .enableDumpapp(Stetho.defaultDumperPluginsProvider(context))
-                        .enableWebKitInspector(rimProvider)
-                        .build());
+//        RealmInspectorModulesProvider rimProvider = RealmInspectorModulesProvider.builder(context)
+//                .withFolder(context.getFilesDir())
+//                .withMetaTables()
+//                .withDescendingOrder()
+//                .withLimit(REALM_PROVIDER_LIMIT)
+//                .databaseNamePattern(Pattern.compile(".+\\.realm"))
+//                .build();
+//
+//        Stetho.initialize(
+//                Stetho.newInitializerBuilder(context)
+//                        .enableDumpapp(Stetho.defaultDumperPluginsProvider(context))
+//                        .enableWebKitInspector(rimProvider)
+//                        .build());
 
     }
 

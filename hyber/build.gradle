@@ -50,11 +50,11 @@ android {
 dependencies {
     compile 'org.jetbrains:annotations:13.0'
 
-    compile 'com.android.support:appcompat-v7:25.1.0'
-    compile 'com.android.support:recyclerview-v7:25.1.0'
+    compile 'com.android.support:appcompat-v7:25.3.0'
+    compile 'com.android.support:recyclerview-v7:25.3.0'
 
-    compile 'com.google.android.gms:play-services-base:10.0.1'
-    compile 'com.google.firebase:firebase-messaging:10.0.1'
+    compile 'com.google.android.gms:play-services-base:10.2.1'
+    compile 'com.google.firebase:firebase-messaging:10.2.1'
 
     compile 'io.reactivex:rxandroid:1.2.1'
     compile 'io.reactivex:rxjava:1.1.6'
@@ -71,10 +71,9 @@ dependencies {
     apt "org.projectlombok:lombok:1.12.6"
 
     // Debug dependencies
-    compile 'com.facebook.stetho:stetho:1.4.1'
-    compile 'com.facebook.stetho:stetho-okhttp3:1.4.1'
-    compile 'com.uphyca:stetho_realm:2.0.0'
-
+//    compile 'com.facebook.stetho:stetho:1.4.1'
+//    compile 'com.facebook.stetho:stetho-okhttp3:1.4.1'
+//    compile 'com.uphyca:stetho_realm:2.0.0'
 
     // Tests
     testCompile 'junit:junit:4.12'

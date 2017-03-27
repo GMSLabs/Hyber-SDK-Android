@@ -29,5 +29,6 @@
     <string name="RevokeConfirmText">Do you really want to revoke this device?</string>
     <string name="Revoke">Revoke</string>
     <string name="Cancel">Cancel</string>
+    <string name="login">Login</string>
 
 </resources>
