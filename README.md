@@ -10,16 +10,16 @@ For more information about Hyber and its features, see [hyber.im][hyber.im].
 ### Introduction
 First of all you need to configure [Google Services Plugin][google-services-plugin] and [Firebase Cloud Messaging][firebase-cloud-messaging]
 
-After that you need to initialize the Hyber inside onCreate method in your application class.
-```
-    buildConfigField 'String', 'HYBER_CLIENT_API_KEY', hyber_client_api_key
-```
-
-And after that you need to write next line to app level build.gradle file inside build config block
+After that you need to initialize the Hyber inside onCreate method in your Application class.
 ```java
     Hyber.with(this, BuildConfig.HYBER_CLIENT_API_KEY)
         .setNotificationListener(...)
         .init();
+```
+
+And after that you need to write next line to app level build.gradle file inside build config block
+```
+    buildConfigField 'String', 'HYBER_CLIENT_API_KEY', hyber_client_api_key
 ```
 ***
 
