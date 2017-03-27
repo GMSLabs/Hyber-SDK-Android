@@ -23,6 +23,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
 import android.widget.AdapterView;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
@@ -60,6 +61,7 @@ public class AuthActivity extends AppCompatActivity {
     private ViewGroup mLinearLayout;
     private ProgressDialog progressDialog;
     private FrameLayout mCountryLayout;
+    private Button loginButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -71,6 +73,14 @@ public class AuthActivity extends AppCompatActivity {
 
         mLinearLayout = (ViewGroup) findViewById(R.id.linear_layout_auth);
         mCountryLayout = (FrameLayout) findViewById(R.id.fragment_country_container);
+        loginButton = (Button) findViewById(R.id.loginButton);
+        loginButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (view != null)
+                    view.onNextPressed();
+            }
+        });
 
         view = new PhoneView(this);
         view.setVisibility(View.VISIBLE);
