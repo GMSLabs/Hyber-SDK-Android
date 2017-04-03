@@ -18,7 +18,9 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import io.realm.Realm;
 import retrofit2.Response;
@@ -79,7 +81,7 @@ final class ApiBusinessModel implements IApiBusinessModel {
             HyberLogger.e(e, "Url: %s\nResponse code: %d\nResponse error body: %s",
                     response.raw().request().url().toString(), response.code(), response.errorBody());
         }
-        return new HyberError(HyberError.HyberErrorStatus.INTERNAL_ERROR);
+        return new HyberError(HyberError.HyberErrorStatus.API_ERROR);
     }
 
     private Map<String, String> generateAuthorizedHeaders() {
@@ -106,6 +108,12 @@ final class ApiBusinessModel implements IApiBusinessModel {
     @Override
     public void authorize(@NonNull final String phone, @NonNull final String password, @NonNull final AuthorizationListener listener) {
         HyberLogger.i("Start user registration.");
+        if ((System.currentTimeMillis() - Hyber.lastAuthorizeTime) < TimeUnit.SECONDS.toMillis(1)) {
+            listener.onFailure(new HyberError(HyberError.HyberErrorStatus.TOO_MANY_REQUESTS, "Authorize request has limit to 1 req/sec"));
+            return;
+        } else {
+            Hyber.lastAuthorizeTime = System.currentTimeMillis();
+        }
 
         final String sessionId = Utils.getRandomUuid();
 
@@ -175,7 +183,7 @@ final class ApiBusinessModel implements IApiBusinessModel {
         repo.open();
         user = repo.getCurrentUser();
         if (user == null || token == null) {
-            listener.onFailure();
+            listener.onFailure(new HyberError(HyberError.HyberErrorStatus.UNAUTHORIZED, "User not authorized"));
             repo.close();
             return;
         } else {
@@ -220,18 +228,21 @@ final class ApiBusinessModel implements IApiBusinessModel {
                                 HyberLogger.i("Response for update user device data api with error\n%d ==> %s!",
                                         ErrorStatus.byCode(response.body().getError().getCode()).getCode(),
                                         ErrorStatus.byCode(response.body().getError().getCode()).getDescription());
-                                listener.onFailure();
+                                listener.onFailure(new HyberError(HyberError.HyberErrorStatus.API_ERROR,
+                                        String.format(Locale.getDefault(),
+                                                "Response for update user device data api with error\n%d ==> %s!",
+                                                ErrorStatus.byCode(response.body().getError().getCode()).getCode(),
+                                                ErrorStatus.byCode(response.body().getError().getCode()).getDescription())));
                             }
                         } else {
-                            responseIsUnsuccessful(response);
-                            listener.onFailure();
+                            listener.onFailure(responseIsUnsuccessful(response));
                         }
                     }
                 }, new Action1<Throwable>() {
                     @Override
                     public void call(Throwable throwable) {
                         HyberLogger.e(throwable, "Error in update user device data api request!");
-                        listener.onFailure();
+                        listener.onFailure(new HyberError(HyberError.HyberErrorStatus.INTERNAL_ERROR, "Error in update user device data api request!"));
                     }
                 });
     }
@@ -551,7 +562,7 @@ final class ApiBusinessModel implements IApiBusinessModel {
     interface SendDeviceDataListener {
         void onSuccess();
 
-        void onFailure();
+        void onFailure(@lombok.NonNull HyberError status);
     }
 
     interface SendMessageDeliveryReportListener {

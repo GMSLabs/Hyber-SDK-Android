@@ -58,6 +58,8 @@ public final class Hyber {
     private static RealmResults<Message> mMessageResults;
     private static HashMap<String, Boolean> drInQueue;
 
+    static long lastAuthorizeTime = 0;
+
     private static Hyber instance = null;
 
     private Hyber() {
@@ -265,16 +267,17 @@ public final class Hyber {
         getApiBusinessModel().authorize(phone, password, new ApiBusinessModel.AuthorizationListener() {
             @Override
             public void onSuccess() {
-                callback.onSuccess(new EmptyResult());
                 getApiBusinessModel().sendDeviceData(new ApiBusinessModel.SendDeviceDataListener() {
                     @Override
                     public void onSuccess() {
                         HyberLogger.i("Send device data is success");
+                        callback.onSuccess(new EmptyResult());
                     }
 
                     @Override
-                    public void onFailure() {
-                        HyberLogger.i("Send device data is failure");
+                    public void onFailure(@lombok.NonNull HyberError status) {
+                        HyberLogger.e("Send device data is failure");
+                        callback.onFailure(status);
                     }
                 });
             }
@@ -448,8 +451,8 @@ public final class Hyber {
             }
 
             @Override
-            public void onFailure() {
-                HyberLogger.d("Refreshed FCM token can not sent to Hyber.");
+            public void onFailure(@lombok.NonNull HyberError status) {
+                HyberLogger.d("Refreshed FCM token can not sent to Hyber.\n%s - %s", status.getStatus().name(), status.getMessage());
             }
         });
     }

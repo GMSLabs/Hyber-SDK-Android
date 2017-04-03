@@ -12,6 +12,7 @@ import android.content.res.Resources;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
+import com.google.firebase.FirebaseApp;
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.hyber.log.HyberLogger;
 
@@ -134,6 +135,11 @@ class PushRegistrarFCM implements PushRegistrator {
                 String registrationId = null;
 
                 for (int currentRetry = 0; currentRetry < FCM_RETRY_COUNT; currentRetry++) {
+                    try {
+                        FirebaseApp.initializeApp(appContext);
+                    } catch (Exception e) {
+                        HyberLogger.e(e);
+                    }
                     registrationId = FirebaseInstanceId.getInstance().getToken();
                     if (registrationId != null) {
                         HyberLogger.i("Device registered, Firebase registration push token = %s", registrationId);
