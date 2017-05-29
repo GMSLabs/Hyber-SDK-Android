@@ -12,7 +12,6 @@ build/
 .gradle
 
 # Configuration files
-gradle.properties
 local.properties
 /properties
 /keystores

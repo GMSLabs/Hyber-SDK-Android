@@ -7,7 +7,7 @@
 
 SLUG="Incuube/Hyber-SDK-Android"
 JDK="oraclejdk8"
-BRANCH="master-2.0"
+BRANCH="master"
 
 export FABRIC_GROUP=""
 export FABRIC_NOTES=""
