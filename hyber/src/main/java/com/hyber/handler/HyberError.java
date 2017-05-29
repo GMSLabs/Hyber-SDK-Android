@@ -19,7 +19,9 @@ public class HyberError {
         MESSAGE_HISTORY_INCORRECT_START_TIME,
         MESSAGE_CALLBACK_NOT_ALLOWED,
         INCORRECT_MESSAGE_ID,
-        INCORRECT_DEVICE_ID
+        INCORRECT_DEVICE_ID,
+        TOO_MANY_REQUESTS,
+        API_ERROR
     }
 
     @NonNull

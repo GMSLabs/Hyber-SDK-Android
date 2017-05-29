@@ -1,7 +1,7 @@
 apply plugin: 'com.android.library'
 apply plugin: 'realm-android'
 apply plugin: 'android-apt'
-apply plugin: 'jacoco-android'
+//apply plugin: 'jacoco-android'
 
 repositories {
     mavenCentral()
@@ -31,11 +31,11 @@ android {
         buildConfigField 'String', 'API_URL_pc_receiver', api_url_pc_receiver
     }
 
-    buildTypes {
-        all {
-            testCoverageEnabled true
-        }
-    }
+//    buildTypes {
+//        all {
+//            testCoverageEnabled true
+//        }
+//    }
 
     lintOptions {
         abortOnError false
@@ -50,8 +50,8 @@ android {
 dependencies {
     compile 'org.jetbrains:annotations:13.0'
 
-    compile 'com.android.support:appcompat-v7:25.3.0'
-    compile 'com.android.support:recyclerview-v7:25.3.0'
+    compile 'com.android.support:appcompat-v7:25.3.1'
+    compile 'com.android.support:recyclerview-v7:25.3.1'
 
     compile 'com.google.android.gms:play-services-base:10.2.1'
     compile 'com.google.firebase:firebase-messaging:10.2.1'

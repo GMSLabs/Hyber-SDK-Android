@@ -11,7 +11,7 @@ import java.lang.ref.WeakReference;
 
 final class HyberActivityLifecycleHandler {
 
-    private static final String TAG = "AppFingerprint";
+    private static final String TAG = "HyberActivityLifecycleHandler";
 
     private static final int DELAY_MILLS = 2000;
     private static boolean nextResumeIsFirstActivity;
@@ -24,7 +24,10 @@ final class HyberActivityLifecycleHandler {
     }
 
     static Activity getCurrActivity() {
-        return curActivity.get();
+        if (curActivity == null)
+            return null;
+        else
+            return curActivity.get();
     }
 
     // Note: Only supports one callback, create a list when this needs to be used by more than the permissions dialog.
