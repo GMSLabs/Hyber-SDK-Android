@@ -53,7 +53,7 @@ node {
   }
 
   stage ('Publication Hyber DEV to Fabric') {
-    if (env.BRANCH_NAME == 'master-2.0') {
+    if (env.BRANCH_NAME == 'master') {
       sh "printenv"
       sh "./provide_properties.sh properties.zip dev"
       sh "./provide_keystore.sh keystores.zip dev"
@@ -74,7 +74,7 @@ node {
   }
 
   stage ('Publication Hyber TD to Fabric') {
-    if (env.BRANCH_NAME == 'master-2.0') {
+    if (env.BRANCH_NAME == 'master') {
       sh "printenv"
       sh "./provide_properties.sh properties.zip td"
       sh "./provide_keystore.sh keystores.zip td"
@@ -95,7 +95,7 @@ node {
   }
 
   stage ('Publication Hyber PROD to Fabric') {
-    if (env.BRANCH_NAME == 'master-2.0') {
+    if (env.BRANCH_NAME == 'master') {
       sh "printenv"
       sh "./provide_properties.sh properties.zip prod"
       sh "./provide_keystore.sh keystores.zip prod"
@@ -116,7 +116,7 @@ node {
   }
 
   stage ('Publication Hyber PRODD to Fabric') {
-    if (env.BRANCH_NAME == 'master-2.0') {
+    if (env.BRANCH_NAME == 'master') {
       sh "printenv"
       sh "./provide_properties.sh properties.zip prodd"
       sh "./provide_keystore.sh keystores.zip prodd"
