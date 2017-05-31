@@ -29,7 +29,8 @@ final class HyberRestClient {
     static {
         OkHttpClient okHttpClient = new OkHttpClient.Builder()
 //                .addNetworkInterceptor(new StethoInterceptor())
-//                .addInterceptor(new HyberHttpLoggingInterceptor().setLevel(HyberHttpLoggingInterceptor.Level.FULL))
+                .addInterceptor(new HyberHttpLoggingInterceptor().setLevel(BuildConfig.DEBUG ?
+                        HyberHttpLoggingInterceptor.Level.FULL : HyberHttpLoggingInterceptor.Level.NONE))
                 .connectTimeout(STANDARD_API_TIMEOUT_SECONDS, TimeUnit.SECONDS)
                 .readTimeout(STANDARD_API_TIMEOUT_SECONDS, TimeUnit.SECONDS)
                 .writeTimeout(STANDARD_API_TIMEOUT_SECONDS, TimeUnit.SECONDS)

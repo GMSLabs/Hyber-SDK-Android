@@ -5,6 +5,7 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.os.Handler;
 import android.support.annotation.NonNull;
@@ -16,6 +17,7 @@ import com.crashlytics.android.Crashlytics;
 import com.google.firebase.crash.FirebaseCrash;
 import com.google.firebase.messaging.RemoteMessage;
 import com.google.gson.Gson;
+import com.google.gson.internal.Streams;
 import com.hyber.Hyber;
 import com.hyber.MessageRespModel;
 import com.hyber.example.ui.SplashActivity;
@@ -32,6 +34,8 @@ public class ApplicationLoader extends Application {
 
     public static volatile Context applicationContext;
     public static volatile Handler applicationHandler;
+    public static final String SP_EXAMPLE_SETTINGS = "example_settings";
+    public static final String SP_HYBER_CLIENT_API_KEY = "hyber_client_api_key";
 
     @Override
     public void onCreate() {
@@ -45,8 +49,18 @@ public class ApplicationLoader extends Application {
 
         HyberLogger.plant(new HyberLogger.DebugTree(), new CrashReportingTree(), new UIErrorTree());
 
+        String hyberClientApiKey = BuildConfig.HYBER_CLIENT_API_KEY;
+        SharedPreferences sp = getSharedPreferences(SP_EXAMPLE_SETTINGS, MODE_PRIVATE);
+        if (sp != null) {
+            if (sp.getString(SP_HYBER_CLIENT_API_KEY, null) == null) {
+                sp.edit().putString(SP_HYBER_CLIENT_API_KEY, hyberClientApiKey).commit();
+            } else {
+                hyberClientApiKey = sp.getString(SP_HYBER_CLIENT_API_KEY, null);
+            }
+        }
+
         //Initialisation Hyber SDK
-        Hyber.with(this, BuildConfig.HYBER_CLIENT_API_KEY)
+        Hyber.with(this, sp.getString(SP_HYBER_CLIENT_API_KEY, hyberClientApiKey))
                 .setNotificationListener(new HyberNotificationListener() {
                     @Override
                     public void onMessageReceived(RemoteMessage remoteMessage) {
@@ -129,7 +143,7 @@ public class ApplicationLoader extends Application {
         protected void log(int priority, String tag, String message, Throwable t) {
             if (t != null) {
                 Crashlytics.logException(t);
-                FirebaseCrash.report(t);
+//                FirebaseCrash.report(t);
             }
         }
 
@@ -180,6 +194,13 @@ public class ApplicationLoader extends Application {
 
     private void runOnUiThread(Runnable r) {
         applicationHandler.post(r);
+    }
+
+    public static void restartApplication(Context context) {
+        Intent i = context.getPackageManager()
+                .getLaunchIntentForPackage(context.getPackageName());
+        i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        context.startActivity(i);
     }
 
 }

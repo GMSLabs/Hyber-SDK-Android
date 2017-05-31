@@ -2,9 +2,7 @@ package com.hyber.example.ui;
 
 import android.content.Context;
 import android.content.Intent;
-import android.os.Build;
 import android.os.Bundle;
-import android.speech.tts.TextToSpeech;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.AppCompatEditText;
@@ -26,9 +24,6 @@ import com.hyber.handler.HyberError;
 import com.hyber.handler.LogoutUserHandler;
 import com.hyber.log.HyberLogger;
 import com.hyber.model.Message;
-
-import java.util.Locale;
-import java.util.UUID;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -60,8 +55,6 @@ public class MessagesFragment extends Fragment {
     private int mMaxHistoryRequests = 2;
     private Long mTimeForNextHistoryRequest;
 
-    private TextToSpeech mTTS;
-
     public MessagesFragment() {
         // Required empty public constructor
     }
@@ -83,47 +76,6 @@ public class MessagesFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         HyberLogger.i("I'm alive!");
-
-        mTTS = new TextToSpeech(getActivity(), new TextToSpeech.OnInitListener() {
-            @Override
-            public void onInit(int status) {
-                // TODO Auto-generated method stub
-                if (status == TextToSpeech.SUCCESS) {
-                    Locale locale = Locale.US;
-                    int result = mTTS.setLanguage(locale);
-                    if (result == TextToSpeech.LANG_MISSING_DATA
-                            || result == TextToSpeech.LANG_NOT_SUPPORTED) {
-                        HyberLogger.e("TTS", "Sorry, this language is unsupported");
-                    }
-                } else {
-                    HyberLogger.e("TTS", "Error!");
-                }
-            }
-        });
-    }
-
-    private void speakOut(String text) {
-        boolean isEnglish = true;
-        for (char c : text.toCharArray()) {
-            if (Character.UnicodeBlock.of(c) != Character.UnicodeBlock.BASIC_LATIN) {
-                isEnglish = false;
-                break;
-            }
-        }
-        Locale locale;
-        if (isEnglish) {
-            locale = Locale.ENGLISH;
-        } else {
-            locale = new Locale("ru");
-        }
-        mTTS.setLanguage(locale);
-        // A random String (Unique ID).
-        String utteranceId = UUID.randomUUID().toString();
-        if (Build.VERSION.SDK_INT < 21) {
-            mTTS.speak(text, TextToSpeech.QUEUE_FLUSH, null);
-        } else {
-            mTTS.speak(text, TextToSpeech.QUEUE_FLUSH, null, utteranceId);
-        }
     }
 
     @OnClick(R.id.sendAnswerAppCompatImageButton)
@@ -170,7 +122,6 @@ public class MessagesFragment extends Fragment {
                             HyberLogger.e(e, "mAdapter count %d, position %d",
                                     mAdapter.getItemCount(), positionStart + itemCount - 1);
                         }
-                        speakOut(mAdapter.getItem(positionStart).getBody());
                     }
 
                     @Override
@@ -246,11 +197,6 @@ public class MessagesFragment extends Fragment {
 
     @Override
     public void onDestroyView() {
-        // Don't forget to shutdown mTTS!
-        if (mTTS != null) {
-            mTTS.stop();
-            mTTS.shutdown();
-        }
         unbinder.unbind();
         super.onDestroyView();
     }

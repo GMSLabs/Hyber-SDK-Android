@@ -52,7 +52,7 @@ final class ApiBusinessModel implements IApiBusinessModel {
     private HyberError responseIsUnsuccessful(Response response) {
         try {
             String contentType = response.headers().get("Content-Type");
-            if (contentType.contains("application/json")) {
+            if (contentType != null && contentType.contains("application/json")) {
                 BaseResponse errorResp = new Gson().fromJson(response.errorBody().string(), BaseResponse.class);
                 if (errorResp != null && errorResp.getError() != null && errorResp.getError().getCode() != null) {
                     ErrorStatus es = ErrorStatus.byCode(errorResp.getError().getCode());
@@ -70,7 +70,7 @@ final class ApiBusinessModel implements IApiBusinessModel {
                     HyberLogger.e("Url: %s\nResponse code: %d\nResponse in json format: %s",
                             response.raw().request().url().toString(), response.code(), response.errorBody().string());
                 }
-            } else if (contentType.contains("text/html")) {
+            } else if (contentType != null && contentType.contains("text/html")) {
                 HyberLogger.e("Url: %s\nResponse code: %d\nResponse in html format: %s",
                         response.raw().request().url().toString(), response.code(), Html.fromHtml(response.errorBody().string()));
             } else {

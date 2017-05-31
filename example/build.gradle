@@ -99,13 +99,6 @@ android {
 
             signingConfig signingConfigs.debug
         }
-        prodd {
-            applicationId "com.hyber.example.prodd"
-
-            buildConfigField 'String', 'HYBER_CLIENT_API_KEY', hyber_client_api_key
-
-            signingConfig signingConfigs.debug
-        }
     }
 }
 
@@ -117,8 +110,8 @@ dependencies {
 
     compile 'io.realm:android-adapters:1.4.0'
 
-    provided "org.projectlombok:lombok:1.12.6"
-    apt "org.projectlombok:lombok:1.12.6"
+    provided "org.projectlombok:lombok:1.16.16"
+    apt "org.projectlombok:lombok:1.16.16"
 
     compile 'com.android.support:support-v4:25.3.1'
     compile 'com.android.support:appcompat-v7:25.3.1'

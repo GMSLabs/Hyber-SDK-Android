@@ -26,6 +26,18 @@
         android:layout_below="@+id/linear_layout_auth"
         android:text="@string/login" />
 
+    <Button
+        android:id="@+id/backToDefaultButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
+        android:layout_marginBottom="15dp"
+        android:layout_marginEnd="15dp"
+        android:layout_marginRight="15dp"
+        android:text="Back to default" />
+
     <FrameLayout
         android:id="@+id/fragment_country_container"
         android:layout_width="match_parent"

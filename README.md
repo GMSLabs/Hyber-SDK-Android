@@ -32,7 +32,7 @@ Add next repository to project level build.gradle:
 
 Then add next dependencies to app level build.gradle:
 ```groovy
-    compile 'com.hyber:hyber-messaging:2.2.0'
+    compile 'com.hyber:hyber-messaging:2.2.2'
 ```
 
 *Hyber SDK requires at minimum Java 7 or Android 4.1.*
@@ -136,7 +136,7 @@ private class CrashReportingTree extends HyberLogger.Tree {
 [release-svg]: http://github-release-version.herokuapp.com/github/Incuube/Hyber-SDK-Android/release.svg?style=flat
 [release-link]: https://github.com/Incuube/Hyber-SDK-Android/releases/latest
 
-[ci-build-status-svg]: https://travis-ci.org/Incuube/Hyber-SDK-Android.svg?branch=master-2.0
+[ci-build-status-svg]: https://travis-ci.org/Incuube/Hyber-SDK-Android.svg?branch=master
 [ci-build-status]: https://travis-ci.org/Incuube/Hyber-SDK-Android
 
 [codecov-svg]: https://codecov.io/gh/Incuube/Hyber-SDK-Android/branch/master/graph/badge.svg

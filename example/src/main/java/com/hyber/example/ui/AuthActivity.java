@@ -6,6 +6,7 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
@@ -33,6 +34,7 @@ import android.widget.Toast;
 import com.hyber.Hyber;
 import com.hyber.example.AndroidUtilities;
 import com.hyber.example.ApplicationLoader;
+import com.hyber.example.BuildConfig;
 import com.hyber.example.LocaleController;
 import com.hyber.example.PhoneFormat.PhoneFormat;
 import com.hyber.example.R;
@@ -62,6 +64,7 @@ public class AuthActivity extends AppCompatActivity {
     private ProgressDialog progressDialog;
     private FrameLayout mCountryLayout;
     private Button loginButton;
+    private Button backToDefaultButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -74,11 +77,18 @@ public class AuthActivity extends AppCompatActivity {
         mLinearLayout = (ViewGroup) findViewById(R.id.linear_layout_auth);
         mCountryLayout = (FrameLayout) findViewById(R.id.fragment_country_container);
         loginButton = (Button) findViewById(R.id.loginButton);
+        backToDefaultButton = (Button) findViewById(R.id.backToDefaultButton);
         loginButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (view != null)
                     view.onNextPressed();
+            }
+        });
+        backToDefaultButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                    backToDefaultButtonOnClick(v);
             }
         });
 
@@ -89,6 +99,27 @@ public class AuthActivity extends AppCompatActivity {
         layoutParams.setMargins(AndroidUtilities.dp(5), AndroidUtilities.dp(5), AndroidUtilities.dp(5), AndroidUtilities.dp(5));
 
         mLinearLayout.addView(view, layoutParams);
+
+        SharedPreferences sp = getSharedPreferences(ApplicationLoader.SP_EXAMPLE_SETTINGS, MODE_PRIVATE);
+        if (sp.getString(ApplicationLoader.SP_HYBER_CLIENT_API_KEY, "").equals(BuildConfig.HYBER_CLIENT_API_KEY))
+            backToDefaultButton.setVisibility(View.GONE);
+        else backToDefaultButton.setVisibility(View.VISIBLE);
+    }
+
+    public void backToDefaultButtonOnClick(View v) {
+        SharedPreferences sp = getSharedPreferences(ApplicationLoader.SP_EXAMPLE_SETTINGS, MODE_PRIVATE);
+        sp.edit().putString(ApplicationLoader.SP_HYBER_CLIENT_API_KEY, BuildConfig.HYBER_CLIENT_API_KEY).commit();
+        Hyber.logoutCurrentUser(new LogoutUserHandler() {
+            @Override
+            public void onSuccess() {
+                ApplicationLoader.restartApplication(getBaseContext());
+            }
+
+            @Override
+            public void onFailure() {
+                ApplicationLoader.restartApplication(getBaseContext());
+            }
+        });
     }
 
     @Override
