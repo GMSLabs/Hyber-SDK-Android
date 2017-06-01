@@ -117,21 +117,25 @@ public class SettingsFragment extends Fragment {
 
     @OnClick(R.id.saveButton)
     public void saveButtonOnClick(View v) {
-        String clientApiKey = clientApiKeyEditText.getEditableText().toString();
+        final String clientApiKey = clientApiKeyEditText.getEditableText().toString();
         if (!isValidClientApiKey(clientApiKey)) {
             clientApiKeyInputLayout.setError("Incorrect Client API Key!");
-        } else clientApiKeyInputLayout.setError(null);
-        Hyber.logoutCurrentUser(new LogoutUserHandler() {
-            @Override
-            public void onSuccess() {
-                ApplicationLoader.restartApplication(getActivity().getBaseContext());
-            }
+        } else {
+            Hyber.logoutCurrentUser(new LogoutUserHandler() {
+                @Override
+                public void onSuccess() {
+                    clientApiKeyInputLayout.setError(null);
+                    SharedPreferences sp = getActivity().getSharedPreferences(ApplicationLoader.SP_EXAMPLE_SETTINGS, MODE_PRIVATE);
+                    sp.edit().putString(ApplicationLoader.SP_HYBER_CLIENT_API_KEY, clientApiKey).commit();
+                    ApplicationLoader.restartApplication(getActivity().getBaseContext());
+                }
 
-            @Override
-            public void onFailure() {
-                ApplicationLoader.restartApplication(getActivity().getBaseContext());
-            }
-        });
+                @Override
+                public void onFailure() {
+                    clientApiKeyInputLayout.setError("Oops... Something went wrong...");
+                }
+            });
+        }
     }
 
     @OnClick(R.id.backToDefaultButton)
@@ -146,7 +150,7 @@ public class SettingsFragment extends Fragment {
 
             @Override
             public void onFailure() {
-                ApplicationLoader.restartApplication(getActivity().getBaseContext());
+                clientApiKeyInputLayout.setError("Oops... Something went wrong...");
             }
         });
     }
