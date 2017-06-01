@@ -6,7 +6,6 @@ set -e
 TYPE_DEV="dev"
 TYPE_TD="td"
 TYPE_PROD="prod"
-TYPE_PRODD="prodd"
 
 #if [ -z ${JENKINS_HOME// } ]
 #then
@@ -32,7 +31,7 @@ KEYSTORE_FOLDER="./keystores"
 #    echo "KEYSTORE_FILE_NAME is ${KEYSTORE_FILE_NAME}"
 #fi
 
-if [ "$BUILD_TYPE" = "$TYPE_DEV" ] || [ "$BUILD_TYPE" = "$TYPE_TD" ] || [ "$BUILD_TYPE" = "$TYPE_PROD" ] || [ "$BUILD_TYPE" = "$TYPE_PRODD" ]
+if [ "$BUILD_TYPE" = "$TYPE_DEV" ] || [ "$BUILD_TYPE" = "$TYPE_TD" ] || [ "$BUILD_TYPE" = "$TYPE_PROD" ]
 then
     echo "BUILD_TYPE is $BUILD_TYPE"
 else

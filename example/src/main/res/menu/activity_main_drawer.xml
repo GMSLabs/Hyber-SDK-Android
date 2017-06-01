@@ -10,6 +10,10 @@
             android:id="@+id/nav_devices"
             android:icon="@drawable/common_full_open_on_phone"
             android:title="Devices" />
+        <item
+            android:id="@+id/nav_settings"
+            android:icon="@android:drawable/ic_dialog_alert"
+            android:title="Settings" />
     </group>
 
 </menu>

@@ -115,27 +115,6 @@ node {
     }
   }
 
-  stage ('Publication Hyber PRODD to Fabric') {
-    if (env.BRANCH_NAME == 'master') {
-      sh "printenv"
-      sh "./provide_properties.sh properties.zip prodd"
-      sh "./provide_keystore.sh keystores.zip prodd"
-
-      env.FABRIC_GROUP='hyber-android,hyber-developers,hyber-testers'
-      env.FABRIC_NOTES='This is prodaction for developers build from branch ' + env.BRANCH_NAME
-      env.FABRIC_DESCRIPTION='This build powered by Jenkins CI'
-
-      sh "echo FABRIC_GROUP = ${FABRIC_GROUP}"
-      sh "echo FABRIC_NOTES = ${FABRIC_NOTES}"
-
-      sh "echo ${env.BRANCH_NAME} is branch for crashlytics upload distribution Prodd build"
-      sh "./gradlew hyber:clean example:clean example:assembleProddDebug"
-      sh "./gradlew example:fabricGenerateResourcesProddDebug example:crashlyticsUploadDistributionProddDebug"
-    } else {
-      sh "echo ${env.BRANCH_NAME} is not branch for crashlytics upload distribution Prodd build"
-    }
-  }
-
   stage ('Clean-up') {
     deleteDir()
   }
