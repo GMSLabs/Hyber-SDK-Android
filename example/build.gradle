@@ -85,6 +85,20 @@ android {
 
             signingConfig signingConfigs.debug
         }
+        qa {
+            applicationId "com.hyber.example.qa"
+
+            buildConfigField 'String', 'HYBER_CLIENT_API_KEY', hyber_client_api_key
+
+            signingConfig signingConfigs.debug
+        }
+        fqa {
+            applicationId "com.hyber.example.fqa"
+
+            buildConfigField 'String', 'HYBER_CLIENT_API_KEY', hyber_client_api_key
+
+            signingConfig signingConfigs.debug
+        }
         td {
             applicationId "com.hyber.example.td"
 
