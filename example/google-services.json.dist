@@ -54,6 +54,94 @@
       "client_info": {
         "mobilesdk_app_id": "1:936881676680:android:qwerty_22_qwerty",
         "android_client_info": {
+          "package_name": "com.hyber.example.qa"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "936881676680-qwertyqwerty1qwertyqwerty1qwerty.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.hyber.example.qa",
+            "certificate_hash": "DEMODEMO_DEMODEMO_DEMODEMO_DEMO_DEMODEMO"
+          }
+        },
+        {
+          "client_id": "936881676680-qwertyqwerty1qwertyqwerty1qwerty.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "DEMODEMO_DEMODEMO_DEMODEMODEMO_DEMODEMO"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "936881676680-qwertyqwerty1qwertyqwerty1qwerty.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    },
+    {
+      "client_info": {
+      "mobilesdk_app_id": "1:936881676680:android:qwerty_22_qwerty",
+        "android_client_info": {
+          "package_name": "com.hyber.example.fqa"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "936881676680-qwertyqwerty1qwertyqwerty1qwerty.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.hyber.example.fqa",
+            "certificate_hash": "DEMODEMO_DEMODEMO_DEMODEMO_DEMO_DEMODEMO"
+          }
+        },
+        {
+          "client_id": "936881676680-qwertyqwerty1qwertyqwerty1qwerty.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "DEMODEMO_DEMODEMO_DEMODEMODEMO_DEMODEMO"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+        "status": 1
+      },
+      "appinvite_service": {
+        "status": 2,
+        "other_platform_oauth_client": [
+          {
+            "client_id": "936881676680-qwertyqwerty1qwertyqwerty1qwerty.apps.googleusercontent.com",
+            "client_type": 3
+          }
+        ]
+      },
+      "ads_service": {
+        "status": 2
+      }
+    }
+ },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:936881676680:android:qwerty_22_qwerty",
+        "android_client_info": {
           "package_name": "com.hyber.example.td"
         }
       },

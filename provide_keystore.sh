@@ -4,6 +4,8 @@
 set -e
 
 TYPE_DEV="dev"
+TYPE_QA="qa"
+TYPE_FQA="fqa"
 TYPE_TD="td"
 TYPE_PROD="prod"
 
@@ -31,7 +33,7 @@ KEYSTORE_FOLDER="./keystores"
 #    echo "KEYSTORE_FILE_NAME is ${KEYSTORE_FILE_NAME}"
 #fi
 
-if [ "$BUILD_TYPE" = "$TYPE_DEV" ] || [ "$BUILD_TYPE" = "$TYPE_TD" ] || [ "$BUILD_TYPE" = "$TYPE_PROD" ]
+if [ "$BUILD_TYPE" = "$TYPE_DEV" ] || [ "$BUILD_TYPE" = "$TYPE_QA" ] || [ "$BUILD_TYPE" = "$TYPE_FQA" ] || [ "$BUILD_TYPE" = "$TYPE_TD" ] || [ "$BUILD_TYPE" = "$TYPE_PROD" ]
 then
     echo "BUILD_TYPE is $BUILD_TYPE"
 else
