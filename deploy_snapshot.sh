@@ -25,14 +25,9 @@ elif [ "$TRAVIS_BRANCH" != "$BRANCH" ]; then
   echo "Skipping snapshot deployment: wrong branch. Expected '$BRANCH' but was '$TRAVIS_BRANCH'."
 else
   echo "Decrypt properties"
-  openssl aes-256-cbc -d -K ${encrypted_openssl_key} -iv ${encrypted_openssl_iv} -in properties.zip.enc -out properties.zip
+  curl -s https://raw.githubusercontent.com/AndrewKochura/CI-Guardian/master/guardian.sh | bash /dev/stdin -d --filename=properties --zip-password=${encrypted_zip_password} --openssl-key=${encrypted_openssl_key} --openssl-iv=${encrypted_openssl_iv}
   echo "Decrypt keystores"
-  openssl aes-256-cbc -d -K ${encrypted_openssl_key} -iv ${encrypted_openssl_iv} -in keystores.zip.enc -out keystores.zip
-
-  echo "Unzip properties"
-  unzip -P ${encrypted_zip_password} properties.zip
-  echo "Unzip keystores"
-  unzip -P ${encrypted_zip_password} keystores.zip
+  curl -s https://raw.githubusercontent.com/AndrewKochura/CI-Guardian/master/guardian.sh | bash /dev/stdin -d --filename=keystores --zip-password=${encrypted_zip_password} --openssl-key=${encrypted_openssl_key} --openssl-iv=${encrypted_openssl_iv}
 
   echo "Provide DEV's properties"
   ./provide_properties.sh dev
