@@ -10,7 +10,7 @@ buildscript {
 apply plugin: 'com.android.application'
 apply plugin: 'io.fabric'
 apply plugin: 'android-apt'
-//apply plugin: 'jacoco-android'
+apply plugin: 'jacoco-android'
 
 repositories {
     maven { url 'https://maven.fabric.io/public' }

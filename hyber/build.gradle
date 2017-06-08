@@ -1,7 +1,7 @@
 apply plugin: 'com.android.library'
 apply plugin: 'realm-android'
 apply plugin: 'android-apt'
-//apply plugin: 'jacoco-android'
+apply plugin: 'jacoco-android'
 
 repositories {
     mavenCentral()
