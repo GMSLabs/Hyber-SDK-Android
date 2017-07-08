@@ -2,6 +2,7 @@ subprojects { project ->
     repositories {
         jcenter()
         mavenCentral()
+        maven { url "https://maven.google.com" }
         maven { url "https://jitpack.io" }
         maven { url 'https://github.com/uPhyca/stetho-realm/raw/master/maven-repo' }
     }
@@ -29,7 +30,7 @@ subprojects { project ->
             mavenCentral()
         }
         dependencies {
-            classpath 'com.android.tools.build:gradle:2.3.2'
+            classpath 'com.android.tools.build:gradle:2.3.3'
             classpath 'com.google.gms:google-services:3.0.0'
             classpath 'io.realm:realm-gradle-plugin:2.1.1'
             classpath 'com.dicedmelon.gradle:jacoco-android:0.1.1'
