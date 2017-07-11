@@ -176,11 +176,16 @@ public final class Hyber {
 
         initDone = true;
 
+        checkFirebaseToken();
+    }
+
+    public static void checkFirebaseToken() {
         try {
             startRegistrationOrOnSession();
         } catch (Throwable throwable) {
             HyberLogger.e(throwable);
         }
+
     }
 
     private static RealmChangeListener<RealmResults<Message>> getMessageChangeListener() {
@@ -254,12 +259,7 @@ public final class Hyber {
 
     static void onAppFocus() {
         foreground = true;
-
-        try {
-            startRegistrationOrOnSession();
-        } catch (Throwable throwable) {
-            throwable.printStackTrace();
-        }
+        checkFirebaseToken();
     }
 
     public static void userRegistration(@NonNull String phone, @NonNull String password, final HyberCallback<EmptyResult, HyberError> callback) {
@@ -457,30 +457,9 @@ public final class Hyber {
         });
     }
 
-    static SharedPreferences getHyberPreferences(Context context) {
-        return context.getSharedPreferences(Hyber.class.getSimpleName(), Context.MODE_PRIVATE);
-    }
-
-    static void runOnUiThread(Runnable action) {
-        Handler handler = new Handler(Looper.getMainLooper());
-        handler.post(action);
-    }
-
-    public enum LogLevel {
-        NONE, FATAL, ERROR, WARN, INFO, DEBUG, VERBOSE
-    }
-
-    public interface PushTokenUpdateHandler {
-        void onSuccess();
-
-        void onFailure(String message);
-    }
-
     public static final class Builder {
         private WeakReference<Context> mWeakContext;
         private String mClientApiKey;
-        private boolean mPromptLocation;
-        private boolean mDisableGmsMissingPrompt;
         private HyberNotificationListener mNotificationListener;
 
         private Builder() {
@@ -497,16 +476,6 @@ public final class Hyber {
             return this;
         }
 
-        public Builder setAutoPromptLocation(boolean enable) {
-            this.mPromptLocation = enable;
-            return this;
-        }
-
-        public Builder disableGmsMissingPrompt(boolean disable) {
-            this.mDisableGmsMissingPrompt = disable;
-            return this;
-        }
-
         public void init() {
             Hyber.init(this, this.mClientApiKey);
         }
@@ -517,14 +486,6 @@ public final class Hyber {
 
         void removeContext() {
             mWeakContext.clear();
-        }
-
-        boolean isPromptLocation() {
-            return mPromptLocation;
-        }
-
-        boolean isDisableGmsMissingPrompt() {
-            return mDisableGmsMissingPrompt;
         }
 
         @Nullable
