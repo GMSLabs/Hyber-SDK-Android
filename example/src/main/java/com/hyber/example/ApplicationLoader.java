@@ -47,7 +47,7 @@ public class ApplicationLoader extends Application {
 
         applicationHandler = new Handler(applicationContext.getMainLooper());
 
-        HyberLogger.plant(new HyberLogger.DebugTree(), new CrashReportingTree(), new UIErrorTree());
+        HyberLogger.plant(new HyberLogger.DebugTree(), new CrashReportingTree()/*, new UIErrorTree()*/);
 
         String hyberClientApiKey = BuildConfig.HYBER_CLIENT_API_KEY;
         SharedPreferences sp = getSharedPreferences(SP_EXAMPLE_SETTINGS, MODE_PRIVATE);
@@ -143,7 +143,7 @@ public class ApplicationLoader extends Application {
         protected void log(int priority, String tag, String message, Throwable t) {
             if (t != null) {
                 Crashlytics.logException(t);
-//                FirebaseCrash.report(t);
+                FirebaseCrash.report(t);
             }
         }
 
