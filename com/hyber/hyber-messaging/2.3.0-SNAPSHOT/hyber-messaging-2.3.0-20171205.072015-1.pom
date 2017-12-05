@@ -47,25 +47,25 @@
     <dependency>
       <groupId>com.android.support</groupId>
       <artifactId>appcompat-v7</artifactId>
-      <version>27.0.1</version>
+      <version>27.0.2</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>com.android.support</groupId>
       <artifactId>recyclerview-v7</artifactId>
-      <version>27.0.1</version>
+      <version>27.0.2</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>com.google.android.gms</groupId>
       <artifactId>play-services-base</artifactId>
-      <version>11.6.0</version>
+      <version>11.6.2</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>com.google.firebase</groupId>
       <artifactId>firebase-messaging</artifactId>
-      <version>11.6.0</version>
+      <version>11.6.2</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
@@ -100,7 +100,7 @@
     </dependency>
     <dependency>
       <groupId>com.squareup.retrofit2</groupId>
-      <artifactId>adapter-rxjava</artifactId>
+      <artifactId>adapter-rxjava2</artifactId>
       <version>2.3.0</version>
       <scope>compile</scope>
     </dependency>
