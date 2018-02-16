@@ -2,9 +2,6 @@ package com.hyber;
 
 import android.app.Activity;
 import android.content.Context;
-import android.content.SharedPreferences;
-import android.os.Handler;
-import android.os.Looper;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
@@ -13,8 +10,9 @@ import com.hyber.handler.CurrentUserHandler;
 import com.hyber.handler.EmptyResult;
 import com.hyber.handler.HyberCallback;
 import com.hyber.handler.HyberError;
-import com.hyber.handler.HyberNotificationListener;
+import com.hyber.handler.HyberMessageListener;
 import com.hyber.handler.LogoutUserHandler;
+import com.hyber.handler.RemoteMessageListener;
 import com.hyber.log.HyberLogger;
 import com.hyber.model.Device;
 import com.hyber.model.Message;
@@ -27,12 +25,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import io.reactivex.Observable;
+import io.reactivex.functions.Consumer;
 import io.realm.OrderedRealmCollection;
 import io.realm.Realm;
 import io.realm.RealmChangeListener;
 import io.realm.RealmResults;
-import rx.Observable;
-import rx.functions.Action1;
 
 public final class Hyber {
 
@@ -112,12 +110,21 @@ public final class Hyber {
         repo = new Repository();
         repo.open();
 
-        NotificationBundleProcessor.getRemoteMessageObservable()
-                .subscribe(new Action1<RemoteMessage>() {
+        NotificationBundleProcessor.getRemoteMessageFlowable()
+                .subscribe(new Consumer<RemoteMessage>() {
                     @Override
-                    public void call(RemoteMessage remoteMessage) {
-                        if (mInitBuilder.mNotificationListener != null)
-                            mInitBuilder.mNotificationListener.onMessageReceived(remoteMessage);
+                    public void accept(RemoteMessage message) {
+                        if (mInitBuilder.mRemoteMessageListener != null)
+                            mInitBuilder.mRemoteMessageListener.onMessageReceived(message);
+                    }
+                });
+
+        NotificationBundleProcessor.getHyberMessageFlowable()
+                .subscribe(new Consumer<HyberMessage>() {
+                    @Override
+                    public void accept(HyberMessage message) {
+                        if (mInitBuilder.mHyberMessageListener != null)
+                            mInitBuilder.mHyberMessageListener.onMessageReceived(message);
                     }
                 });
 
@@ -206,10 +213,10 @@ public final class Hyber {
                     }
                 }
 
-                Observable.from(messageIds)
-                        .subscribe(new Action1<String>() {
+                Observable.fromIterable(messageIds)
+                        .subscribe(new Consumer<String>() {
                             @Override
-                            public void call(String messageId) {
+                            public void accept(String messageId) {
                                 HyberLogger.d("Message %s is changed", messageId);
                                 Message receivedMessage = repo.getMessageById(repo.getCurrentUser(), messageId);
 
@@ -246,9 +253,9 @@ public final class Hyber {
                                 }
                                 mMessageChangeListener.onChange(repo.getAllUnreportedMessages());
                             }
-                        }, new Action1<Throwable>() {
+                        }, new Consumer<Throwable>() {
                             @Override
-                            public void call(Throwable throwable) {
+                            public void accept(Throwable throwable) {
                                 HyberLogger.e(throwable);
                                 drInQueue = new HashMap<>();
                             }
@@ -460,7 +467,8 @@ public final class Hyber {
     public static final class Builder {
         private WeakReference<Context> mWeakContext;
         private String mClientApiKey;
-        private HyberNotificationListener mNotificationListener;
+        private RemoteMessageListener mRemoteMessageListener;
+        private HyberMessageListener mHyberMessageListener;
 
         private Builder() {
 
@@ -471,8 +479,13 @@ public final class Hyber {
             this.mClientApiKey = clientApiKey;
         }
 
-        public Builder setNotificationListener(@NonNull final HyberNotificationListener listener) {
-            this.mNotificationListener = listener;
+        public Builder setRemoteMessageListener(@NonNull final RemoteMessageListener listener) {
+            this.mRemoteMessageListener = listener;
+            return this;
+        }
+
+        public Builder setHyberMessageListener(@NonNull final HyberMessageListener listener) {
+            this.mHyberMessageListener = listener;
             return this;
         }
 
@@ -489,8 +502,13 @@ public final class Hyber {
         }
 
         @Nullable
-        public HyberNotificationListener getNotificationListener() {
-            return mNotificationListener;
+        public RemoteMessageListener getRemoteMessageListener() {
+            return mRemoteMessageListener;
+        }
+
+        @Nullable
+        public HyberMessageListener getHyberMessageListener() {
+            return mHyberMessageListener;
         }
 
     }

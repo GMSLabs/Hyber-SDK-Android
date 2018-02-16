@@ -1,6 +1,6 @@
 package com.hyber;
 
-import android.util.Log;
+import com.hyber.log.HyberLogger;
 
 import java.io.EOFException;
 import java.io.IOException;
@@ -209,12 +209,12 @@ public class HyberHttpLoggingInterceptor implements Interceptor {
             response = chain.proceed(request);
         } catch (Exception e) {
             logResponseSB.append(String.format(Locale.getDefault(), "<-- HTTP FAILED: %s", e));
-            Log.e(TAG, logRequestSB.toString());
-            Log.e(TAG, logResponseSB.toString());
+            HyberLogger.e(logRequestSB.toString());
+            HyberLogger.e(logResponseSB.toString());
             throw e;
         }
 
-        Log.d(TAG, logRequestSB.toString());
+        HyberLogger.d(logRequestSB.toString());
 
         ResponseBody responseBody = response.body();
 
@@ -267,7 +267,7 @@ public class HyberHttpLoggingInterceptor implements Interceptor {
             }
         }
 
-        Log.d(TAG, logResponseSB.toString());
+        HyberLogger.d(logResponseSB.toString());
 
         return response;
     }
@@ -300,4 +300,5 @@ public class HyberHttpLoggingInterceptor implements Interceptor {
         String contentEncoding = headers.get("Content-Encoding");
         return contentEncoding != null && !"identity".equalsIgnoreCase(contentEncoding);
     }
+
 }

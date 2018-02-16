@@ -41,6 +41,7 @@ public class User extends RealmObject {
     @Required
     @NonNull
     private String sessionId;
+    @Nullable
     private String fcmToken;
     @Required
     @NonNull

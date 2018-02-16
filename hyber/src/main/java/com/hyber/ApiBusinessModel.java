@@ -22,9 +22,9 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
+import io.reactivex.functions.Consumer;
 import io.realm.Realm;
 import retrofit2.Response;
-import rx.functions.Action1;
 
 final class ApiBusinessModel implements IApiBusinessModel {
 
@@ -128,9 +128,9 @@ final class ApiBusinessModel implements IApiBusinessModel {
         headers.put(X_HYBER_SESSION_ID, sessionId);
 
         HyberRestClient.registerUserObservable(headers, reqModel)
-                .subscribe(new Action1<Response<DeviceRegistrationRespModel>>() {
+                .subscribe(new Consumer<Response<DeviceRegistrationRespModel>>() {
                     @Override
-                    public void call(Response<DeviceRegistrationRespModel> response) {
+                    public void accept(Response<DeviceRegistrationRespModel> response) throws Exception {
                         if (response.isSuccessful()) {
                             HyberLogger.i("Request for user registration is success.");
 
@@ -165,9 +165,9 @@ final class ApiBusinessModel implements IApiBusinessModel {
                             listener.onFailure(responseIsUnsuccessful(response));
                         }
                     }
-                }, new Action1<Throwable>() {
+                }, new Consumer<Throwable>() {
                     @Override
-                    public void call(Throwable throwable) {
+                    public void accept(Throwable throwable) {
                         HyberError hyberError = new HyberError(HyberError.HyberErrorStatus.INTERNAL_ERROR, "Error in user registration api request!");
                         HyberLogger.e(throwable, hyberError.toString());
                         listener.onFailure(hyberError);
@@ -199,9 +199,9 @@ final class ApiBusinessModel implements IApiBusinessModel {
 
         repo.close();
         HyberRestClient.updateUserObservable(generateAuthorizedHeaders(), reqModel)
-                .subscribe(new Action1<Response<DeviceUpdateRespModel>>() {
+                .subscribe(new Consumer<Response<DeviceUpdateRespModel>>() {
                     @Override
-                    public void call(final Response<DeviceUpdateRespModel> response) {
+                    public void accept(final Response<DeviceUpdateRespModel> response) {
                         if (response.isSuccessful()) {
                             HyberLogger.i("Request for update user device data is success.");
                             if (response.body().getError() == null) {
@@ -238,9 +238,9 @@ final class ApiBusinessModel implements IApiBusinessModel {
                             listener.onFailure(responseIsUnsuccessful(response));
                         }
                     }
-                }, new Action1<Throwable>() {
+                }, new Consumer<Throwable>() {
                     @Override
-                    public void call(Throwable throwable) {
+                    public void accept(Throwable throwable) {
                         HyberLogger.e(throwable, "Error in update user device data api request!");
                         listener.onFailure(new HyberError(HyberError.HyberErrorStatus.INTERNAL_ERROR, "Error in update user device data api request!"));
                     }
@@ -260,9 +260,9 @@ final class ApiBusinessModel implements IApiBusinessModel {
         }
         HyberLogger.i("Start downloading all devices.");
         HyberRestClient.getAllDevicesObservable(generateAuthorizedHeaders())
-                .subscribe(new Action1<Response<DevicesRespEnvelope>>() {
+                .subscribe(new Consumer<Response<DevicesRespEnvelope>>() {
                     @Override
-                    public void call(final Response<DevicesRespEnvelope> response) {
+                    public void accept(final Response<DevicesRespEnvelope> response) {
                         if (response.isSuccessful()) {
                             if (!response.body().getDevices().isEmpty()) {
                                 HyberLogger.i("Request for downloading all devices is success.");
@@ -313,9 +313,9 @@ final class ApiBusinessModel implements IApiBusinessModel {
                             listener.onFailure(responseIsUnsuccessful(response));
                         }
                     }
-                }, new Action1<Throwable>() {
+                }, new Consumer<Throwable>() {
                     @Override
-                    public void call(Throwable throwable) {
+                    public void accept(Throwable throwable) {
                         HyberError hyberError = new HyberError(HyberError.HyberErrorStatus.INTERNAL_ERROR, "Error in downloading all devices api request!");
                         HyberLogger.e(throwable, hyberError.toString());
                         listener.onFailure(hyberError);
@@ -336,9 +336,9 @@ final class ApiBusinessModel implements IApiBusinessModel {
         HyberLogger.i("Start revoke devices.");
         RevokeDevicesReqModel reqModel = new RevokeDevicesReqModel(deviceIds);
         HyberRestClient.revokeDevicesObservable(generateAuthorizedHeaders(), reqModel)
-                .subscribe(new Action1<Response<Void>>() {
+                .subscribe(new Consumer<Response<Void>>() {
                     @Override
-                    public void call(Response<Void> response) {
+                    public void accept(Response<Void> response) {
                         if (response.isSuccessful()) {
                             HyberLogger.i("Request for revoke devices is success.");
                             final Repository repo = new Repository();
@@ -362,9 +362,9 @@ final class ApiBusinessModel implements IApiBusinessModel {
                             listener.onFailure(responseIsUnsuccessful(response));
                         }
                     }
-                }, new Action1<Throwable>() {
+                }, new Consumer<Throwable>() {
                     @Override
-                    public void call(Throwable throwable) {
+                    public void accept(Throwable throwable) {
                         HyberError hyberError = new HyberError(HyberError.HyberErrorStatus.INTERNAL_ERROR, "Error in revoke devices api request!");
                         HyberLogger.e(throwable, hyberError.toString());
                         listener.onFailure(hyberError);
@@ -385,9 +385,9 @@ final class ApiBusinessModel implements IApiBusinessModel {
         }
         HyberLogger.i("Start downloading message history.");
         HyberRestClient.getMessageHistoryObservable(generateAuthorizedHeaders(), startDate)
-                .subscribe(new Action1<Response<MessageHistoryRespEnvelope>>() {
+                .subscribe(new Consumer<Response<MessageHistoryRespEnvelope>>() {
                     @Override
-                    public void call(Response<MessageHistoryRespEnvelope> response) {
+                    public void accept(Response<MessageHistoryRespEnvelope> response) {
                         if (response.isSuccessful()) {
                             HyberLogger.i("Request for downloading message history is success.");
 
@@ -414,7 +414,7 @@ final class ApiBusinessModel implements IApiBusinessModel {
 
                                 List<Message> messages = new ArrayList<>();
 
-                                for (MessageRespModel messageModel : response.body().getMessages()) {
+                                for (HyberMessage messageModel : response.body().getMessages()) {
 
                                     boolean isRead = false;
                                     boolean isReported = true;
@@ -449,9 +449,9 @@ final class ApiBusinessModel implements IApiBusinessModel {
                             listener.onFailure(responseIsUnsuccessful(response));
                         }
                     }
-                }, new Action1<Throwable>() {
+                }, new Consumer<Throwable>() {
                     @Override
-                    public void call(Throwable throwable) {
+                    public void accept(Throwable throwable) {
                         HyberError hyberError = new HyberError(HyberError.HyberErrorStatus.INTERNAL_ERROR, "Error in downloading message history api request!");
                         HyberLogger.e(throwable, hyberError.toString());
                         listener.onFailure(hyberError);
@@ -474,9 +474,9 @@ final class ApiBusinessModel implements IApiBusinessModel {
         HyberLogger.i("Start sending push delivery report.");
         MessageDeliveryReportReqModel reqModel = new MessageDeliveryReportReqModel(messageId, receivedAt);
         HyberRestClient.sendMessageDeliveryReportObservable(generateAuthorizedHeaders(), reqModel)
-                .subscribe(new Action1<Response<MessageDeliveryReportRespModel>>() {
+                .subscribe(new Consumer<Response<MessageDeliveryReportRespModel>>() {
                     @Override
-                    public void call(Response<MessageDeliveryReportRespModel> response) {
+                    public void accept(Response<MessageDeliveryReportRespModel> response) {
                         if (response.isSuccessful()) {
                             HyberLogger.i("Request for sending push delivery report is success.");
                             listener.onSuccess(messageId);
@@ -485,9 +485,9 @@ final class ApiBusinessModel implements IApiBusinessModel {
                             listener.onFailure();
                         }
                     }
-                }, new Action1<Throwable>() {
+                }, new Consumer<Throwable>() {
                     @Override
-                    public void call(Throwable throwable) {
+                    public void accept(Throwable throwable) {
                         HyberLogger.e(throwable, "Error in sending push delivery report api request!");
                         listener.onFailure();
                     }
@@ -509,9 +509,9 @@ final class ApiBusinessModel implements IApiBusinessModel {
         HyberLogger.i("Start sending bidirectional answer.");
         MessageCallbackReqModel reqModel = new MessageCallbackReqModel(messageId, answerText);
         HyberRestClient.sendMessageCallbackObservable(generateAuthorizedHeaders(), reqModel)
-                .subscribe(new Action1<Response<MessageCallbackRespModel>>() {
+                .subscribe(new Consumer<Response<MessageCallbackRespModel>>() {
                     @Override
-                    public void call(Response<MessageCallbackRespModel> response) {
+                    public void accept(Response<MessageCallbackRespModel> response) {
                         if (response.isSuccessful()) {
                             HyberLogger.i("Request for sending bidirectional answer is success.");
                             listener.onSuccess(messageId);
@@ -519,9 +519,9 @@ final class ApiBusinessModel implements IApiBusinessModel {
                             listener.onFailure(responseIsUnsuccessful(response));
                         }
                     }
-                }, new Action1<Throwable>() {
+                }, new Consumer<Throwable>() {
                     @Override
-                    public void call(Throwable throwable) {
+                    public void accept(Throwable throwable) {
                         HyberError hyberError = new HyberError(HyberError.HyberErrorStatus.INTERNAL_ERROR, "Error in sending bidirectional answer api request!");
                         HyberLogger.e(throwable, hyberError.toString());
                         listener.onFailure(hyberError);

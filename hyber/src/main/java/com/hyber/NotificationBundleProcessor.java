@@ -8,33 +8,48 @@ import com.hyber.model.User;
 
 import java.util.Date;
 
-import rx.Observable;
-import rx.Subscriber;
+import io.reactivex.BackpressureStrategy;
+import io.reactivex.Flowable;
+import io.reactivex.FlowableEmitter;
+import io.reactivex.FlowableOnSubscribe;
 
 final class NotificationBundleProcessor {
 
-    private static Subscriber<? super RemoteMessage> mRemoteMessageSubscriber;
+    private static FlowableEmitter<HyberMessage> mHyberMessageFlowableEmitter;
+    private static FlowableEmitter<RemoteMessage> mRemoteMessageFlowableEmitter;
 
-    private static Observable<RemoteMessage> remoteMessageObservable =
-            Observable.create(new Observable.OnSubscribe<RemoteMessage>() {
+    private static Flowable<RemoteMessage> remoteMessageFlowable =
+            Flowable.create(new FlowableOnSubscribe<RemoteMessage>() {
                 @Override
-                public void call(Subscriber<? super RemoteMessage> subscriber) {
-                    mRemoteMessageSubscriber = subscriber;
+                public void subscribe(FlowableEmitter<RemoteMessage> e) {
+                    mRemoteMessageFlowableEmitter = e;
                 }
-            });
+            }, BackpressureStrategy.BUFFER);
+
+    private static Flowable<HyberMessage> hyberMessageFlowable =
+            Flowable.create(new FlowableOnSubscribe<HyberMessage>() {
+                @Override
+                public void subscribe(FlowableEmitter<HyberMessage> e) {
+                    mHyberMessageFlowableEmitter = e;
+                }
+            }, BackpressureStrategy.BUFFER);
 
     private NotificationBundleProcessor() {
 
     }
 
-    static Observable<RemoteMessage> getRemoteMessageObservable() {
-        return remoteMessageObservable;
+    static Flowable<RemoteMessage> getRemoteMessageFlowable() {
+        return remoteMessageFlowable;
+    }
+
+    static Flowable<HyberMessage> getHyberMessageFlowable() {
+        return hyberMessageFlowable;
     }
 
     static void processMessageFromFCM(RemoteMessage remoteMessage) {
 
-        if (mRemoteMessageSubscriber != null)
-            mRemoteMessageSubscriber.onNext(remoteMessage);
+        if (mRemoteMessageFlowableEmitter != null)
+            mRemoteMessageFlowableEmitter.onNext(remoteMessage);
 
         HyberLogger.i("From: %s", remoteMessage.getFrom());
 
@@ -52,7 +67,10 @@ final class NotificationBundleProcessor {
             String messageData = remoteMessage.getData().get("message");
             if (messageData != null) {
                 try {
-                    MessageRespModel messageModel = new Gson().fromJson(messageData, MessageRespModel.class);
+                    HyberMessage hyberMessage = new Gson().fromJson(messageData, HyberMessage.class);
+
+                    if (mHyberMessageFlowableEmitter != null)
+                        mHyberMessageFlowableEmitter.onNext(hyberMessage);
 
                     Repository repo = new Repository();
                     repo.open();
@@ -65,22 +83,22 @@ final class NotificationBundleProcessor {
 
                     boolean isRead = false;
                     boolean isReported = false;
-                    Message message = repo.getMessageById(user, messageModel.getMessageId());
+                    Message message = repo.getMessageById(user, hyberMessage.getMessageId());
                     if (message != null) {
                         isRead = message.getIsRead();
                         isReported = message.getIsReported();
                     }
 
                     Message.MessageBuilder mb = Message.builder();
-                    mb.id(messageModel.getMessageId());
+                    mb.id(hyberMessage.getMessageId());
                     mb.user(user);
-                    mb.partner(messageModel.getPartner() != null ? messageModel.getPartner() : "push");
-                    mb.title(messageModel.getTitle());
-                    mb.body(messageModel.getBody());
-                    mb.date(messageModel.getTime() != null ? messageModel.getTime() : new Date());
-                    mb.imageUrl(messageModel.getImage() != null ? messageModel.getImage().getUrl() : null);
-                    mb.buttonUrl(messageModel.getButton() != null ? messageModel.getButton().getUrl() : null);
-                    mb.buttonText(messageModel.getButton() != null ? messageModel.getButton().getText() : null);
+                    mb.partner(hyberMessage.getPartner() != null ? hyberMessage.getPartner() : "push");
+                    mb.title(hyberMessage.getTitle());
+                    mb.body(hyberMessage.getBody());
+                    mb.date(hyberMessage.getTime() != null ? hyberMessage.getTime() : new Date());
+                    mb.imageUrl(hyberMessage.getImage() != null ? hyberMessage.getImage().getUrl() : null);
+                    mb.buttonUrl(hyberMessage.getButton() != null ? hyberMessage.getButton().getUrl() : null);
+                    mb.buttonText(hyberMessage.getButton() != null ? hyberMessage.getButton().getText() : null);
                     mb.isRead(isRead);
                     mb.isReported(isReported);
 

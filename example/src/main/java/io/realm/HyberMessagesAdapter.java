@@ -10,7 +10,7 @@ import com.hyber.model.Message;
 
 import java.util.HashMap;
 
-import io.realm.internal.TableOrView;
+import io.realm.internal.Table;
 
 public abstract class HyberMessagesAdapter extends com.hyber.RealmRecyclerViewAdapter<Message, HyberMessageViewHolder> {
 
@@ -25,18 +25,18 @@ public abstract class HyberMessagesAdapter extends com.hyber.RealmRecyclerViewAd
         Long indexOfField;
         RealmFieldType typeOfField;
 
-        indexOfField = adapterData.getTableOrView().getTable().getPrimaryKey();
-        if (indexOfField == TableOrView.NO_MATCH)
+        indexOfField = adapterData.getTable().getTable().getColumnIndex(Message.ID);
+        if (indexOfField == Table.NO_MATCH)
             throw new IllegalStateException("Animating the results requires a primaryKey.");
-        typeOfField = adapterData.getTableOrView().getColumnType(indexOfField);
+        typeOfField = adapterData.getTable().getColumnType(indexOfField);
         if (typeOfField != RealmFieldType.STRING)
             throw new IllegalStateException("Animating the results requires a primaryKey of type String type");
         columnIndexRealmFieldTypeHashMap.put(indexOfField, typeOfField);
 
-        indexOfField = adapterData.getTableOrView().getTable().getColumnIndex(Message.IS_REPORTED);
-        if (indexOfField == TableOrView.NO_MATCH)
+        indexOfField = adapterData.getTable().getColumnIndex(Message.IS_REPORTED);
+        if (indexOfField == Table.NO_MATCH)
             throw new IllegalStateException("Animating the results requires a isReported field.");
-        typeOfField = adapterData.getTableOrView().getColumnType(indexOfField);
+        typeOfField = adapterData.getTable().getColumnType(indexOfField);
         if (typeOfField != RealmFieldType.BOOLEAN)
             throw new IllegalStateException("Animating the results requires a primaryKey of type Boolean type");
         columnIndexRealmFieldTypeHashMap.put(indexOfField, typeOfField);

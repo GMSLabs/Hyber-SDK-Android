@@ -7,6 +7,7 @@ buildscript {
         classpath 'io.fabric.tools:gradle:1.23.0'
     }
 }
+
 apply plugin: 'com.android.application'
 apply plugin: 'io.fabric'
 apply plugin: 'jacoco-android'
@@ -16,19 +17,24 @@ repositories {
 }
 
 android {
-    compileSdkVersion 25
-    buildToolsVersion '25.0.3'
+    compileSdkVersion 27
+    buildToolsVersion '27.0.3'
 
     defaultConfig {
         applicationId "com.hyber.example"
 
         minSdkVersion 16
-        targetSdkVersion 25
-        versionCode 2
-        versionName "2.2.3"
+        targetSdkVersion 27
+        versionCode 3
+        versionName "2.3.0"
 
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
 
+        buildConfigField 'String', 'HYBER_CLIENT_API_KEY', hyber_client_api_key
+
+        ext.betaDistributionGroupAliases=System.getenv('FABRIC_GROUP')
+        ext.betaDistributionReleaseNotes=System.getenv('FABRIC_NOTES') + "\n" + System.getenv('FABRIC_DESCRIPTION')
+        ext.betaDistributionNotifications=true
     }
 
     sourceSets {
@@ -61,83 +67,58 @@ android {
     }
 
     buildTypes {
-//        all {
-//            testCoverageEnabled true
-//        }
         debug {
             minifyEnabled false
-            ext.betaDistributionGroupAliases=System.getenv('FABRIC_GROUP')
-            ext.betaDistributionReleaseNotes=System.getenv('FABRIC_NOTES') + "\n" + System.getenv('FABRIC_DESCRIPTION')
-            ext.betaDistributionNotifications=true
+            applicationIdSuffix ".debug"
+            signingConfig signingConfigs.debug
+        }
+        dev {
+            applicationIdSuffix ".dev"
+            signingConfig signingConfigs.debug
+        }
+        qa {
+            applicationIdSuffix ".qa"
+            signingConfig signingConfigs.debug
+        }
+        fqa {
+            applicationIdSuffix ".fqa"
+            signingConfig signingConfigs.debug
+        }
+        td {
+            applicationIdSuffix ".td"
+            signingConfig signingConfigs.debug
+        }
+        prod {
+            applicationIdSuffix ".prod"
+            signingConfig signingConfigs.debug
         }
     }
 
     lintOptions {
         abortOnError false
     }
-
-    productFlavors {
-        dev {
-            applicationId "com.hyber.example.dev"
-
-            buildConfigField 'String', 'HYBER_CLIENT_API_KEY', hyber_client_api_key
-
-            signingConfig signingConfigs.debug
-        }
-        qa {
-            applicationId "com.hyber.example.qa"
-
-            buildConfigField 'String', 'HYBER_CLIENT_API_KEY', hyber_client_api_key
-
-            signingConfig signingConfigs.debug
-        }
-        fqa {
-            applicationId "com.hyber.example.fqa"
-
-            buildConfigField 'String', 'HYBER_CLIENT_API_KEY', hyber_client_api_key
-
-            signingConfig signingConfigs.debug
-        }
-        td {
-            applicationId "com.hyber.example.td"
-
-            buildConfigField 'String', 'HYBER_CLIENT_API_KEY', hyber_client_api_key
-
-            signingConfig signingConfigs.debug
-        }
-        prod {
-            applicationId "com.hyber.example.prod"
-
-            buildConfigField 'String', 'HYBER_CLIENT_API_KEY', hyber_client_api_key
-
-            signingConfig signingConfigs.debug
-        }
-    }
 }
 
 dependencies {
-    // Required dependencies for the Hyber
-//    compile 'com.google.firebase:firebase-messaging:10.2.1'
-
-    compile project(':hyber')
+    implementation project(':hyber')
 
     compile 'io.realm:android-adapters:1.4.0'
 
-    provided "org.projectlombok:lombok:1.16.16"
-    annotationProcessor "org.projectlombok:lombok:1.16.16"
+    provided "org.projectlombok:lombok:1.16.18"
+    annotationProcessor "org.projectlombok:lombok:1.16.18"
 
-    compile 'com.android.support:support-v4:25.4.0'
-    compile 'com.android.support:appcompat-v7:25.4.0'
-    compile 'com.android.support:design:25.4.0'
-    compile 'com.android.support:cardview-v7:25.4.0'
+    compile 'com.android.support:support-v4:27.1.1'
+    compile 'com.android.support:appcompat-v7:27.1.1'
+    compile 'com.android.support:design:27.1.1'
+    compile 'com.android.support:cardview-v7:27.1.1'
 
-    compile 'com.jakewharton:butterknife:8.7.0'
-    annotationProcessor 'com.jakewharton:butterknife-compiler:8.7.0'
+    compile 'com.jakewharton:butterknife:8.8.1'
+    annotationProcessor 'com.jakewharton:butterknife-compiler:8.8.1'
 
     compile 'com.squareup.picasso:picasso:2.5.2'
 
     // Analytics
-    compile 'com.google.firebase:firebase-crash:10.2.1'
+    compile 'com.google.firebase:firebase-crash:16.0.1'
     compile('com.crashlytics.sdk.android:crashlytics:2.6.8@aar') {
         transitive = true;
     }

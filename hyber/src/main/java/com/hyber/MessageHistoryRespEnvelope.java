@@ -18,6 +18,6 @@ class MessageHistoryRespEnvelope extends BaseResponse {
     @SerializedName("lastTime")
     private Long lastTime;
     @SerializedName("messages")
-    private List<MessageRespModel> messages;
+    private List<HyberMessage> messages;
 
 }

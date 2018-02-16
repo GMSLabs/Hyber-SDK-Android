@@ -33,17 +33,23 @@ public class Message extends RealmObject {
     @PrimaryKey
     @NonNull
     private String id;
+    @NonNull
     private User user;
     @Required
     @NonNull
     private String partner;
+    @Nullable
     private String title;
+    @Nullable
     private String body;
     @Required
     @NonNull
     private Date date;
+    @Nullable
     private String imageUrl;
+    @Nullable
     private String buttonUrl;
+    @Nullable
     private String buttonText;
     @Required
     @NonNull

@@ -10,23 +10,16 @@ import android.content.res.Configuration;
 import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.v4.app.NotificationCompat;
-import android.util.Log;
-import android.widget.Toast;
 
 import com.crashlytics.android.Crashlytics;
 import com.google.firebase.crash.FirebaseCrash;
 import com.google.firebase.messaging.RemoteMessage;
-import com.google.gson.Gson;
-import com.google.gson.internal.Streams;
 import com.hyber.Hyber;
-import com.hyber.MessageRespModel;
+import com.hyber.HyberMessage;
 import com.hyber.example.ui.SplashActivity;
-import com.hyber.handler.HyberNotificationListener;
+import com.hyber.handler.HyberMessageListener;
+import com.hyber.handler.RemoteMessageListener;
 import com.hyber.log.HyberLogger;
-
-import org.jetbrains.annotations.Nullable;
-
-import java.util.Map;
 
 import io.fabric.sdk.android.Fabric;
 
@@ -61,14 +54,17 @@ public class ApplicationLoader extends Application {
 
         //Initialisation Hyber SDK
         Hyber.with(this, sp.getString(SP_HYBER_CLIENT_API_KEY, hyberClientApiKey))
-                .setNotificationListener(new HyberNotificationListener() {
+                .setRemoteMessageListener(new RemoteMessageListener() {
                     @Override
-                    public void onMessageReceived(RemoteMessage remoteMessage) {
-                        if (remoteMessage.getNotification() != null) {
-                            onNotification(remoteMessage.getNotification());
-                        } else if (remoteMessage.getData() != null) {
-                            onNotificationFromData(remoteMessage.getData());
-                        }
+                    public void onMessageReceived(RemoteMessage message) {
+                        if (message.getNotification() != null)
+                            onNotification(message.getNotification());
+                    }
+                })
+                .setHyberMessageListener(new HyberMessageListener() {
+                    @Override
+                    public void onMessageReceived(HyberMessage message) {
+                        onHyberNotification(message);
                     }
                 })
                 .init();
@@ -105,36 +101,25 @@ public class ApplicationLoader extends Application {
         mNotifyMgr.notify(0, mBuilder.build());
     }
 
-    private void onNotificationFromData(@NonNull @lombok.NonNull Map<String, String> data) {
-        String messageData = data.get("message");
-        if (messageData != null) {
-            try {
-                Intent i = new Intent(this, SplashActivity.class);
-                i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+    private void onHyberNotification(@NonNull @lombok.NonNull HyberMessage message) {
+        Intent i = new Intent(this, SplashActivity.class);
+        i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 
-                PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, i, PendingIntent.FLAG_UPDATE_CURRENT);
+        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, i, PendingIntent.FLAG_UPDATE_CURRENT);
 
-                MessageRespModel messageModel = new Gson().fromJson(messageData, MessageRespModel.class);
-
-                NotificationCompat.Builder mBuilder =
-                        new NotificationCompat.Builder(ApplicationLoader.this)
-                                .setSmallIcon(R.mipmap.ic_launcher)
-                                .setContentTitle(messageModel.getTitle())
-                                .setContentText(messageModel.getBody())
-                                .setAutoCancel(true)
-                                .setPriority(NotificationCompat.PRIORITY_MAX)
-                                .setContentIntent(pendingIntent);
-                // Gets an instance of the NotificationManager service
-                NotificationManager mNotifyMgr =
-                        (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-                // Builds the notification and issues it.
-                mNotifyMgr.notify(0, mBuilder.build());
-            } catch (Exception e) {
-                HyberLogger.e(e);
-            }
-        } else {
-            HyberLogger.w("Message object not exist in RemoteMessage data payload");
-        }
+        NotificationCompat.Builder mBuilder =
+                new NotificationCompat.Builder(ApplicationLoader.this)
+                        .setSmallIcon(R.mipmap.ic_launcher)
+                        .setContentTitle(message.getTitle())
+                        .setContentText(message.getBody())
+                        .setAutoCancel(true)
+                        .setPriority(NotificationCompat.PRIORITY_MAX)
+                        .setContentIntent(pendingIntent);
+        // Gets an instance of the NotificationManager service
+        NotificationManager mNotifyMgr =
+                (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+        // Builds the notification and issues it.
+        mNotifyMgr.notify(0, mBuilder.build());
     }
 
     private class CrashReportingTree extends HyberLogger.Tree {
@@ -147,49 +132,6 @@ public class ApplicationLoader extends Application {
             }
         }
 
-    }
-
-    private class UIErrorTree extends HyberLogger.Tree {
-
-        @Override
-        protected void log(final int priority, @Nullable String tag, @Nullable final String message,
-                           @Nullable final Throwable t) {
-            if (priority < Log.WARN) {
-                return;
-            }
-
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-
-                    StringBuilder sb = new StringBuilder();
-                    switch (priority) {
-                        case Log.WARN:
-                            sb.append("WARN:");
-                            break;
-                        case Log.ERROR:
-                            sb.append("ERROR:");
-                            break;
-                        case Log.ASSERT:
-                            sb.append("ASSERT:");
-                            break;
-                        default:
-                            sb.append("VERBOSE:");
-                    }
-
-                    if (t != null) {
-                        sb.append(t.getLocalizedMessage())
-                                .append("\n");
-                    }
-
-                    if (message != null) {
-                        sb.append(message);
-                    }
-
-                    Toast.makeText(applicationContext, sb.toString(), Toast.LENGTH_LONG).show();
-                }
-            });
-        }
     }
 
     private void runOnUiThread(Runnable r) {

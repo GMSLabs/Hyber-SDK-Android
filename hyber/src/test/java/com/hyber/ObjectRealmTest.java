@@ -24,20 +24,20 @@ import static org.junit.Assert.assertThat;
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
 import static org.powermock.api.mockito.PowerMockito.when;
 
-@RunWith(RobolectricTestRunner.class)
-@Config(constants = BuildConfig.class, manifest=Config.NONE)
-@PowerMockIgnore({"org.mockito.*", "org.robolectric.*", "android.*"})
-@SuppressStaticInitializationFor("io.realm.internal.Util")
-@PrepareForTest({Realm.class, RealmLog.class})
+//@RunWith(RobolectricTestRunner.class)
+//@Config(constants = BuildConfig.class, manifest=Config.NONE)
+//@PowerMockIgnore({"org.mockito.*", "org.robolectric.*", "android.*"})
+//@SuppressStaticInitializationFor("io.realm.internal.Util")
+//@PrepareForTest({Realm.class, RealmLog.class})
 public class ObjectRealmTest {
 
     private static final String TAG = ObjectRealmTest.class.getSimpleName();
 
-    @Rule
+//    @Rule
     public PowerMockRule rule = new PowerMockRule();
     Realm mockRealm;
 
-    @Before
+//    @Before
     public void setup() {
         Log.i(TAG, "Preparing for test");
         mockStatic(RealmLog.class);
@@ -52,7 +52,7 @@ public class ObjectRealmTest {
         Log.i(TAG, "Prepared for test");
     }
 
-    @Test
+//    @Test
     public void shouldBeAbleToGetDefaultInstance() {
         Log.i(TAG, "Start test of Realm.getDefaultInstance");
 
@@ -61,7 +61,7 @@ public class ObjectRealmTest {
         Log.i(TAG, "Finish test of Realm.getDefaultInstance");
     }
 
-    @Test
+//    @Test
     public void shouldBeAbleToMockRealmMethods() {
         Log.i(TAG, "Start test of mocked Realm methods");
 
@@ -74,7 +74,7 @@ public class ObjectRealmTest {
         Log.i(TAG, "Finish test of mocked Realm methods");
     }
 
-    @Test
+//    @Test
     public void shouldBeAbleToCreateARealmObject() {
         Log.i(TAG, "Start test of create User Realm object");
 
