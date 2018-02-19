@@ -133,6 +133,60 @@ private class CrashReportingTree extends HyberLogger.Tree {
 }
 ```
 
+### KeyHash (Fingerprint)
+To authenticate the exchange of information between your app and the Hyber platform, you need to generate a release/debug key hash and add this to the Hyber mobile app settings within your Hyber Application ID (Client API Key). Without this, your Hyber integration may not work properly when you release/debug your app to the store and during development.
+
+When publishing your app, it is typically signed with a different signature to your development environment. Therefore, you want to make sure you create a Release Key Hash and add this to the Hyber mobile app settings for Hyber Application ID (Client API Key).
+
+To generate a hash of your release key, run the following command on Mac or Windows substituting your release key alias and the path to your keystore.
+
+On Mac OS, run:
+```bash
+keytool -exportcert -alias <RELEASE_KEY_ALIAS> -keystore <RELEASE_KEY_PATH> | openssl sha1 -binary | openssl base64
+```
+
+On Windows, you will need the following:
+
+- Key and Certificate Management Tool (keytool) from the Java Development Kit
+- OpenSSL for Windows Library from the Google Code Archive
+
+Run the following command in a command prompt in the Java SDK folder:
+```bash
+keytool -exportcert -alias <RELEASE_KEY_ALIAS> -keystore <RELEASE_KEY_PATH> | PATH_TO_OPENSSL_LIBRARY\bin\openssl sha1 -binary | PATH_TO_OPENSSL_LIBRARY\bin\openssl base64
+```
+Make sure to use the password that you set when you first created the release key.
+
+This command should generate a 28 characher string. Copy and paste this Release/Debug Key Hash into your Hyber Application ID's mobile application settings.
+
+![Hyber Application Settings](assets/hyber_app_settings.png)
+
+You can also manually modify the sample code to use the right key hash. For example in HelloHyberSampleActivity class make a temporary change to the onCreate():
+```java
+@Override
+public void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+
+    // Add code to print out the key hash
+    try {
+        PackageInfo info = getPackageManager().getPackageInfo(
+                "your.application.package",
+                PackageManager.GET_SIGNATURES);
+        for (Signature signature : info.signatures) {
+            MessageDigest md = MessageDigest.getInstance("SHA");
+            md.update(signature.toByteArray());
+            Log.d("KeyHash:", Base64.encodeToString(md.digest(), Base64.DEFAULT));
+            }
+    } catch (NameNotFoundException e) {
+    } catch (NoSuchAlgorithmException e) {
+    }
+    ...
+```
+Save your changes and re-run the sample. Check your logcat output for a message similar to this:
+```bash
+12-20 10:47:37.747: D/KeyHash:(936): 478uEnKQV+fMQT8Dy4AKvHkYibo=
+```
+Save the key hash in your Hyber profile. Re-run the samples and verify that you can log in successfully.
+
 [release-svg]: http://github-release-version.herokuapp.com/github/Incuube/Hyber-SDK-Android/release.svg?style=flat
 [release-link]: https://github.com/Incuube/Hyber-SDK-Android/releases/latest
 
