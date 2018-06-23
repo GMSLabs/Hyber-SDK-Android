@@ -29,26 +29,26 @@ else
   echo "Decrypt keystores"
   curl -s https://raw.githubusercontent.com/AndrewKochura/CI-Guardian/master/guardian.sh | bash /dev/stdin -d --filename=keystores --zip-password=${encrypted_zip_password} --openssl-key=${encrypted_openssl_key} --openssl-iv=${encrypted_openssl_iv}
 
-  echo "Provide DEV's properties"
-  ./provide_properties.sh dev
-  echo "Provide DEV's keystores"
-  ./provide_keystore.sh dev
-  echo "Initialize Fabric params for DEV's"
-  export FABRIC_GROUP='hyber-android,hyber-developers,hyber-testers'
-  export FABRIC_NOTES="$TRAVIS_COMMIT_MESSAGE"
-  export FABRIC_DESCRIPTION="Build for DEV's from commit $TRAVIS_COMMIT"
-  echo "Build DEV's snapshot..."
-  ./gradlew clean example:assembleDevDebug
-  echo "Deploy DEV's snapshot..."
-  ./gradlew example:fabricGenerateResourcesDevDebug example:crashlyticsUploadDistributionDevDebug
-  echo "DEV's snapshot is deployed!"
+#  echo "Provide DEV's properties"
+#  ./provide_properties.sh dev
+#  echo "Provide DEV's keystores"
+#  ./provide_keystore.sh dev
+#  echo "Initialize Fabric params for DEV's"
+##  export FABRIC_GROUP='hyber-android,hyber-developers,hyber-testers'
+#  export FABRIC_NOTES="$TRAVIS_COMMIT_MESSAGE"
+#  export FABRIC_DESCRIPTION="Build for DEV's from commit $TRAVIS_COMMIT"
+#  echo "Build DEV's snapshot..."
+#  ./gradlew clean example:assembleDevDebug
+#  echo "Deploy DEV's snapshot..."
+#  ./gradlew example:fabricGenerateResourcesDevDebug example:crashlyticsUploadDistributionDevDebug
+#  echo "DEV's snapshot is deployed!"
 
   echo "Provide QA's properties"
   ./provide_properties.sh qa
   echo "Provide QA's keystores"
   ./provide_keystore.sh qa
   echo "Initialize Fabric params for QA's"
-  export FABRIC_GROUP='hyber-android,hyber-developers,hyber-testers'
+#  export FABRIC_GROUP='hyber-android,hyber-developers,hyber-testers'
   export FABRIC_NOTES="$TRAVIS_COMMIT_MESSAGE"
   export FABRIC_DESCRIPTION="Build for QA's from commit $TRAVIS_COMMIT"
   echo "Build QA's snapshot..."
@@ -57,40 +57,40 @@ else
   ./gradlew example:fabricGenerateResourcesQaDebug example:crashlyticsUploadDistributionQaDebug
   echo "QA's snapshot is deployed!"
 
-  echo "Provide FQA's properties"
-  ./provide_properties.sh fqa
-  echo "Provide FQA's keystores"
-  ./provide_keystore.sh fqa
-  echo "Initialize Fabric params for FQA's"
-  export FABRIC_GROUP='hyber-android,hyber-developers,hyber-testers'
-  export FABRIC_NOTES="$TRAVIS_COMMIT_MESSAGE"
-  export FABRIC_DESCRIPTION="Build for FQA's from commit $TRAVIS_COMMIT"
-  echo "Build FQA's snapshot..."
-  ./gradlew clean example:assembleFqaDebug
-  echo "Deploy FQA's snapshot..."
-  ./gradlew example:fabricGenerateResourcesFqaDebug example:crashlyticsUploadDistributionFqaDebug
-  echo "FQA's snapshot is deployed!"
+#  echo "Provide FQA's properties"
+#  ./provide_properties.sh fqa
+#  echo "Provide FQA's keystores"
+#  ./provide_keystore.sh fqa
+#  echo "Initialize Fabric params for FQA's"
+##  export FABRIC_GROUP='hyber-android,hyber-developers,hyber-testers'
+#  export FABRIC_NOTES="$TRAVIS_COMMIT_MESSAGE"
+#  export FABRIC_DESCRIPTION="Build for FQA's from commit $TRAVIS_COMMIT"
+#  echo "Build FQA's snapshot..."
+#  ./gradlew clean example:assembleFqaDebug
+#  echo "Deploy FQA's snapshot..."
+#  ./gradlew example:fabricGenerateResourcesFqaDebug example:crashlyticsUploadDistributionFqaDebug
+#  echo "FQA's snapshot is deployed!"
 
-  echo "Provide TD's properties"
-  ./provide_properties.sh td
-  echo "Provide TD's keystores"
-  ./provide_keystore.sh td
-  echo "Initialize Fabric params for TD's"
-  export FABRIC_GROUP='hyber-android,hyber-developers,hyber-testers,hyber-td'
-  export FABRIC_NOTES="$TRAVIS_COMMIT_MESSAGE"
-  export FABRIC_DESCRIPTION="Build for TD's from commit $TRAVIS_COMMIT"
-  echo "Build TD's snapshot..."
-  ./gradlew clean example:assembleTdDebug
-  echo "Deploy TD's snapshot..."
-  ./gradlew example:fabricGenerateResourcesTdDebug example:crashlyticsUploadDistributionTdDebug
-  echo "TD's snapshot is deployed!"
+#  echo "Provide TD's properties"
+#  ./provide_properties.sh td
+#  echo "Provide TD's keystores"
+#  ./provide_keystore.sh td
+#  echo "Initialize Fabric params for TD's"
+##  export FABRIC_GROUP='hyber-android,hyber-developers,hyber-testers,hyber-td'
+#  export FABRIC_NOTES="$TRAVIS_COMMIT_MESSAGE"
+#  export FABRIC_DESCRIPTION="Build for TD's from commit $TRAVIS_COMMIT"
+#  echo "Build TD's snapshot..."
+#  ./gradlew clean example:assembleTdDebug
+#  echo "Deploy TD's snapshot..."
+#  ./gradlew example:fabricGenerateResourcesTdDebug example:crashlyticsUploadDistributionTdDebug
+#  echo "TD's snapshot is deployed!"
 
   echo "Provide PROD's properties"
   ./provide_properties.sh prod
   echo "Provide PROD's keystores"
   ./provide_keystore.sh prod
   echo "Initialize Fabric params for PROD's"
-  export FABRIC_GROUP='hyber-android,hyber-developers,hyber-testers,hyber-td,hyber-managers'
+#  export FABRIC_GROUP='hyber-android,hyber-developers,hyber-testers,hyber-td,hyber-managers'
   export FABRIC_NOTES="$TRAVIS_COMMIT_MESSAGE"
   export FABRIC_DESCRIPTION="Build for PROD's from commit $TRAVIS_COMMIT"
   echo "Build PROD's snapshot..."
