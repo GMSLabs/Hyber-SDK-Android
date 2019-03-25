@@ -8,16 +8,16 @@ For more information about Hyber and its features, see [hyber.im][hyber.im].
 ***
 
 ### Introduction
-First of all you need to configure [Google Services Plugin][google-services-plugin] and [Firebase Cloud Messaging][firebase-cloud-messaging]
+First of all, you need to configure [Google Services Plugin][google-services-plugin] and [Firebase Cloud Messaging][firebase-cloud-messaging]
 
-After that you need to initialize the Hyber inside onCreate method in your Application class.
+After that, you need to initialise the Hyber inside the onCreate method in your Application class.
 ```java
     Hyber.with(this, BuildConfig.HYBER_CLIENT_API_KEY)
         .setNotificationListener(...)
         .init();
 ```
 
-And after that you need to write next line to app level build.gradle file inside build config block
+Also, after that, you need to write next line to app level build.gradle file inside build config block
 ```
     buildConfigField 'String', 'HYBER_CLIENT_API_KEY', hyber_client_api_key
 ```
@@ -25,12 +25,12 @@ And after that you need to write next line to app level build.gradle file inside
 
 ### Download
 #### GRADLE
-Add next repository to project level build.gradle:
+Add following repository to project level build.gradle:
 ```groovy
     maven { url 'https://raw.github.com/Incuube/Hyber-SDK-Android/maven/' }
 ```
 
-Then add next dependencies to app level build.gradle:
+Then add following dependencies to app level build.gradle:
 ```groovy
     compile 'com.hyber:hyber-messaging:2.2.2'
 ```
@@ -122,7 +122,7 @@ If you are using Proguard in your project add the following lines to your config
 ```
 
 ### Logging
-For manipulation with logs from library you can create a subclass ```HyberLogger.Tree```.
+For manipulation with logs from the library, you can create a subclass ```HyberLogger.Tree```.
 Example:
 ```java
 private class CrashReportingTree extends HyberLogger.Tree {
@@ -134,9 +134,9 @@ private class CrashReportingTree extends HyberLogger.Tree {
 ```
 
 ### KeyHash (Fingerprint)
-To authenticate the exchange of information between your app and the Hyber platform, you need to generate a release/debug key hash and add this to the Hyber mobile app settings within your Hyber Application ID (Client API Key). Without this, your Hyber integration may not work properly when you release/debug your app to the store and during development.
+To authenticate the exchange of information between your app and the Hyber platform, you need to generate a release/debug key hash and add this to the Hyber mobile app settings within your Hyber Application ID (Client API Key). Without this, your Hyber integration may not work well when you release/debug your app to the store and during development.
 
-When publishing your app, it is typically signed with a different signature to your development environment. Therefore, you want to make sure you create a Release Key Hash and add this to the Hyber mobile app settings for Hyber Application ID (Client API Key).
+When publishing, an application is usually signed with a different signature in the development environment. Therefore, you want to make sure you create a Release Key Hash and add this to the Hyber mobile app settings for Hyber Application ID (Client API Key).
 
 To generate a hash of your release key, run the following command on Mac or Windows substituting your release key alias and the path to your keystore.
 
@@ -145,7 +145,7 @@ On Mac OS, run:
 keytool -exportcert -alias <RELEASE_KEY_ALIAS> -keystore <RELEASE_KEY_PATH> | openssl sha1 -binary | openssl base64
 ```
 
-On Windows, you will need the following:
+On Windows, you need the following steps:
 
 - Key and Certificate Management Tool (keytool) from the Java Development Kit
 - OpenSSL for Windows Library from the Google Code Archive
@@ -156,7 +156,7 @@ keytool -exportcert -alias <RELEASE_KEY_ALIAS> -keystore <RELEASE_KEY_PATH> | PA
 ```
 Make sure to use the password that you set when you first created the release key.
 
-This command should generate a 28 characher string. Copy and paste this Release/Debug Key Hash into your Hyber Application ID's mobile application settings.
+This command should generate a 28 character string. Copy and paste this Release/Debug Key Hash into your Hyber Application ID's mobile application settings.
 
 ![Hyber Application Settings](assets/hyber_app_settings.png)
 
